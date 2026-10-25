@@ -5,6 +5,7 @@
     "src/inject/index.ts",
     "src/options/main.ts",
     "src/popup/main.ts",
+    "src/live/main.ts",
     "src/components/**",
     "scripts/*.ts",
     "*.config.*"
@@ -13,7 +14,7 @@
     "@iconify/json",
     "uno.css"
   ],
-  "ignoreBinaries": ["gh", "xcrun"],
+  "ignoreBinaries": ["xcrun"],
   "rules": {
     "types": "off",
     "enumMembers": "off",

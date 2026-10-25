@@ -1,6 +1,3 @@
-// import path from 'node:path'
-
-// import fs from 'fs-extra'
 import { defineConfig } from 'tsup'
 
 import { thirdPartyLicensesEsbuildPlugin } from './scripts/thirdPartyLicenses'
@@ -13,9 +10,7 @@ export default defineConfig(() => ({
     'contentScripts/listenVideoControl': './src/contentScripts/listenVideoControl.ts',
     'background/index': './src/background/index.ts',
     'contentScripts/pageLoading': './src/contentScripts/pageLoading.ts',
-  },
-  async onSuccess() {
-    // fs.copySync(path.resolve(__dirname, './src/inject/index.js'), path.resolve(__dirname, `./${outDir}/inject/index.js`))
+    'contentScripts/liveLauncher': './src/contentScripts/liveLauncher.ts',
   },
   outDir,
   format: ['esm'],

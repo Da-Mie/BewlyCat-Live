@@ -4,6 +4,7 @@ import { useDebounceFn } from '@vueuse/core'
 import type { Video, VideoCardRemovedState, VideoCardState } from '~/components/VideoCard/types'
 import { createVideoCardState } from '~/components/VideoCard/types'
 import { isBangumiVideo } from '~/components/VideoCard/utils'
+import { getAccountFilterDecision } from '~/composables/useAccountLevelFilter'
 import type { BewlyAppProvider } from '~/composables/useAppProvider'
 import type { CardWindowSnapshot } from '~/composables/useCardWindow'
 import { useCardWindow } from '~/composables/useCardWindow'
@@ -16,6 +17,7 @@ import type { GridLayoutType } from '~/logic'
 import { originalSettings, settings } from '~/logic'
 import { normalizeVideoCardCoverRatio } from '~/logic/storage'
 import { useUserRelationStore } from '~/stores/userRelationStore'
+import { normalizeAccountMid } from '~/utils/accountLevelFilter'
 import { getAdaptiveGridColumnCount, getListGridColumnCount } from '~/utils/gridLayout'
 import emitter from '~/utils/mitt'
 
@@ -306,15 +308,32 @@ const loadingMoreSkeletonItems = computed(() => {
   })) as T[]
 })
 
+let videoTransformCache = new Map<string | number, VideoTransformCacheEntry<T>>()
+
 // 合并实际数据和骨架屏
+function accountFilterState(item: T, index: number, query = false) {
+  if (!settings.value.accountLevelFilters.videos.enabled || (item as any)?._isSkeleton || props.isSkeletonItem?.(item))
+    return 'allow'
+  const video = getTransformedVideo(item, getUniqueKey(item, index))
+  // Series, live rooms and user search results are not uploaded video cards.
+  if (!video || video.roomid || isBangumiVideo(video) || video.goto === 'space')
+    return 'allow'
+  const author = Array.isArray(video.author) ? video.author[0] : video.author
+  return getAccountFilterDecision({ mid: normalizeAccountMid(author?.mid), followed: userRelationStore.getFollowing(author?.mid) ?? video.followed ?? author?.followed }, 'videos', query)
+}
+
+const levelFilteredItems = computed(() => props.items.filter((item, index) => accountFilterState(item, index) !== 'block'))
+const allItemsLevelFiltered = computed(() => settings.value.accountLevelFilters.videos.enabled && props.items.length > 0 && levelFilteredItems.value.length === 0)
+const sourceIndices = computed(() => new Map(props.items.map((item, index) => [item, index])))
+
 const displayItems = computed(() => {
   if (showInitialSkeleton.value)
     return initialSkeletonItems.value
 
   if (showLoadingMoreSkeletonItems.value)
-    return [...props.items, ...loadingMoreSkeletonItems.value]
+    return [...levelFilteredItems.value, ...loadingMoreSkeletonItems.value]
 
-  return props.items
+  return levelFilteredItems.value
 })
 
 function isDocumentVisible(): boolean {
@@ -323,6 +342,9 @@ function isDocumentVisible(): boolean {
 
 // 检查是否可以加载更多
 function canLoadMore(): boolean {
+  // A fully filtered page must not drain the entire upstream feed automatically.
+  if (allItemsLevelFiltered.value)
+    return false
   // 后台标签页里 IntersectionObserver 可能一直保持相交，不能继续预加载。
   if (!isDocumentVisible())
     return false
@@ -1001,6 +1023,8 @@ function createRenderItem(item: T, index: number): VideoCardRenderItem {
   }
 
   const video = getTransformedVideo(item, key)
+  if (accountFilterState(item, index) === 'pending')
+    return { key, index, item, skeleton: true, type: fallbackType, video: undefined }
   const skeleton = !video || (video.id == null && !video.bvid)
   const type = skeleton ? fallbackType : inferVideoTypeFromVideo(video)
   return { key, index, item, skeleton, type, video }
@@ -1089,7 +1113,7 @@ function getCardState(key: string | number) {
 }
 
 watch(cardKeys, (keys) => {
-  const validKeys = new Set(keys)
+  const validKeys = new Set([...keys, ...props.items.map(getUniqueKey)])
   for (const key of cardStates.keys()) {
     if (!validKeys.has(key))
       cardStates.delete(key)
@@ -1104,8 +1128,6 @@ interface VideoTransformCacheEntry<T = any> {
   item: T
   video: Video | undefined
 }
-
-let videoTransformCache = new Map<string | number, VideoTransformCacheEntry<T>>()
 
 function resetTransformCaches() {
   videoTransformCache = new Map()
@@ -1195,6 +1217,7 @@ function handleRefresh() {
 
 // 生成唯一 key
 function getUniqueKey(item: T, index: number): string | number {
+  index = sourceIndices.value.get(item) ?? index
   // 如果是骨架屏占位，使用骨架屏 ID
   if ((item as any)?._skeletonId)
     return (item as any)._skeletonId
@@ -1212,10 +1235,24 @@ function getUniqueKey(item: T, index: number): string | number {
     return `error-${index}`
   }
 }
+watchEffect(() => {
+  if (settings.value.accountLevelFilters.videos.enabled) {
+    // Query only the mounted card window, not every author in a long cached feed.
+    renderItems.value.forEach(({ card }) => {
+      if (card)
+        accountFilterState(card.item, card.index, true)
+    })
+  }
+})
 </script>
 
 <template>
   <div class="video-card-grid-root">
+    <div v-if="allItemsLevelFiltered && !noMoreContent && !needToLoginFirst">
+      <Button :disabled="loading" @click="!loading && emit('loadMore')">
+        {{ $t('account_filter.load_next') }}
+      </Button>
+    </div>
     <!-- 需要登录 -->
     <Empty v-if="needToLoginFirst" mt-6 :description="$t('common.please_log_in_first')">
       <Button type="primary" @click="handleLogin">

@@ -70,15 +70,18 @@ function readLicense(packageDirectory: string): ThirdPartyLicense | undefined {
     const licenseFiles = readdirSync(packageDirectory)
       .filter(file => LICENSE_FILE_PATTERN.test(file))
       .sort()
-    const licenseText = licenseFiles
+    // brotli 1.3.3 omits a license file and its decoder carries Apache notices.
+    const bundledBrotliLicense = pkg.name === 'brotli' && pkg.version === '1.3.3'
+    const licenseTexts = licenseFiles
       .map(file => readFileSync(join(packageDirectory, file), 'utf-8').trim())
-      .filter(Boolean)
-      .join('\n\n')
+    if (bundledBrotliLicense)
+      licenseTexts.push(readFileSync(r('assets/licenses/brotli-LICENSE.txt'), 'utf-8').trim())
+    const licenseText = licenseTexts.filter(Boolean).join('\n\n')
 
     return {
       name: pkg.name,
       version: pkg.version,
-      license: normalizeLicenseField(pkg),
+      license: bundledBrotliLicense ? 'MIT AND Apache-2.0' : normalizeLicenseField(pkg),
       homepage: normalizeHomepage(pkg),
       licenseText: licenseText || undefined,
     }

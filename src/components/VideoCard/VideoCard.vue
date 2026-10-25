@@ -1,11 +1,14 @@
 <script lang="ts" setup>
 import { computed, ref, watchEffect } from 'vue'
 
+import { useAccountLevelFilter } from '~/composables/useAccountLevelFilter'
 import { useBewlyApp } from '~/composables/useAppProvider'
 import { useUserRelationScope } from '~/composables/useUserRelationScope'
 import { useVideoCardSharedStyles } from '~/composables/useVideoCardSharedStyles'
 import { settings } from '~/logic'
 import type { VideoCardLayoutSetting } from '~/logic/storage'
+import { useUserRelationStore } from '~/stores/userRelationStore'
+import { normalizeAccountMid } from '~/utils/accountLevelFilter'
 import { calcCurrentTime, numFormatter } from '~/utils/dataFormatter'
 import { recordVideoVisit } from '~/utils/videoVisitHistory'
 
@@ -13,6 +16,7 @@ import VideoCardCover from './components/VideoCardCover.vue'
 import VideoCardInfo from './components/VideoCardInfo.vue'
 import { useVideoCardLogic } from './composables/useVideoCardLogic'
 import type { Video, VideoCardRemovedState, VideoCardState } from './types'
+import { isBangumiVideo } from './utils'
 import VideoCardContextMenu from './VideoCardContextMenu/VideoCardContextMenu.vue'
 
 const props = withDefaults(defineProps<Props>(), {
@@ -42,6 +46,12 @@ interface Props {
   /** 页面持有的移除状态（取消稍后再看/取消收藏的确认与还原），与卡片自身的不感兴趣移除共用遮罩 */
   removedState?: VideoCardRemovedState
 }
+
+const relationStore = useUserRelationStore()
+const accountFilterState = useAccountLevelFilter(() => {
+  const author = Array.isArray(props.video?.author) ? props.video.author[0] : props.video?.author
+  return { mid: normalizeAccountMid(author?.mid), followed: relationStore.getFollowing(author?.mid) ?? props.video?.followed ?? author?.followed }
+}, 'videos', () => !props.skeleton && !!props.video && !props.video.roomid && !isBangumiVideo(props.video) && props.video.goto !== 'space')
 
 const layout = computed((): VideoCardLayoutSetting => {
   const layoutSetting = settings.value.videoCardLayout as VideoCardLayoutSetting | undefined
@@ -352,6 +362,7 @@ provide('getVideoType', () => props.type!)
 
 <template>
   <div
+    v-if="accountFilterState === 'allow'"
     :ref="(el) => logic.cardRootRef.value = el as HTMLElement"
     class="video-card-container"
     :data-layout-edit-target="skeleton ? undefined : 'video-card'"

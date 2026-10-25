@@ -1,6 +1,8 @@
 :host,
 :root {
   --bew-page-max-width: 2280px;
+  --bew-watch-page-max-width: 1760px;
+  --bew-watch-sidebar-width: 344px;
 
   // #region Typography
   // Use semantic roles instead of one-off size/weight pairs. Body and title share

@@ -11,6 +11,7 @@ export interface CategoryPage {
   icon: string
   iconActivated: string
   component: Component
+  componentProps?: Record<string, unknown>
   groupKey?: string
   warning?: boolean
   badgeKey?: string
@@ -55,11 +56,12 @@ watch(activePage, page => sessionStorage.setItem(props.storageKey, page))
 watchEffect(() => setBreadcrumb?.(currentPage.value ? t(currentPage.value.titleKey) : undefined))
 
 function selectPage(page: string) {
-  if (page === activePage.value)
+  if (page === activePage.value || !props.pages.some(item => item.value === page))
     return
 
-  scrollSettingsContentToTop?.()
+  // Navigation must not depend on the search/scroll cleanup succeeding.
   activePage.value = page
+  scrollSettingsContentToTop?.()
 }
 
 function handlePageMouseDown(event: MouseEvent) {
@@ -92,6 +94,7 @@ function handlePageMouseDown(event: MouseEvent) {
           type="button"
           class="settings-category-button"
           :class="{ active: activePage === page.value }"
+          :aria-current="activePage === page.value ? 'page' : undefined"
           @mousedown="handlePageMouseDown"
           @click="selectPage(page.value)"
         >
@@ -112,7 +115,7 @@ function handlePageMouseDown(event: MouseEvent) {
         :warning="currentPage.warning"
         :badge="currentPage.badgeKey ? $t(currentPage.badgeKey) : undefined"
       />
-      <Component :is="currentPage.component" :key="currentPage.value" />
+      <Component :is="currentPage.component" :key="currentPage.value" v-bind="currentPage.componentProps" />
     </section>
   </div>
 </template>
@@ -128,6 +131,7 @@ function handlePageMouseDown(event: MouseEvent) {
 
 .settings-category-nav {
   position: sticky;
+  z-index: 1;
   // The scroll viewport already reserves the 80px header with padding. A zero
   // inset keeps the sticky position aligned with the nav's natural position.
   top: 0;
@@ -194,6 +198,9 @@ function handlePageMouseDown(event: MouseEvent) {
 }
 
 .settings-category-content {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
   min-width: 0;
 }
 

@@ -736,6 +736,20 @@ export const settingsSearchEntries: SettingsSearchEntry[] = [
     'settings.adjust_comment_image_height',
     'settings.hide_comment_image_scrollbar',
   ]),
+  ...createEntries({ menu: MenuType.Bilibili, secondaryPage: 'account-filters', storageKey: bilibiliStorageKey }, [
+    'account_filter.title',
+    'account_filter.senior',
+    'account_filter.unknown',
+  ]),
+  ...createEntries({ menu: MenuType.Bilibili, secondaryPage: 'live-room', storageKey: bilibiliStorageKey }, [
+    'live_room.enhanced',
+    'live_room.remember',
+    'live_room.hide_gifts',
+    'live_room.hide_gift_effects',
+    'live_room.show_sc',
+    'live_room.background',
+    'live_room.hide_entry',
+  ]),
   ...createEntries(vipFeaturesRoute, [
     'settings.bilibili_features.vip_features',
     'settings.show_bcoin_receive_reminder',

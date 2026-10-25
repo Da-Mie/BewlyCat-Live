@@ -11,8 +11,8 @@ function isBilibiliLiveOrigin(value: string): boolean {
 }
 
 /**
- * 直播站本身不在匹配列表中，但直播页会嵌入主站、登录等匹配域名的框架。
- * 当前页面或任一上层页面属于直播站时，BewlyCat 不执行任何页面处理。
+ * 直播页会嵌入主站、登录等匹配域名的框架。主站功能通过此判断避开直播上下文；
+ * 直播顶层的专用增强另行初始化，不进入这些内嵌框架。
  */
 export function isInBilibiliLiveContext(): boolean {
   try {

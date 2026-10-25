@@ -11,6 +11,23 @@ if (!sessionStorage.getItem(storageKey) && legacyPage && bilibiliPageValues.incl
 
 const pages = [
   {
+    value: 'account-filters',
+    titleKey: 'account_filter.title',
+    descriptionKey: 'account_filter.description',
+    icon: 'i-mingcute:filter-line',
+    iconActivated: 'i-mingcute:filter-fill',
+    component: defineAsyncComponent(() => import('../AccountLevelSettings.vue')),
+    componentProps: { showHeading: false },
+  },
+  {
+    value: 'live-room',
+    titleKey: 'live_room.title',
+    descriptionKey: 'live_room.description',
+    icon: 'i-mingcute:live-line',
+    iconActivated: 'i-mingcute:live-fill',
+    component: defineAsyncComponent(() => import('../LiveRoomSettings.vue')),
+  },
+  {
     value: 'player',
     titleKey: 'settings.bilibili_features.video_playback',
     descriptionKey: 'settings.category_playback_player_desc',

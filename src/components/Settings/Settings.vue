@@ -492,8 +492,8 @@ function handleClose() {
 }
 
 function changeMenuItem(menuItem: MenuType) {
-  cancelSearchNavigation()
   activatedMenuItem.value = menuItem
+  cancelSearchNavigation()
 }
 </script>
 
@@ -693,7 +693,7 @@ function changeMenuItem(menuItem: MenuType) {
               <Component
                 :is="settingsMenu[activatedMenuItem as keyof typeof settingsMenu]"
                 v-if="settingsContentReady"
-                :key="settingsContentKey"
+                :key="`${activatedMenuItem}:${settingsContentKey}`"
               />
             </Transition>
           </main>

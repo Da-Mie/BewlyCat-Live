@@ -5,25 +5,21 @@
     }
   },
   "git": {
-    "commitMessage": "chore: release v${version}",
-    "tagName": "v${version}"
+    "commit": false,
+    "tag": false,
+    "push": false
+  },
+  "github": {
+    "release": false
+  },
+  "npm": {
+    "publish": false
   },
   "hooks": {
     "before:init": [
       "pnpm run lint",
       "pnpm run typecheck",
-      "pnpm run test --run"
-    ],
-    "after:bump": [
-      "pnpm run build",
-      "pnpm run build-firefox",
-      "pnpm run pack:zip",
-      "pnpm run pack:zip-firefox",
-      "pnpm run pack:zip-firefox-sources"
-    ],
-    "after:release": [
-      "gh release upload v${version} extension.zip extension-firefox.zip",
-      "pnpm run submit"
+      "pnpm run knip"
     ]
   }
 }

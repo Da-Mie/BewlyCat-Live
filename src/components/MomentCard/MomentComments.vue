@@ -3,6 +3,7 @@ import { useInfiniteScroll } from '@vueuse/core'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import { getAccountFilterDecision } from '~/composables/useAccountLevelFilter'
 import { settings } from '~/logic'
 import { useTopBarStore } from '~/stores/topBarStore'
 import { getCommentSexIcon } from '~/utils/commentUserInfo'
@@ -60,8 +61,8 @@ const treeEnabled = computed(() => settings.value.enableCommentReplyTreeDisplay)
 const treeMode = computed(() => settings.value.commentReplyTreeMode)
 const groups = computed(() => state.comments.map(root => ({
   root,
-  rows: getCommentRows(root, treeEnabled.value, treeMode.value),
-})))
+  rows: getCommentRows(root, treeEnabled.value, treeMode.value, comment => getAccountFilterDecision(comment.identity ?? {}, 'comments') === 'allow'),
+})).filter(group => group.rows.length > 0))
 
 const userId = computed(() => account.isLogin ? String(getUserID() || '') : '')
 const draftPrefix = computed(() => `${userId.value}:${moment.id}`)

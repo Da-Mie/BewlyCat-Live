@@ -1,8 +1,12 @@
+import type { AccountLevelFilters } from './accountLevelFilter'
+import { normalizeAccountLevelFilters } from './accountLevelFilter'
+
 export type PageCommentReplyTreeMode = 'lineCollapseMain' | 'lineKeepMain' | 'indentOnly'
 export type PageCommentReplyPaginationMode = 'loadMore' | 'pagination'
 
 /** Minimal settings payload shared with the page's main-world script. */
 export interface PageSettingsPayload {
+  accountLevelFilters: AccountLevelFilters
   localLoudnessEnabled: boolean
   localLoudnessTarget: number
   localLoudnessStrength: number
@@ -65,6 +69,7 @@ export function createPageSettingsPayload(value: unknown): PageSettingsPayload |
   }
 
   return {
+    accountLevelFilters: normalizeAccountLevelFilters(value.accountLevelFilters),
     localLoudnessEnabled: value.localLoudnessEnabled === true,
     localLoudnessTarget: typeof value.localLoudnessTarget === 'number' && Number.isFinite(value.localLoudnessTarget)
       ? Math.max(-24, Math.min(-14, value.localLoudnessTarget))
@@ -103,6 +108,7 @@ export function createPageSettingsPayload(value: unknown): PageSettingsPayload |
  * 快照缺失或无法读取时调用方按默认行为处理，不能据此跳过默认开启的功能。
  */
 export interface PageBootSnapshot {
+  accountLevelFilters: AccountLevelFilters
   preventMobileRedirect: boolean
   skipConciseDanmaku: boolean
 }
@@ -115,6 +121,7 @@ export function readPageBootSnapshot(): Partial<PageBootSnapshot> | null {
     if (!isRecord(value))
       return null
     return {
+      accountLevelFilters: isRecord(value.accountLevelFilters) ? normalizeAccountLevelFilters(value.accountLevelFilters) : undefined,
       preventMobileRedirect: typeof value.preventMobileRedirect === 'boolean' ? value.preventMobileRedirect : undefined,
       skipConciseDanmaku: typeof value.skipConciseDanmaku === 'boolean' ? value.skipConciseDanmaku : undefined,
     }
@@ -126,6 +133,7 @@ export function readPageBootSnapshot(): Partial<PageBootSnapshot> | null {
 
 export function writePageBootSnapshot(settings: PageSettingsPayload) {
   const snapshot: PageBootSnapshot = {
+    accountLevelFilters: settings.accountLevelFilters,
     preventMobileRedirect: settings.preventMobileRedirect,
     skipConciseDanmaku: settings.skipConciseDanmaku,
   }

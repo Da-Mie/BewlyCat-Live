@@ -1,7 +1,9 @@
 import type { CSSProperties } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useToast } from 'vue-toastification'
 
 import { useBewlyApp } from '~/composables/useAppProvider'
+import { LIVE_CLIENT_OPEN } from '~/constants/liveClient'
 import { appAuthTokens, settings } from '~/logic'
 import type { VideoInfo } from '~/models/video/videoInfo'
 import type { VideoPreviewResult } from '~/models/video/videoPreview'
@@ -11,6 +13,7 @@ import { ensureFreshAppAccessToken, requestAppClient } from '~/utils/authProvide
 import { calcCurrentTime, numFormatter, parseStatNumber } from '~/utils/dataFormatter'
 import { computeFloatingMenuPosition } from '~/utils/floatingMenu'
 import { removeHttpFromUrl } from '~/utils/main'
+import { sendMessage } from '~/utils/messaging'
 import { openLinkInBackground } from '~/utils/tabs'
 
 import type { Video, VideoCardState } from '../types'
@@ -29,6 +32,7 @@ interface VideoCardProps {
 
 export function useVideoCardLogic(propsOrGetter: MaybeRefOrGetter<VideoCardProps>, savedState?: VideoCardState) {
   const toast = useToast()
+  const { t } = useI18n()
   const { openIframeDrawer, openVideoDialog } = useBewlyApp()
   const topBarStore = useTopBarStore()
 
@@ -344,6 +348,11 @@ export function useVideoCardLogic(propsOrGetter: MaybeRefOrGetter<VideoCardProps
   }
 
   function handleClick(event: MouseEvent) {
+    if (props.value.video?.roomid && settings.value.liveRoomEnhanced && !event.defaultPrevented && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && event.button === 0) {
+      event.preventDefault()
+      void sendMessage(LIVE_CLIENT_OPEN, { roomId: String(props.value.video.roomid), active: settings.value.videoCardLinkOpenMode !== 'background' }).catch(() => toast.error(t('live_client.open_failed')))
+      return
+    }
     videoCurrentTime.value = getCurrentTime(videoElement) ?? videoCurrentTime.value
     if (settings.value.videoCardLinkOpenMode === 'background' && videoUrl.value && !event.ctrlKey && !event.metaKey) {
       event.preventDefault()

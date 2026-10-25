@@ -2031,3 +2031,130 @@ inject:
   load_more: Load more
   expand_all_replies: Load all
   load_reply_pages: 'Load {count} pages'
+
+account_filter:
+  load_next: Load the next batch
+  title: Account level filters
+  description: Filter comments, videos and live messages by account level. Configure each type separately.
+  scope_comments: Comments and replies
+  scope_videos: Video cards
+  scope_liveDanmaku: Live chat and on-screen danmaku
+  enabled: Enable filtering
+  levels: Block these accounts
+  ordinary_six: Ordinary LV6
+  senior: Senior members
+  exempt_self: Keep my own content
+  exempt_followed: Keep content from followed accounts
+  whitelist: Exempt UIDs (one per line or comma-separated)
+  levels_hint: Content from selected levels is hidden. Select a level again to remove it.
+  disabled_hint: Enable to choose account groups. Disabling keeps your selections.
+  unknown: When account information is unavailable
+  policy_allow: Keep
+  policy_block: Hide
+  exceptions: Exceptions
+  whitelist_hint: Numeric UIDs only, separated by lines or commas. Saved when you leave this field.
+  whitelist_error: Enter valid numeric UIDs, up to 500.
+
+live_room:
+  background: Use room background
+  background_desc: Use the streamer’s background with a softened image and a theme overlay for readable text.
+  show_sc: Show floating Super Chats
+  hide_gift_effects: Hide gift animations
+  title: Live room
+  description: Open live links and live cards in the new BewlyCat room by default. You can open the original room at any time.
+  enhanced: Use the new live room by default
+  hide_gifts: Hide gift messages
+  hide_entry: Hide entrance messages
+  options: Live settings
+  theme: Toggle theme
+  close: Close
+  remember: Remember viewing preferences
+  remember_desc: 'Restore quality, stream, volume, mute, danmaku, chat and header visibility next time.'
+
+live_client:
+  filters_title: Danmaku filters
+  danmaku_enable: Enable danmaku (D)
+  danmaku_disable: Disable danmaku (D)
+  native_filters: Bilibili danmaku filters
+  native_filters_hint: Use the keywords and blocked users set in the original room for your current Bilibili account. Sync automatically when you return to this page.
+  native_filter_waiting: Syncing Bilibili filters…
+  native_filter_ready: Your account’s filters are up to date.
+  native_filter_guest: Sign in to Bilibili to sync your account’s danmaku filters.
+  native_filter_failed: Could not sync filters. Chat and danmaku are paused; video playback continues.
+  native_filter_sync: Sync again
+  hide_header: Hide header
+  show_header: Show header
+  header_visibility: Show live header
+  title: Live
+  independent: BewlyCat Live
+  room_input: Room ID or live room URL
+  open_room: Open
+  options: Live options
+  original: Open original room
+  invalid_room: Enter a valid Bilibili room ID or URL.
+  room_label: 'Room {id}'
+  live: Live
+  offline: Offline
+  quality: Quality
+  line: Stream
+  danmaku_on: Danmaku on
+  danmaku_off: Danmaku off
+  hide_chat: Hide chat panel
+  show_chat: Show chat panel
+  refresh: Reload live stream
+  retry: Retry
+  fullscreen: Fullscreen
+  player: Live player
+  loading_stream: Loading the live stream…
+  start_playing: Play live stream
+  player_failed: Unable to play the live stream. Try again or open the original room.
+  loading_room: Loading room…
+  restricted: This room requires viewing permission. Open the original room to continue.
+  no_stream: No playable stream is available. Try reloading.
+  offline_detail: The streamer is offline. Reload the live stream after the broadcast starts.
+  chat: Chat
+  chat_connecting: Connecting
+  chat_connected: Connected
+  chat_reconnecting: Reconnecting
+  chat_closed: Not connected
+  chat_error: Connection failed
+  reconnect: Reconnect chat
+  empty_chat: No messages yet
+  history_failed: Chat history is unavailable. New messages will still appear.
+  latest: Jump to latest
+  login_hint: Sign in to Bilibili to send messages.
+  login: Sign in
+  message_input: Send a message
+  send: Send
+  entered: joined the room
+  welcome: Watch in BewlyCat
+  welcome_detail: Enter a room ID or paste a Bilibili live room URL.
+  settings_failed: Unable to load settings. Reload the extension and this page.
+  open_failed: Unable to open the new live room. Refresh the page and try again.
+  danmaku: Danmaku
+  realtime_chat: Live chat
+  preferences_hint: Changes are saved automatically.
+  autoplay_hint: Press play to start with your saved volume settings.
+
+live_gifts:
+  title: Gifts and SC
+  gift: Gifts
+  sc: SC
+  remaining: '{seconds}s remaining'
+  gold: gold seeds
+  silver: silver seeds
+  loading: Loading gifts…
+  sending: Sending, please wait…
+  confirm: Confirm purchase
+  recipient: Recipient
+  total: Total
+  back: Edit selection
+  pay_send: Buy and send
+  quantity: Quantity
+  sc_text: Your message
+  review: Continue
+  unavailable: These gifts are unavailable in this room.
+  sent: Sent. Display depends on Bilibili moderation and delivery.
+  reviewing: Submitted for moderation.
+  unknown: Unable to confirm delivery. Check the original room before trying again.
+  check_before_retry: Check delivery before trying again to avoid a duplicate purchase.
