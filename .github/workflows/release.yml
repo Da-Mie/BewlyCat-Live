@@ -1,6 +1,7 @@
-name: Build draft release
+name: Release
 
 on:
+  create:
   workflow_dispatch:
     inputs:
       tag:
@@ -18,13 +19,16 @@ permissions:
 
 jobs:
   release:
+    if: github.event_name == 'workflow_dispatch' || (github.event.ref_type == 'branch' && startsWith(github.event.ref, 'release/'))
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: write
     env:
       RELEASE_TAG: ${{ inputs.tag }}
-      PRERELEASE: ${{ inputs.prerelease }}
+      RELEASE_BRANCH: ${{ github.event.ref }}
+      PUBLISH_RELEASE: ${{ github.event_name == 'create' }}
+      PRERELEASE: ${{ github.event_name == 'create' || inputs.prerelease }}
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
@@ -43,7 +47,8 @@ jobs:
           node --input-type=module <<'JS'
           import { appendFileSync, readFileSync, existsSync } from 'node:fs'
           const pkg = JSON.parse(readFileSync('package.json', 'utf8'))
-          const tag = /^v(\d+\.\d+\.\d+)-personal\.([1-9]\d*)$/.exec(process.env.RELEASE_TAG)
+          const releaseTag = process.env.RELEASE_TAG || process.env.RELEASE_BRANCH?.replace(/^release\//, '')
+          const tag = /^v(\d+\.\d+\.\d+)-personal\.([1-9]\d*)$/.exec(releaseTag ?? '')
           if (!tag || tag[1] !== pkg.version)
             throw new Error('The fork tag base version must match package.json')
           if (pkg.homepage !== `https://github.com/${process.env.GITHUB_REPOSITORY}`)
@@ -54,7 +59,7 @@ jobs:
             throw new Error('The tag does not contain the personal fork features')
           const api = `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}`
           const headers = { Authorization: `Bearer ${process.env.GH_TOKEN}`, Accept: 'application/vnd.github+json' }
-          const refResponse = await fetch(`${api}/git/ref/tags/${encodeURIComponent(process.env.RELEASE_TAG)}`, { headers })
+          const refResponse = await fetch(`${api}/git/ref/tags/${encodeURIComponent(releaseTag)}`, { headers })
           if (refResponse.status !== 404) {
             if (!refResponse.ok)
               throw new Error(`Cannot verify the release tag: HTTP ${refResponse.status}`)
@@ -68,7 +73,7 @@ jobs:
             if (object?.type !== 'commit' || object.sha !== process.env.GITHUB_SHA)
               throw new Error('The existing tag must point to the selected workflow commit')
           }
-          appendFileSync(process.env.GITHUB_ENV, `PACKAGE_VERSION=${pkg.version}\n`)
+          appendFileSync(process.env.GITHUB_ENV, `PACKAGE_VERSION=${pkg.version}\nRELEASE_TAG=${releaseTag}\n`)
           JS
 
       - run: pnpm install --frozen-lockfile
@@ -84,7 +89,11 @@ jobs:
           import hashlib, json, zipfile
           root = Path('extension')
           manifest = json.loads((root / 'manifest.json').read_text())
-          assert manifest['version'] == json.loads(Path('package.json').read_text())['version']
+          package = json.loads(Path('package.json').read_text())
+          assert manifest['version'] == package['version']
+          assert manifest['name'] == package['displayName']
+          assert manifest['homepage_url'] == package['homepage']
+          assert (root / 'dist/live/index.html').is_file()
           with zipfile.ZipFile('extension.zip', 'w', compression=zipfile.ZIP_DEFLATED) as archive:
               for path in sorted(root.rglob('*')):
                   if path.is_file():
@@ -94,9 +103,13 @@ jobs:
           Path('SHA256SUMS').write_text(f'{digest}  extension.zip\n')
           PY
 
-      - name: Create draft release
+      - name: Create GitHub release
         run: |
+          release_options=(--draft)
+          if [ "$PUBLISH_RELEASE" = "true" ]; then
+            release_options=()
+          fi
           gh release create "$RELEASE_TAG" extension.zip SHA256SUMS \
-            --target "$GITHUB_SHA" --draft --prerelease="$PRERELEASE" \
+            --target "$GITHUB_SHA" "${release_options[@]}" --prerelease="$PRERELEASE" \
             --title "BewlyCat Live $PACKAGE_VERSION" \
             --notes-file "docs/releases/$PACKAGE_VERSION.md"
