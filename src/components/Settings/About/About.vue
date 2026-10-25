@@ -18,7 +18,7 @@ import {
 } from '~/utils/settingsCloudSyncProtocol'
 
 import licenseText from '../../../../LICENSE?raw'
-import { version } from '../../../../package.json'
+import { displayName, homepage, version } from '../../../../package.json'
 import Maintenance from '../Advanced/Maintenance.vue'
 import SettingsItem from '../components/SettingsItem.vue'
 import SettingsItemGroup from '../components/SettingsItemGroup.vue'
@@ -33,7 +33,7 @@ interface ThirdPartyLicense {
 }
 
 // 由 scripts/thirdPartyLicenses.ts 在各构建产物中分别生成。
-const THIRD_PARTY_LICENSE_BUILDS = ['content', 'inject', 'background']
+const THIRD_PARTY_LICENSE_BUILDS = ['content', 'inject', 'background', 'live']
 
 const hasNewVersion = ref<boolean>(false)
 const contributorsImageFailed = ref(false)
@@ -161,7 +161,7 @@ function handleSyncDialogClose() {
 }
 
 async function checkGitHubRelease() {
-  const apiUrl = `https://api.github.com/repos/keleus/BewlyCat/releases/latest`
+  const apiUrl = `${homepage.replace('https://github.com/', 'https://api.github.com/repos/')}/releases/latest`
 
   try {
     const response = await fetch(apiUrl)
@@ -171,8 +171,7 @@ async function checkGitHubRelease() {
     const data = await response.json()
     const latestVersion = data.tag_name
 
-    // Here you can compare `latestVersion` with your current version
-    const currentVersion = `v${version}` // Replace with your actual current version
+    const currentVersion = `v${version}`
 
     if (latestVersion !== currentVersion)
       hasNewVersion.value = true
@@ -252,7 +251,7 @@ async function handleCopyEnvironmentInfo() {
 
         <a
           v-if="hasNewVersion"
-          href="https://github.com/keleus/BewlyCat/releases" target="_blank"
+          :href="`${homepage}/releases`" target="_blank"
           pos="absolute bottom-0 right-0" transform="translate-x-50%" un-text="xs $bew-text-1" p="y-1 x-2" bg="$bew-fill-1"
           rounded="$bew-radius"
         >
@@ -261,7 +260,7 @@ async function handleCopyEnvironmentInfo() {
       </div>
       <section class="about-brand" text-center mt-2>
         <p flex="inline gap-2">
-          <span>BewlyCat</span>
+          <span>{{ displayName }}</span>
           <span
             v-if="isDev"
             class="bew-warning-text"
@@ -272,7 +271,7 @@ async function handleCopyEnvironmentInfo() {
         </p>
         <p text-center>
           <a
-            href="https://github.com/keleus/BewlyCat/releases" target="_blank"
+            :href="`${homepage}/releases`" target="_blank"
             un-text="sm color-$bew-text-2 hover:color-$bew-text-3"
           >
             v{{ version }}
@@ -344,7 +343,7 @@ async function handleCopyEnvironmentInfo() {
           </h3>
           <div grid="~ xl:cols-6 lg:cols-5 md:cols-4 cols-3 gap-2">
             <a
-              href="https://github.com/keleus/BewlyCat" target="_blank"
+              :href="homepage" target="_blank"
               class="link-card"
               bg="black dark:white !opacity-10 !hover:opacity-20"
               un-text="black dark:white"

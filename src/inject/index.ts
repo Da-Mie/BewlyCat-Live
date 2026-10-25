@@ -1,17 +1,21 @@
 // 由于是浏览器环境，所以引入的ts不能使用webextension-polyfill相关api，包含获取本地Storage，获取的是网页的localStorage
 import { isSearchResultApiPath } from '~/constants/searchApi'
 import COMMENT_REPLY_TREE_GUIDES_CSS from '~/styles/commentReplyTree.scss?inline'
+import type { AccountIdentity } from '~/utils/accountLevelFilter'
+import { readAccountIdentity } from '~/utils/accountLevelFilter'
 import { getBilibiliDesktopNavigatorValues, isBilibiliWwwUrl } from '~/utils/bilibiliDesktopNavigation'
 import { isInBilibiliLiveContext } from '~/utils/bilibiliLive'
 import { CommentReplyPageCache } from '~/utils/commentReplyPageCache'
 import type { CommentReplyAvatarAnchor, CommentReplyTreeBranch } from '~/utils/commentReplyTree'
 import { formatCommentReplyGuideCoordinate, getCommentReplyBranchPath, getCommentReplyBranchToggleY } from '~/utils/commentReplyTree'
+import { projectCommentTree } from '~/utils/commentTreeProjection'
 import { getCommentSexIcon, normalizeCommentLocation } from '~/utils/commentUserInfo'
 import { i18n } from '~/utils/i18n'
 import { isElectron } from '~/utils/main'
 import type { PageSettingsPayload } from '~/utils/pageSettingsProtocol'
 import { createPageSettingsPayload, readPageBootSnapshot } from '~/utils/pageSettingsProtocol'
 
+import { createPageAccountFilter } from './accountLevelFilter'
 import { createLocalLoudnessController } from './audio/localLoudness'
 
 // 存储当前设置状态
@@ -28,10 +32,13 @@ const settingsReadyPromise = new Promise<void>((resolve) => {
   resolveSettingsReady = resolve
 })
 
+const bootAccountFilters = readPageBootSnapshot()?.accountLevelFilters
+const accountFilter = createPageAccountFilter(() => currentSettings?.accountLevelFilters ?? bootAccountFilters, settingsReadyPromise)
+
 const pageScriptGlobal = globalThis as typeof globalThis & {
   __BEWLYCAT_PAGE_SCRIPT_INITIALIZED__?: boolean
 }
-// 直播站及其内嵌框架中不改写任何页面全局对象。
+// 原生直播上下文不加载主站处理；独立直播页持有自己的消息连接。
 const shouldInitializePageScript = !pageScriptGlobal.__BEWLYCAT_PAGE_SCRIPT_INITIALIZED__
   && !isInBilibiliLiveContext()
 
@@ -43,6 +50,7 @@ if (isElectronEnv) {
   console.warn('[BewlyCat] Detected Electron environment, extension disabled.')
 }
 else if (shouldInitializePageScript) {
+  accountFilter.setTreeRefresh(refreshCommentReplyTrees)
   let localLoudness: ReturnType<typeof createLocalLoudnessController> | undefined
   if (typeof AudioContext !== 'undefined') {
     try {
@@ -254,6 +262,7 @@ else if (shouldInitializePageScript) {
 
   /** 楼中楼已见过的回复关系（跨分页保留，用于父节点不在当前页时回溯挂载） */
   interface CommentReplyTreeCachedMeta {
+    identity?: AccountIdentity
     authorName: string | null
     avatarUrl: string | null
     ctime: number | null
@@ -2401,6 +2410,7 @@ else if (shouldInitializePageScript) {
       extras?.messageText ?? null,
     )
     const next: CommentReplyTreeCachedMeta = {
+      identity: { ...previous?.identity, ...Object.fromEntries(Object.entries(readAccountIdentity(replyItem)).filter(([, value]) => value !== undefined)) },
       authorName: getReplyAuthorName(replyItem) ?? previous?.authorName ?? null,
       avatarUrl: replyItem?.member?.avatar ?? previous?.avatarUrl ?? null,
       ctime: getCommentReplyCtime(replyItem) ?? previous?.ctime ?? null,
@@ -3063,13 +3073,15 @@ else if (shouldInitializePageScript) {
     collapseParentBody: boolean,
   ) {
     const hideDescendantsAtDepth: boolean[] = []
-    const rootBranchCollapsed = state.collapsedNodeKeys.has(COMMENT_REPLY_TREE_ROOT_KEY)
+    const rootFiltered = accountFilter.isHidden(getCommentReplyTreeRootRenderer(component))
+    const rootBranchCollapsed = !rootFiltered && state.collapsedNodeKeys.has(COMMENT_REPLY_TREE_ROOT_KEY)
     // 仅「收起主评论」模式才折叠父节点本体；「不收起主评论」只隐藏子回复
     getCommentReplyTreeRootRenderer(component)
       ?.toggleAttribute('data-bewly-comment-reply-collapsed', collapseParentBody && rootBranchCollapsed)
 
     const hiddenByTail = new Set<HTMLElement>()
-    collectCommentReplyTailHiddenRenderers(state, COMMENT_REPLY_TREE_ROOT_KEY, rootNodes, hiddenByTail)
+    if (!rootFiltered)
+      collectCommentReplyTailHiddenRenderers(state, COMMENT_REPLY_TREE_ROOT_KEY, rootNodes, hiddenByTail)
     orderedNodes.forEach(({ node }) => {
       if (node.children.length > 1)
         collectCommentReplyTailHiddenRenderers(state, getCommentReplyTreeNodeKey(node), node.children, hiddenByTail)
@@ -3400,7 +3412,7 @@ else if (shouldInitializePageScript) {
     // 主评论锚点同样需要有效，否则根分支线会整体错位；容器模式不画根分支，无需校验
     if (threadRoot && !containerEnabled) {
       const mainRenderer = getCommentReplyTreeRootRenderer(component)
-      if (mainRenderer && !getCommentReplyAvatarAnchor(mainRenderer, origin)) {
+      if (mainRenderer && !accountFilter.isHidden(mainRenderer) && !getCommentReplyAvatarAnchor(mainRenderer, origin)) {
         retryLayout()
         return
       }
@@ -3420,13 +3432,13 @@ else if (shouldInitializePageScript) {
 
     const visibleRootNodes = rootNodes.filter(isCommentReplyTreeNodeVisible)
     const threadRootRenderer = getCommentReplyTreeRootRenderer(component)
-    const rootBranchCollapsed = state.collapsedNodeKeys.has(COMMENT_REPLY_TREE_ROOT_KEY)
+    const rootBranchCollapsed = !accountFilter.isHidden(threadRootRenderer) && state.collapsedNodeKeys.has(COMMENT_REPLY_TREE_ROOT_KEY)
     /*
      * 容器模式下主评论位于滚动区上方，根分支的锚点、主干与 −/+ 都会落在
      * 滚动内容坐标系之外，既裁切又没法稳定对齐。这里直接不画主评论那条线，
      * 收起整层改用容器底边的原生「收起回复」。
      */
-    const threadRootAnchor = containerEnabled
+    const threadRootAnchor = containerEnabled || accountFilter.isHidden(threadRootRenderer)
       ? null
       : (threadRootRenderer ? getCommentReplyAvatarAnchor(threadRootRenderer, origin) : null)
     // 分支收起后即使子回复全隐藏，也保留控件以便展开
@@ -4211,48 +4223,54 @@ else if (shouldInitializePageScript) {
         continue
 
       const meta = metaByRpid.get(rpid)
+      const parentFiltered = accountFilter.decision(meta?.identity ?? {}, 'comments') !== 'allow'
       const authorName = meta?.authorName ?? getReplyAtAuthorFromMessage(getCommentReplyData(child.renderer))
       let renderer = existing.get(rpid)
       if (!renderer) {
         renderer = document.createElement('div')
         renderer.className = 'bewly-comment-missing-parent'
         renderer.dataset.parentRpid = rpid
-        const body = document.createElement('div')
-        body.className = 'bewly-comment-missing-parent__body'
-        const avatar = document.createElement('span')
-        avatar.className = 'bewly-comment-missing-parent__avatar'
-        avatar.textContent = '?'
-        avatar.setAttribute('aria-hidden', 'true')
-        const text = document.createElement('span')
-        text.className = 'bewly-comment-missing-parent__text'
-        body.append(avatar, text)
-        renderer.append(body)
       }
-      const label = labels[language] ?? labels['cmn-CN']
-      const text = renderer.querySelector<HTMLElement>('.bewly-comment-missing-parent__text')!
-      // 缓存已提供原正文时直接载入父评论，不能仍标记为「不在本页」。
-      const content = `${authorName ? `@${authorName} · ` : ''}${meta?.messageText || label}`
-      if (text.textContent !== content)
-        text.textContent = content
-      renderer.toggleAttribute('data-cached', Boolean(meta?.messageText))
-      const avatar = renderer.querySelector<HTMLElement>('.bewly-comment-missing-parent__avatar')!
-      const avatarUrl = typeof meta?.avatarUrl === 'string' && /^(?:https?:)?\/\//.test(meta.avatarUrl)
-        ? meta.avatarUrl
-        : null
-      if (meta?.messageText && avatarUrl) {
-        let image = avatar.querySelector('img')
-        if (!image) {
-          image = document.createElement('img')
-          image.alt = ''
-          avatar.replaceChildren(image)
-        }
-        if (image.getAttribute('src') !== avatarUrl)
-          image.setAttribute('src', avatarUrl)
+      if (parentFiltered) {
+        renderer.replaceChildren()
+        renderer.style.setProperty('display', 'none', 'important')
       }
       else {
-        const avatarText = meta?.messageText ? authorName?.slice(0, 1) || '·' : '?'
-        if (avatar.textContent !== avatarText)
-          avatar.textContent = avatarText
+        renderer.style.removeProperty('display')
+        if (!renderer.querySelector('.bewly-comment-missing-parent__body')) {
+          const body = document.createElement('div')
+          body.className = 'bewly-comment-missing-parent__body'
+          const avatar = document.createElement('span')
+          avatar.className = 'bewly-comment-missing-parent__avatar'
+          avatar.setAttribute('aria-hidden', 'true')
+          const text = document.createElement('span')
+          text.className = 'bewly-comment-missing-parent__text'
+          body.append(avatar, text)
+          renderer.append(body)
+        }
+        const label = labels[language] ?? labels['cmn-CN']
+        const text = renderer.querySelector<HTMLElement>('.bewly-comment-missing-parent__text')!
+        const content = `${authorName ? `@${authorName} · ` : ''}${meta?.messageText || label}`
+        if (text.textContent !== content)
+          text.textContent = content
+        renderer.toggleAttribute('data-cached', Boolean(meta?.messageText))
+        const avatar = renderer.querySelector<HTMLElement>('.bewly-comment-missing-parent__avatar')!
+        const avatarUrl = typeof meta?.avatarUrl === 'string' && /^(?:https?:)?\/\//.test(meta.avatarUrl) ? meta.avatarUrl : null
+        if (meta?.messageText && avatarUrl) {
+          let image = avatar.querySelector('img')
+          if (!image) {
+            image = document.createElement('img')
+            image.alt = ''
+            avatar.replaceChildren(image)
+          }
+          if (image.getAttribute('src') !== avatarUrl)
+            image.setAttribute('src', avatarUrl)
+        }
+        else {
+          const avatarText = meta?.messageText ? authorName?.slice(0, 1) || '·' : '?'
+          if (avatar.textContent !== avatarText)
+            avatar.textContent = avatarText
+        }
       }
       if (renderer.parentElement !== replyContainer)
         replyContainer.append(renderer)
@@ -4332,6 +4350,39 @@ else if (shouldInitializePageScript) {
       .forEach(node => visitNode(node, 0))
 
     return orderedNodes
+  }
+
+  function projectVisibleCommentReplyNodes(ordered: Array<{ depth: number, node: CommentReplyTreeNode }>, metaByRpid: Map<string, CommentReplyTreeCachedMeta>) {
+    const nodes = ordered.map(row => row.node)
+    const parents = new Map<HTMLElement, HTMLElement | null>(nodes.map(node => [node.renderer, null]))
+    nodes.forEach(node => node.children.forEach(child => parents.set(child.renderer, node.renderer)))
+    const rows = projectCommentTree(nodes, node => node.renderer, node => parents.get(node.renderer) ?? null, (node) => {
+      const identity = node.rpid ? metaByRpid.get(node.rpid)?.identity : undefined
+      return accountFilter.decision(identity ?? readAccountIdentity(getCommentReplyData(node.renderer)), 'comments') === 'allow'
+    })
+    const liftedRenderers = new Set<HTMLElement>()
+    const copies = new Map<HTMLElement, CommentReplyTreeNode>()
+    for (const row of rows) {
+      const lifted = (parents.get(row.item.renderer) ?? null) !== (row.parent?.renderer ?? null)
+      if (lifted)
+        liftedRenderers.add(row.item.renderer)
+      copies.set(row.item.renderer, {
+        ...row.item,
+        parentRpid: row.parent?.rpid ?? null,
+        directParentVisible: lifted || row.item.directParentVisible,
+        directParentAuthorName: lifted ? null : row.item.directParentAuthorName,
+        directParentMessageText: lifted ? null : row.item.directParentMessageText,
+        children: [],
+      })
+    }
+    for (const row of rows) {
+      if (row.parent)
+        copies.get(row.parent.renderer)!.children.push(copies.get(row.item.renderer)!)
+    }
+    return {
+      orderedNodes: rows.map(row => ({ node: copies.get(row.item.renderer)!, depth: Math.min(row.depth, MAX_COMMENT_REPLY_TREE_DEPTH) })),
+      liftedRenderers,
+    }
   }
 
   function updateCommentReplyTree(component: any) {
@@ -4458,7 +4509,7 @@ else if (shouldInitializePageScript) {
     const nodes: CommentReplyTreeNode[] = replyRenderers.map((replyRenderer) => {
       const replyItem = getCommentReplyData(replyRenderer)
       // 同步 data + DOM 正文进缓存，翻页后仍可引用父评摘要
-      const fromDomMessage = getCommentRendererMessageText(replyRenderer)
+      const fromDomMessage = replyRenderer.hasAttribute('data-bewly-account-filtered') ? null : getCommentRendererMessageText(replyRenderer)
       const cachedMeta = cacheCommentReplyTreeMeta(state, replyItem, { messageText: fromDomMessage })
       const rpid = getReplyRpid(replyItem) ?? null
       // 当前页 data 偶发缺字段时回退到跨页缓存
@@ -4484,7 +4535,7 @@ else if (shouldInitializePageScript) {
     // 第二次同步会合并其他 renderer 的缓存，再移除本地已删除/隐藏的回复。
     getCommentReplyInvisibleIds(component).forEach(rpid => state.replyMetaByRpid.delete(rpid))
     addMissingCommentReplyTreeParents(nodes, state.replyMetaByRpid, replyContainer)
-    const orderedNodes = buildCommentReplyTreeOrder(nodes, state.replyMetaByRpid)
+    const { orderedNodes, liftedRenderers } = projectVisibleCommentReplyNodes(buildCommentReplyTreeOrder(nodes, state.replyMetaByRpid), state.replyMetaByRpid)
     const rootNodes = orderedNodes
       .filter(({ depth }) => depth === 0)
       .map(({ node }) => node)
@@ -4520,17 +4571,19 @@ else if (shouldInitializePageScript) {
     // - 直接父不在本页无正文但有 parent rpid：紧凑「回复 @… + 不在本页」
     orderedNodes.forEach(({ node }) => {
       const parentOffpage = Boolean(node.parentRpid && !node.directParentVisible)
+      const parentMeta = node.parentRpid ? state.replyMetaByRpid.get(node.parentRpid) : undefined
+      const parentFiltered = parentOffpage && accountFilter.decision(parentMeta?.identity ?? {}, 'comments') !== 'allow'
       const hasCachedBody = Boolean(node.directParentMessageText?.trim())
       // 有正文缓存 或 仅有离页父 ID 都展示我们的标注
-      const showOffpageLabel = Boolean(parentOffpage && (hasCachedBody || node.parentRpid))
+      const showOffpageLabel = Boolean(!parentFiltered && !liftedRenderers.has(node.renderer) && parentOffpage && (hasCachedBody || node.parentRpid))
       // 展示自有标注时隐藏原生前缀，避免「回复 @」重复
-      const hideNativePrefix = showOffpageLabel
+      const hideNativePrefix = liftedRenderers.has(node.renderer) || accountFilter.isHidden(getCommentReplyTreeRootRenderer(component)) || showOffpageLabel
         ? true
         : (showGuides && !parentOffpage)
       setCommentReplyAtPrefixHidden(node.renderer, hideNativePrefix)
       updateCommentReplyOffpageParentLabel(node.renderer, {
-        authorName: node.directParentAuthorName,
-        messageText: node.directParentMessageText,
+        authorName: parentFiltered ? null : node.directParentAuthorName,
+        messageText: parentFiltered ? null : node.directParentMessageText,
         parentRpid: node.parentRpid,
         show: showOffpageLabel,
       })
@@ -4775,6 +4828,8 @@ else if (shouldInitializePageScript) {
       if (typeof classConstructor !== 'function')
         return
 
+      accountFilter.patch(name, classConstructor)
+
       if (name === 'bili-comment-replies-renderer') {
         patchCommentReplyPaginationPrototype(classConstructor)
         patchCommentRepliesRendererDisconnect(classConstructor)
@@ -4979,6 +5034,7 @@ else if (shouldInitializePageScript) {
 
       const isFirstTime = !settingsReady
       currentSettings = pageSettings
+      accountFilter.refresh()
       localLoudness?.update({ enabled: pageSettings.localLoudnessEnabled, target: pageSettings.localLoudnessTarget, strength: pageSettings.localLoudnessStrength / 100 })
       localLoudness?.setAudioDelayEnabled(pageSettings.playerAdjustmentEnabled)
       preventMobileRedirectEnabled = pageSettings.preventMobileRedirect

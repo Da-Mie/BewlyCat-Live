@@ -7,10 +7,14 @@ import { DEFAULT_SEARCH_BAR_CHARACTER } from '~/constants/imgs'
 import type { HomeSubPage } from '~/contentScripts/views/Home/types'
 import type { AppPage } from '~/enums/appEnums'
 import { VideoPageTopBarConfig } from '~/enums/appEnums'
+import type { AccountLevelFilters } from '~/utils/accountLevelFilter'
+import { normalizeAccountLevelFilters } from '~/utils/accountLevelFilter'
 import {
   MOBILE_LIST_LAYOUT_BREAKPOINT,
   normalizeListLayoutBreakpoint,
 } from '~/utils/gridLayout'
+import type { LivePreferences } from '~/utils/livePreferences'
+import { normalizeLivePreferences } from '~/utils/livePreferences'
 import { normalizePlaybackRateStep } from '~/utils/playbackRate'
 
 export const storageDemo = useStorageLocal('webext-demo', 'Storage Demo')
@@ -296,6 +300,15 @@ export interface FavoriteOrganizerFolder {
 export type AmbilightPreset = 'soft' | 'cinema' | 'vivid'
 
 export interface Settings {
+  accountLevelFilters: AccountLevelFilters
+  liveRoomRememberPreferences: boolean
+  liveRoomPreferences: LivePreferences
+  liveRoomEnhanced: boolean
+  liveRoomHideGiftEffects: boolean
+  liveRoomShowSuperChats: boolean
+  liveRoomBackground: boolean
+  liveRoomHideGifts: boolean
+  liveRoomHideEntryEffects: boolean
   ambilightEnabled: boolean
   ambilightEnableFullscreen: boolean
   ambilightPreset: AmbilightPreset
@@ -666,6 +679,15 @@ export const originalLocalSettings: LocalSettings = {
 }
 
 export const originalSettings: Settings = {
+  accountLevelFilters: normalizeAccountLevelFilters(),
+  liveRoomRememberPreferences: true,
+  liveRoomPreferences: normalizeLivePreferences(),
+  liveRoomEnhanced: true,
+  liveRoomHideGiftEffects: false,
+  liveRoomShowSuperChats: true,
+  liveRoomBackground: true,
+  liveRoomHideGifts: false,
+  liveRoomHideEntryEffects: true,
   ambilightEnabled: false,
   ambilightEnableFullscreen: true,
   ambilightPreset: 'cinema',
@@ -1138,6 +1160,10 @@ export const settings = useSettingsStorage(originalSettings, {
   onReady: value => resolveSettingsReady(value),
   normalize: (value) => {
     const record = value as Record<string, any>
+    delete record.liveRoomHideActivities
+    record.liveRoomPreferences = normalizeLivePreferences(record.liveRoomPreferences)
+    if (typeof record.liveRoomRememberPreferences !== 'boolean')
+      record.liveRoomRememberPreferences = true
     record.playbackRateStep = normalizePlaybackRateStep(record.playbackRateStep)
 
     // 旧配置也补齐新入口，保持菜单按钮与各项的默认可见状态一致。
@@ -1171,6 +1197,11 @@ export const settings = useSettingsStorage(originalSettings, {
       Reflect.deleteProperty(record, 'enableFavoriteCoverBlur')
     }
 
+    record.accountLevelFilters = normalizeAccountLevelFilters(record.accountLevelFilters)
+    for (const key of ['liveRoomEnhanced', 'liveRoomHideGifts', 'liveRoomHideEntryEffects', 'liveRoomHideGiftEffects', 'liveRoomShowSuperChats', 'liveRoomBackground'] as const) {
+      if (typeof record[key] !== 'boolean')
+        record[key] = originalSettings[key]
+    }
     record.favoriteOrganizerFolders = normalizeFavoriteOrganizerFolders(record.favoriteOrganizerFolders)
     record.recommendationModeSwitcherOptions = normalizeRecommendationModeSwitcherOptions(record.recommendationModeSwitcherOptions)
 

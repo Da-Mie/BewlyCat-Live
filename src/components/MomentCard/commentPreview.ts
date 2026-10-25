@@ -1,6 +1,9 @@
 import { reactive } from 'vue'
 
 import type { CommentReplyTreeMode } from '~/logic/storage'
+import type { AccountIdentity } from '~/utils/accountLevelFilter'
+import { readAccountIdentity } from '~/utils/accountLevelFilter'
+import { projectCommentTree } from '~/utils/commentTreeProjection'
 import { normalizeCommentLocation } from '~/utils/commentUserInfo'
 
 export interface CommentTarget {
@@ -18,7 +21,7 @@ interface RawComment {
   action?: number
   count?: number
   rcount?: number
-  member?: { mid?: string, uname?: string, avatar?: string, sex?: string }
+  member?: { mid?: string, uname?: string, avatar?: string, sex?: string, level_info?: { current_level?: number, identity?: number }, is_senior_member?: number | boolean }
   reply_control?: { location?: string }
   content?: {
     message?: string
@@ -48,6 +51,7 @@ export interface CommentContentPart {
 }
 
 export interface PreviewComment {
+  identity: AccountIdentity
   missing?: false
   id: string
   parentId: string
@@ -188,6 +192,7 @@ export function normalizeComment(raw: RawComment): PreviewComment {
   const replyCount = Math.max(Number(raw.rcount ?? raw.count) || 0, replies.length)
   const hotReplies = replies.slice(0, 3)
   return {
+    identity: readAccountIdentity(raw),
     id: String(raw.rpid_str || raw.rpid || ''),
     parentId: String(raw.parent_str || raw.parent || '0'),
     mid: String(raw.member?.mid || ''),
@@ -236,6 +241,7 @@ export function mergeComments(existing: PreviewComment[], incoming: PreviewComme
       if (cached) {
         // 完整回复可能补齐摘要里缺失的父节点和用户信息，交互状态仍沿用原对象。
         Object.assign(cached, {
+          identity: comment.identity,
           parentId: comment.parentId,
           mid: comment.mid,
           author: comment.author,
@@ -273,6 +279,7 @@ export interface CommentRow {
 }
 
 export interface MissingComment {
+  identity?: AccountIdentity
   missing: true
   id: string
   parentId: string
@@ -286,11 +293,11 @@ export type CommentTreeComment = PreviewComment | MissingComment
 // 按主评论保留占位节点，分页和重新计算树时仍可复用其折叠状态。
 const missingParentsByRoot = new WeakMap<PreviewComment, Map<string, MissingComment>>()
 
-export function getCommentRows(root: PreviewComment, tree: boolean, mode: CommentReplyTreeMode): CommentRow[] {
+export function getCommentRows(root: PreviewComment, tree: boolean, mode: CommentReplyTreeMode, visible: (comment: CommentTreeComment) => boolean = () => true): CommentRow[] {
   const replies = root.repliesExpanded && root.replyPage > 0 ? root.replies : root.hotReplies
   const all = [root, ...replies.filter(reply => reply.id !== root.id)]
   if (!tree)
-    return all.map(comment => ({ comment, parentId: null, depth: 0, hasChildren: false, collapsed: false, hideBody: false }))
+    return all.filter(visible).map(comment => ({ comment, parentId: null, depth: 0, hasChildren: false, collapsed: false, hideBody: false }))
 
   const byId = new Map<string, CommentTreeComment>(all.map(comment => [comment.id, comment]))
   const orderById = new Map(all.map((comment, index) => [comment.id, index]))
@@ -317,6 +324,7 @@ export function getCommentRows(root: PreviewComment, tree: boolean, mode: Commen
       missingParents.set(parentId, parent)
     }
     parent.parentId = known?.parentId || root.id
+    parent.identity = known?.identity
     parent.author = author || parent.author
     parent.message = known?.content.map(part => part.text).join('') || ''
     byId.set(parentId, parent)
@@ -330,6 +338,7 @@ export function getCommentRows(root: PreviewComment, tree: boolean, mode: Commen
   }
 
   const children = new Map<string, CommentTreeComment[]>()
+  const parentIds = new Map<string, string | null>([[root.id, null]])
   for (const comment of byId.values()) {
     if (comment.id === root.id)
       continue
@@ -344,6 +353,7 @@ export function getCommentRows(root: PreviewComment, tree: boolean, mode: Commen
       visited.add(ancestor.id)
       ancestor = byId.get(ancestor.parentId)
     }
+    parentIds.set(comment.id, parentId)
     const siblings = children.get(parentId) || []
     siblings.push(comment)
     children.set(parentId, siblings)
@@ -351,18 +361,31 @@ export function getCommentRows(root: PreviewComment, tree: boolean, mode: Commen
   // 占位分支保留首条子回复的位置，避免统一被追加到楼层末尾。
   children.forEach(siblings => siblings.sort((a, b) => orderById.get(a.id)! - orderById.get(b.id)!))
 
-  const rows: CommentRow[] = []
-  const queue: Array<{ comment: CommentTreeComment, depth: number, parentId: string | null }> = [{ comment: root, depth: 0, parentId: null }]
+  const ordered: CommentTreeComment[] = []
+  const queue: CommentTreeComment[] = [root]
+  const visited = new Set<string>()
   while (queue.length) {
-    const { comment, depth, parentId } = queue.pop()!
-    const descendants = children.get(comment.id) || []
-    const hasChildren = descendants.length > 0 || (comment === root && !root.repliesDone)
+    const comment = queue.pop()!
+    if (visited.has(comment.id))
+      continue
+    visited.add(comment.id)
+    ordered.push(comment)
+    const descendants = children.get(comment.id) ?? []
+    for (let index = descendants.length - 1; index >= 0; index--)
+      queue.push(descendants[index])
+  }
+  const rows: CommentRow[] = []
+  let collapsedDepth: number | undefined
+  for (const row of projectCommentTree(ordered, comment => comment.id, comment => parentIds.get(comment.id) ?? null, visible)) {
+    const { item: comment, depth, parent } = row
+    if (collapsedDepth !== undefined && depth > collapsedDepth)
+      continue
+    collapsedDepth = undefined
+    const hasChildren = row.hasChildren || (comment === root && !root.repliesDone)
     const collapsed = mode !== 'indentOnly' && hasChildren && comment.collapsed
-    rows.push({ comment, parentId, depth, hasChildren, collapsed, hideBody: collapsed && mode === 'lineCollapseMain' })
-    if (!collapsed) {
-      for (let index = descendants.length - 1; index >= 0; index--)
-        queue.push({ comment: descendants[index], depth: depth + 1, parentId: comment.id })
-    }
+    rows.push({ comment, parentId: parent?.id ?? null, depth, hasChildren, collapsed, hideBody: collapsed && mode === 'lineCollapseMain' })
+    if (collapsed)
+      collapsedDepth = depth
   }
   return rows
 }

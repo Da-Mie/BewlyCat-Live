@@ -8,23 +8,12 @@ import { CONTENT_SCRIPT_EXCLUDE_MATCHES, CONTENT_SCRIPT_MATCHES } from './consta
 export async function getManifest() {
   const pkg = await fs.readJSON(r('package.json')) as typeof PkgType
 
-  // update this file to update this manifest.json
-  // can also be conditional based on your need
   const manifest: Manifest.WebExtensionManifest = {
     manifest_version: 3,
     name: `${pkg.displayName || pkg.name}${isDev ? ' Dev' : ''}`,
     version: pkg.version,
     description: pkg.description,
     homepage_url: pkg.homepage,
-    // action: {
-    //   default_icon: './assets/icon-512.png',
-    //   default_popup: './dist/popup/index.html',
-    // },
-    // options_ui: {
-    //   page: './dist/options/index.html',
-    //   open_in_tab: true,
-    // },
-
     // Setting `persistent` to true in Manifest V3 results in an error in Firefox
     // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/background
     background: (isFirefox || isSafari)
@@ -48,11 +37,20 @@ export async function getManifest() {
     host_permissions: [
       '*://*.bilibili.com/*',
       '*://*.hdslb.com/*',
+      '*://*.bilivideo.com/*',
+      '*://*.bilivideo.cn/*',
+      '*://*.acgvideo.com/*',
     ],
     // IframePage and IframeDrawer embed supported Bilibili pages and rely on the
     // content scripts for styling, layout synchronization, and interactions.
     // Blank frames are not supported pages, so match_about_blank is intentionally omitted.
     content_scripts: [
+      {
+        matches: ['*://live.bilibili.com/*'],
+        js: ['./dist/contentScripts/liveLauncher.js'],
+        run_at: 'document_start',
+        all_frames: false,
+      },
       {
         matches: [...CONTENT_SCRIPT_MATCHES],
         exclude_matches: [...CONTENT_SCRIPT_EXCLUDE_MATCHES],

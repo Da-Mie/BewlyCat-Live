@@ -8,7 +8,6 @@ import type { UserConfig } from 'vite'
 import { defineConfig } from 'vite'
 
 import { buildCommit, isDev, isFirefox, isSafari, port, r } from './scripts/utils'
-// import { MV3Hmr } from './vite-mv3-hmr'
 
 export const sharedConfig: UserConfig = {
   root: r('src'),
@@ -22,6 +21,9 @@ export const sharedConfig: UserConfig = {
     Vue(),
 
     AutoImport({
+      // Production entries may build concurrently; the tracked declarations are
+      // complete already, and must not be truncated by competing generators.
+      dts: isDev ? r('src/auto-imports.d.ts') : false,
       imports: [
         'vue',
         {
@@ -39,9 +41,6 @@ export const sharedConfig: UserConfig = {
       strictMessage: false,
       include: [r('./src/_locales/**')],
     }),
-
-    // https://github.com/unocss/unocss
-    // UnoCSS(),
 
     replace({
       '__DEV__': JSON.stringify(isDev),

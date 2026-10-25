@@ -3,6 +3,7 @@ import 'uno.css'
 
 import { createApp } from 'vue'
 
+import { installAccountIdentityBridge } from '~/composables/useAccountLevelFilter'
 import { startIframeThemeListener, useDark } from '~/composables/useDark'
 import { CONTENT_SCRIPT_COMMIT, CONTENT_SCRIPT_PING, CONTENT_SCRIPT_PONG } from '~/constants/contentScript'
 import { BEWLY_IFRAME_DRAWER_HOST_CLASS, BEWLY_MOUNTED, IFRAME_DARK_MODE_CHANGE, IFRAME_TOP_BAR_CHANGE } from '~/constants/globalEvents'
@@ -74,7 +75,7 @@ const contentScriptGlobal = globalThis as typeof globalThis & {
   __BEWLYCAT_CONTENT_SCRIPT_INITIALIZED__?: boolean
   __BEWLYCAT_PAGE_LOADING__?: PageLoadingGuard
 }
-// 直播站及其内嵌框架中不执行任何页面处理。
+// 主站功能避开直播上下文，原生直播页使用单独的跳转与入口脚本。
 const shouldInitializeContentScript = !contentScriptGlobal.__BEWLYCAT_CONTENT_SCRIPT_INITIALIZED__
   && !isInBilibiliLiveContext()
 const bundledShadowStyleText = contentScriptGlobal.__BEWLYCAT_BUNDLED_STYLE_TEXT__
@@ -82,9 +83,6 @@ const contentScriptManifest = browser.runtime.getManifest()
 const contentScriptRuntimeUrl = browser.runtime.getURL('')
 
 if (shouldInitializeContentScript) {
-  contentScriptGlobal.__BEWLYCAT_CONTENT_SCRIPT_INITIALIZED__ = true
-  // 先于 B 站脚本注册快捷键监听，覆盖其默认快捷键时才能先拦截事件。
-  installShortcutListener()
   browser.runtime.onMessage.addListener((message: unknown) => {
     if (typeof message === 'object' && message !== null && 'type' in message && message.type === CONTENT_SCRIPT_PING) {
       const expected = 'expectedIdentity' in message ? message.expectedIdentity : undefined
@@ -105,6 +103,10 @@ if (shouldInitializeContentScript) {
 
     return false
   })
+  installAccountIdentityBridge()
+  contentScriptGlobal.__BEWLYCAT_CONTENT_SCRIPT_INITIALIZED__ = true
+  // 先于 B 站脚本注册快捷键监听，覆盖其默认快捷键时才能先拦截事件。
+  installShortcutListener()
 }
 
 const isFirefox: boolean = /Firefox/i.test(navigator.userAgent)

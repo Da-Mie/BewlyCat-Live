@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 
+import { useAccountLevelFilter } from '~/composables/useAccountLevelFilter'
+
 import MomentRichText from './MomentRichText.vue'
 import type { DisplayMoment } from './types'
 
@@ -18,10 +20,13 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+// The feed summary has no verifiable author UID; apply the explicit unknown policy.
+const filterState = useAccountLevelFilter(() => ({}), 'comments')
 </script>
 
 <template>
   <button
+    v-if="filterState === 'allow'"
     type="button"
     class="moment-card__hot-comment"
     :aria-label="t('moment_card.view_hot_comment')"

@@ -1945,3 +1945,130 @@ inject:
   load_more: 加载更多
   expand_all_replies: 加载全部
   load_reply_pages: '加载 {count} 页'
+
+account_filter:
+  load_next: 手动加载下一批
+  title: 账号等级过滤
+  description: 按账号等级筛选评论、视频和直播消息，各类内容可单独设置。
+  scope_comments: 评论与楼中楼
+  scope_videos: 视频卡片
+  scope_liveDanmaku: 直播聊天与飘屏弹幕
+  enabled: 启用过滤
+  levels: 屏蔽以下账号
+  ordinary_six: 普通 LV6
+  senior: 硬核会员
+  exempt_self: 保留自己的内容
+  exempt_followed: 保留已关注用户的内容
+  whitelist: 豁免 UID（每行一个，或用逗号分隔）
+  levels_hint: 已选等级的内容会被隐藏，再次点击可取消。
+  disabled_hint: 开启后选择要屏蔽的等级；关闭时保留选择。
+  unknown: 账号信息不可用时
+  policy_allow: 保留
+  policy_block: 隐藏
+  exceptions: 例外与豁免
+  whitelist_hint: 仅填写数字 UID，每行一个或用逗号分隔，离开输入框后保存。
+  whitelist_error: 请填写有效的数字 UID，最多 500 个。
+
+live_room:
+  background: 使用直播间背景
+  background_desc: 使用主播设置的背景图，并自动柔化与遮罩，保持文字清晰。
+  show_sc: 显示 SC 悬浮卡片
+  hide_gift_effects: 隐藏礼物动效
+  title: 直播间
+  description: 打开直播链接或点击直播卡片时，默认进入新版，也可随时前往原版直播间。
+  enhanced: 默认使用新版直播间
+  hide_gifts: 隐藏礼物消息
+  hide_entry: 隐藏入场消息
+  options: 直播设置
+  theme: 切换主题
+  close: 关闭
+  remember: 记住观看设置
+  remember_desc: 下次打开时恢复清晰度、线路、音量、静音、弹幕、聊天栏和顶栏状态。
+
+live_client:
+  filters_title: 弹幕过滤
+  danmaku_enable: 开启弹幕 (D)
+  danmaku_disable: 关闭弹幕 (D)
+  native_filters: B 站弹幕屏蔽
+  native_filters_hint: 使用当前 B 站账号在原版直播间设置的屏蔽词和屏蔽用户，返回此页时自动同步。
+  native_filter_waiting: 正在同步 B 站屏蔽设置…
+  native_filter_ready: 已同步当前账号的屏蔽设置。
+  native_filter_guest: 登录 B 站后，可同步账号的弹幕屏蔽设置。
+  native_filter_failed: 屏蔽设置同步失败，聊天消息和弹幕暂不显示，视频可继续播放。
+  native_filter_sync: 重新同步
+  hide_header: 隐藏顶栏
+  show_header: 显示顶栏
+  header_visibility: 显示直播顶栏
+  title: 直播
+  independent: BewlyCat 直播间
+  room_input: 房间号或直播间链接
+  open_room: 进入直播间
+  options: 直播选项
+  original: 前往原版直播间
+  invalid_room: 请输入有效的 B 站房间号或直播间链接。
+  room_label: '房间 {id}'
+  live: 直播中
+  offline: 未开播
+  quality: 清晰度
+  line: 线路
+  danmaku_on: 弹幕已开启
+  danmaku_off: 弹幕已关闭
+  hide_chat: 收起聊天栏
+  show_chat: 展开聊天栏
+  refresh: 刷新直播
+  retry: 重试
+  fullscreen: 全屏
+  player: 直播播放器
+  loading_stream: 正在加载直播画面…
+  start_playing: 播放直播
+  player_failed: 直播暂时无法播放，请重试或前往原版直播间。
+  loading_room: 正在加载直播间…
+  restricted: 此直播间需要验证观看权限，请前往原版直播间。
+  no_stream: 暂时无法获取可播放的直播画面，请刷新重试。
+  offline_detail: 主播暂未开播，开播后可点击“刷新直播”重新加载。
+  chat: 聊天
+  chat_connecting: 连接中
+  chat_connected: 已连接
+  chat_reconnecting: 重连中
+  chat_closed: 未连接
+  chat_error: 连接失败
+  reconnect: 重新连接
+  empty_chat: 暂无聊天消息
+  history_failed: 暂时无法加载历史消息，新消息仍会正常接收。
+  latest: 回到最新消息
+  login_hint: 登录 B 站后可发送弹幕。
+  login: 前往登录
+  message_input: 发条弹幕聊聊吧
+  send: 发送
+  entered: 进入了直播间
+  welcome: 使用 BewlyCat 观看直播
+  welcome_detail: 输入房间号，或粘贴 B 站直播间链接。
+  settings_failed: 设置加载失败，请重新加载扩展并刷新此页面。
+  open_failed: 无法打开新版直播间，请刷新页面后重试。
+  danmaku: 弹幕
+  realtime_chat: 实时聊天
+  preferences_hint: 设置更改后自动保存。
+  autoplay_hint: 点击播放，即可按上次的音量设置开始观看。
+
+live_gifts:
+  title: 礼物与 SC
+  gift: 礼物
+  sc: SC
+  remaining: 剩余 {seconds} 秒
+  gold: 金瓜子
+  silver: 银瓜子
+  loading: 正在加载礼物…
+  sending: 正在发送，请稍候…
+  confirm: 确认发送
+  recipient: 送给
+  total: 合计
+  back: 返回修改
+  pay_send: 购买并发送
+  quantity: 数量
+  sc_text: 留言内容
+  review: 下一步
+  unavailable: 此直播间暂未开放这类礼物。
+  sent: 已发送，展示以 B 站审核和推送为准。
+  reviewing: 已提交，留言正在审核。
+  unknown: 暂时无法确认发送结果，请在原版直播间核实后再操作。
+  check_before_retry: 请先核实发送结果，避免重复消费。
