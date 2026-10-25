@@ -16,6 +16,11 @@ const container = ref<HTMLElement>()
 const loading = ref(false)
 const failed = ref(false)
 const blocked = ref(false)
+const paused = ref(true)
+const position = ref(0)
+const seekRanges = ref<{ start: number, end: number }[]>([])
+const timeline = computed(() => seekRanges.value.length ? { start: seekRanges.value[0].start, end: seekRanges.value.at(-1)!.end } : undefined)
+const canPictureInPicture = computed(() => !!document.pictureInPictureEnabled && !!video.value?.requestPictureInPicture)
 const source = computed(() => props.streams.find(item => item.id === props.sourceId) ?? props.streams[0])
 let hls: Hls | undefined
 let flv: flvjs.Player | undefined
@@ -29,8 +34,118 @@ function applyAudio() {
     applyLiveAudio(media, props.volume, props.muted)
 }
 function audioChanged() {
-  if (video.value)
-    emit('audioChange', { volume: video.value.volume, muted: video.value.muted })
+  const media = video.value
+  if (media && (media.volume !== props.volume || media.muted !== props.muted))
+    emit('audioChange', { volume: media.volume, muted: media.muted })
+}
+
+function selectPlayer() {
+  container.value?.focus({ preventScroll: true })
+}
+
+function togglePlayback() {
+  if (video.value?.paused)
+    void play()
+  else
+    video.value?.pause()
+}
+
+function pause() {
+  paused.value = true
+  emit('playing', false)
+}
+
+function updateTimeline() {
+  const media = video.value
+  const ranges: { start: number, end: number }[] = []
+  if (media) {
+    position.value = media.currentTime
+    const seekable = media.seekable
+    const buffered = media.buffered
+    for (let i = 0; i < seekable.length; i++) {
+      for (let j = 0; j < buffered.length; j++) {
+        const start = Math.max(0, seekable.start(i), buffered.start(j))
+        const end = Math.min(seekable.end(i), buffered.end(j)) - 0.1
+        if (Number.isFinite(start) && Number.isFinite(end) && end > start)
+          ranges.push({ start, end })
+      }
+    }
+  }
+  seekRanges.value = ranges
+}
+
+function seekTo(target: number) {
+  const media = video.value
+  if (!media || !Number.isFinite(target) || !Number.isFinite(media.currentTime))
+    return
+  updateTimeline()
+  const current = media.currentTime
+  const direction = Math.sign(target - current)
+  if (!direction)
+    return
+  const ranges = direction > 0 ? seekRanges.value : [...seekRanges.value].reverse()
+  let next = current
+  for (const range of ranges) {
+    const candidate = Math.max(range.start, Math.min(range.end, target))
+    if ((candidate - current) * direction >= 0)
+      next = candidate
+    if ((candidate - target) * direction >= 0)
+      break
+  }
+  if (next !== current) {
+    media.currentTime = next
+    position.value = next
+  }
+}
+
+function changeVolume(value: number) {
+  const media = video.value
+  if (!media || !Number.isFinite(value))
+    return
+  const volume = Math.max(0, Math.min(1, Math.round(value * 100) / 100))
+  applyLiveAudio(media, volume, volume === 0)
+  audioChanged()
+}
+
+function toggleMute() {
+  const media = video.value
+  if (!media)
+    return
+  if (media.muted || media.volume === 0) {
+    changeVolume(media.volume || 0.05)
+  }
+  else {
+    media.muted = true
+    audioChanged()
+  }
+}
+
+function handleKeydown(event: KeyboardEvent) {
+  const media = video.value
+  if (!media || event.defaultPrevented || event.isComposing || event.ctrlKey || event.altKey || event.metaKey || event.shiftKey
+    || (event.target !== container.value && event.target !== media) || document.querySelector('dialog[open]')) {
+    return
+  }
+  if (event.code === 'Space') {
+    event.preventDefault()
+    if (!event.repeat)
+      togglePlayback()
+  }
+  else if (['ArrowLeft', 'ArrowRight'].includes(event.key)) {
+    event.preventDefault()
+    seekTo(media.currentTime + (event.key === 'ArrowRight' ? 5 : -5))
+  }
+  else if (['ArrowUp', 'ArrowDown'].includes(event.key)) {
+    event.preventDefault()
+    changeVolume((media.muted ? 0 : media.volume) + (event.key === 'ArrowUp' ? 0.05 : -0.05))
+  }
+}
+
+async function pictureInPicture() {
+  if (document.pictureInPictureElement)
+    await document.exitPictureInPicture()
+  else
+    await video.value?.requestPictureInPicture()
 }
 
 function cleanup() {
@@ -49,6 +164,9 @@ function cleanup() {
     video.value.removeAttribute('src')
     video.value.load()
   }
+  paused.value = true
+  position.value = 0
+  seekRanges.value = []
   emit('playing', false)
 }
 
@@ -169,6 +287,7 @@ onBeforeUnmount(() => {
 function playing() {
   clearTimeout(watchdog)
   loading.value = blocked.value = failed.value = false
+  paused.value = false
   emit('playing', true)
 }
 async function fullscreen() {
@@ -180,13 +299,41 @@ async function fullscreen() {
 </script>
 
 <template>
-  <section ref="container" class="live-player" :aria-label="t('live_client.player')">
+  <section
+    ref="container" class="live-player" :class="{ 'is-paused': paused }" tabindex="0"
+    :aria-label="t('live_client.player')" :aria-description="t('live_client.shortcuts')"
+    aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown Space" @keydown="handleKeydown"
+  >
     <video
-      ref="video" controls autoplay playsinline :muted="muted"
-      @playing="playing" @pause="emit('playing', false)" @error="fail(generation)"
-      @volumechange="audioChanged"
+      ref="video" autoplay playsinline :muted="muted"
+      @click="selectPlayer" @dblclick.prevent="togglePlayback"
+      @play="paused = false" @playing="playing" @pause="pause" @error="fail(generation)"
+      @volumechange="audioChanged" @timeupdate="updateTimeline" @progress="updateTimeline"
+      @loadedmetadata="updateTimeline" @durationchange="updateTimeline"
     />
     <slot />
+    <div class="player-controls">
+      <button type="button" :title="t('live_client.play_pause')" :aria-label="t('live_client.play_pause')" @click="togglePlayback">
+        <i :class="paused ? 'i-mingcute:play-fill' : 'i-mingcute:pause-fill'" aria-hidden="true" />
+      </button>
+      <input
+        class="player-seek" type="range" :min="timeline?.start ?? 0" :max="timeline?.end ?? 1" step="5"
+        :value="position" :disabled="!timeline" :aria-label="t('live_client.seek')"
+        @input="seekTo(Number(($event.currentTarget as HTMLInputElement).value))"
+      >
+      <button type="button" :title="t('live_client.mute')" :aria-label="t('live_client.mute')" :aria-pressed="muted || volume === 0" @click="toggleMute">
+        <i :class="muted || volume === 0 ? 'i-mingcute:volume-mute-line' : 'i-mingcute:volume-line'" aria-hidden="true" />
+      </button>
+      <input
+        class="player-volume" type="range" min="0" max="1" step="0.05"
+        :value="muted ? 0 : volume"
+        :aria-label="t('live_client.volume')" @input="changeVolume(Number(($event.currentTarget as HTMLInputElement).value))"
+      >
+      <span class="player-volume-value">{{ Math.round((muted ? 0 : volume) * 100) }}%</span>
+      <button v-if="canPictureInPicture" type="button" :title="t('live_client.picture_in_picture')" :aria-label="t('live_client.picture_in_picture')" @click="pictureInPicture().catch(() => {})">
+        <i class="i-mingcute:display-line" aria-hidden="true" />
+      </button>
+    </div>
     <div v-if="loading || failed || blocked" class="player-state" role="status">
       <template v-if="loading">
         <span class="player-loader" aria-hidden="true" /><span>{{ t('live_client.loading_stream') }}</span>
@@ -221,15 +368,83 @@ async function fullscreen() {
   border-radius: inherit;
   background: #000;
 }
+.live-player:focus {
+  outline: 2px solid var(--bew-theme-color);
+  outline-offset: -2px;
+}
 video {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
+  cursor: default;
+  touch-action: manipulation;
+}
+.player-controls {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--bew-space-2);
+  padding: var(--bew-space-3);
+  color: #fff;
+  background: linear-gradient(#0009, #000d);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--bew-duration-fast);
+  button {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: var(--bew-control-height);
+    height: var(--bew-control-height);
+    border: 0;
+    border-radius: var(--bew-control-radius);
+    background: transparent;
+    color: inherit;
+    font-size: var(--bew-icon-size-lg);
+    cursor: pointer;
+    &:hover {
+      background: #ffffff24;
+    }
+  }
+  input {
+    min-width: 0;
+    accent-color: var(--bew-theme-color);
+    cursor: pointer;
+  }
+  :focus-visible {
+    outline: 2px solid var(--bew-theme-color);
+    outline-offset: 2px;
+  }
+}
+.player-seek {
+  flex: 1;
+  &:disabled {
+    cursor: default;
+    opacity: 0.3;
+  }
+}
+.player-volume {
+  width: 64px;
+}
+.player-volume-value {
+  min-width: 4ch;
+  font-size: var(--bew-font-size-caption);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.live-player:hover .player-controls,
+.live-player:focus-within .player-controls,
+.live-player.is-paused .player-controls {
+  opacity: 1;
+  pointer-events: auto;
 }
 .player-state {
   position: absolute;
   inset: 0;
+  z-index: 3;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -244,6 +459,7 @@ video {
   outline: 2px solid var(--bew-theme-color);
 }
 .fullscreen-button {
+  z-index: 4;
   display: grid;
   place-items: center;
   position: absolute;
@@ -293,8 +509,10 @@ video {
   }
 }
 @media (hover: none) {
-  .fullscreen-button {
+  .fullscreen-button,
+  .player-controls {
     opacity: 1;
+    pointer-events: auto;
   }
 }
 .live-player:hover .fullscreen-button,

@@ -2033,6 +2033,12 @@ live_client:
   refresh: 重新整理直播
   retry: 重試
   fullscreen: 全螢幕
+  play_pause: 播放/暫停（空白鍵）
+  mute: 靜音/取消靜音
+  volume: 音量
+  seek: 直播緩衝進度
+  picture_in_picture: 畫中畫
+  shortcuts: 撳一下揀選播放器，撳兩下播放或者暫停；左右方向鍵前後移動 5 秒，上下方向鍵調節音量 5%。只可以跳到已緩衝嘅直播畫面。
   player: 直播播放器
   loading_stream: 正在載入直播畫面…
   start_playing: 播放直播
