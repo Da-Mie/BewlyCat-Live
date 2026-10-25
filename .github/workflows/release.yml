@@ -5,8 +5,8 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Fork tag, for example v1.8.2-personal.1
-        default: v1.8.2-personal.1
+        description: Fork tag, for example v1.8.2-personal.2
+        default: v1.8.2-personal.2
         required: true
         type: string
       prerelease:

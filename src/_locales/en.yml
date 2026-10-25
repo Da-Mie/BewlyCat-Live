@@ -2104,6 +2104,12 @@ live_client:
   refresh: Reload live stream
   retry: Retry
   fullscreen: Fullscreen
+  play_pause: Play/Pause (Space)
+  mute: Mute/Unmute
+  volume: Volume
+  seek: Buffered live playback
+  picture_in_picture: Picture in picture
+  shortcuts: Click to focus and double-click to play or pause. Left/Right seeks 5 seconds; Up/Down changes volume by 5%. Seeking is limited to buffered live content.
   player: Live player
   loading_stream: Loading the live stream…
   start_playing: Play live stream
