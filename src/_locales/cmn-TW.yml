@@ -2038,6 +2038,9 @@ live_client:
   volume: 音量
   seek: 直播緩衝進度
   live_edge: 直播中
+  returning_live: 正在回到直播
+  buffering: 緩衝中
+  history_unavailable: 未快取
   return_to_live: 回到直播
   behind_live: 落後直播 {time}
   available_history: 可回看 {time}

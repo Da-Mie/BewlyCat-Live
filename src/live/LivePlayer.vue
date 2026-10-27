@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import type flvjs from 'flv.js'
 import type Hls from 'hls.js'
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import Button from '~/components/Button.vue'
 import type { LiveTimeRange } from '~/utils/livePlayback'
-import { clampLivePosition, formatLiveTime, liveHistorySeconds, readLiveRanges } from '~/utils/livePlayback'
+import { clampLivePosition, formatLiveTime, isLivePositionAvailable, LIVE_TIMELINE_SECONDS, liveHistorySeconds, livePlaybackPoint, readLiveRanges } from '~/utils/livePlayback'
 import { applyLiveAudio } from '~/utils/livePreferences'
 import type { LiveStream } from '~/utils/liveRoom'
 
@@ -23,13 +23,22 @@ const paused = ref(true)
 const position = ref(0)
 const livePosition = ref(0)
 const seekRanges = ref<LiveTimeRange[]>([])
-const timeline = computed(() => seekRanges.value.length ? { start: seekRanges.value[0].start, end: seekRanges.value.at(-1)!.end } : undefined)
-const scrub = ref<{ start: number, end: number, value: number, pointerId: number }>()
+const timeline = computed(() => livePosition.value > 0 ? { start: livePosition.value - LIVE_TIMELINE_SECONDS, end: livePosition.value } : undefined)
+const scrub = ref<{ start: number, end: number, value: number, pointerId: number, originX: number, changed: boolean }>()
+const seekTrack = ref<HTMLElement>()
+const seekInput = ref<HTMLInputElement>()
+const activePointers = new Set<number>()
+const interactions = ref(0)
+const buffering = ref(false)
+const seeking = ref(false)
+const returningLive = ref(false)
+const isFullscreen = ref(false)
+const actualLag = computed(() => Math.max(0, livePosition.value - position.value))
+const atLive = computed(() => !!timeline.value && !paused.value && !buffering.value && !seeking.value && actualLag.value <= 2)
 const axis = computed(() => scrub.value ?? timeline.value)
-const followingLive = ref(true)
-const atLive = computed(() => !!timeline.value && followingLive.value && !paused.value && !scrub.value)
-const displayPosition = computed(() => scrub.value?.value ?? (atLive.value ? timeline.value!.end : position.value))
-const seekPercent = computed(() => axis.value ? Math.max(0, Math.min(100, (displayPosition.value - axis.value.start) / (axis.value.end - axis.value.start) * 100)) : 0)
+const displayPosition = computed(() => scrub.value?.value ?? (atLive.value ? livePosition.value : position.value))
+const seekPercent = computed(() => axis.value ? Math.max(0, Math.min(100, (displayPosition.value - axis.value.start) / LIVE_TIMELINE_SECONDS * 100)) : 0)
+const previewAvailable = computed(() => !!scrub.value && isLivePositionAvailable(seekRanges.value, scrub.value.value))
 const bufferSegments = computed(() => {
   const bounds = axis.value
   if (!bounds)
@@ -47,10 +56,11 @@ const bufferSegments = computed(() => {
       : []
   })
 })
-const behindLive = computed(() => Math.max(0, livePosition.value - displayPosition.value))
-const history = computed(() => seekRanges.value.reduce((sum, range) => sum + range.end - range.start, 0))
+const behindLive = computed(() => scrub.value ? Math.max(0, scrub.value.end - scrub.value.value) : actualLag.value)
+const history = computed(() => seekRanges.value.reduce((sum, range) => sum + Math.max(0, Math.min(range.end, livePosition.value) - Math.max(range.start, timeline.value?.start ?? 0)), 0))
 const controlsVisible = ref(true)
-const showToolbar = computed(() => controlsVisible.value || paused.value || loading.value || failed.value || blocked.value || !!scrub.value)
+const keyboardMode = ref(false)
+const showToolbar = computed(() => controlsVisible.value || paused.value || loading.value || failed.value || blocked.value || !!scrub.value || interactions.value > 0)
 const canPictureInPicture = computed(() => !!document.pictureInPictureEnabled && !!video.value?.requestPictureInPicture)
 const source = computed(() => props.streams.find(item => item.id === props.sourceId) ?? props.streams[0])
 let hls: Hls | undefined
@@ -58,17 +68,16 @@ let flv: flvjs.Player | undefined
 let generation = 0
 let watchdog: ReturnType<typeof setTimeout> | undefined
 let controlsTimer: ReturnType<typeof setTimeout> | undefined
-let controlsHovered = false
 let historyRate = 0
 let attempted = new Set<string>()
 
 function keyboardInControls() {
   const active = document.activeElement
-  return !!active && !!controls.value?.contains(active) && active.matches(':focus-visible')
+  return keyboardMode.value && !!active && !!controls.value?.contains(active)
 }
 
 function hideControls() {
-  if (paused.value || scrub.value || keyboardInControls())
+  if (paused.value || scrub.value || interactions.value || keyboardInControls())
     return
   if (document.activeElement && controls.value?.contains(document.activeElement))
     container.value?.focus({ preventScroll: true })
@@ -79,16 +88,11 @@ function hideControls() {
 function showControls() {
   controlsVisible.value = true
   clearTimeout(controlsTimer)
-  if (!paused.value && !scrub.value) {
-    controlsTimer = setTimeout(() => {
-      if (!controlsHovered && !keyboardInControls() && !scrub.value)
-        hideControls()
-    }, 2500)
-  }
+  if (!paused.value && !scrub.value && !interactions.value)
+    controlsTimer = setTimeout(hideControls, 2500)
 }
 
 function leavePlayer() {
-  controlsHovered = false
   hideControls()
 }
 
@@ -124,18 +128,12 @@ function updateTimeline() {
   const media = video.value
   if (media && Number.isFinite(media.currentTime))
     position.value = media.currentTime
+  if (media && media.readyState >= 3 && !media.seeking)
+    buffering.value = false
   seekRanges.value = media ? readLiveRanges(media) : []
-  const sync = hls?.liveSyncPosition
-  livePosition.value = typeof sync === 'number' && Number.isFinite(sync) && sync >= (timeline.value?.start ?? 0)
-    ? sync
-    : Math.max(timeline.value?.start ?? 0, (timeline.value?.end ?? 0) - 0.9)
-  if (!paused.value && timeline.value && !scrub.value) {
-    const delay = livePosition.value - position.value
-    if (delay <= 1)
-      followingLive.value = true
-    else if (delay > 10)
-      followingLive.value = false
-  }
+  livePosition.value = livePlaybackPoint(seekRanges.value, hls?.liveSyncPosition, media?.duration ?? Infinity)
+  if (atLive.value)
+    returningLive.value = false
 }
 
 function seekTo(target: number) {
@@ -148,52 +146,90 @@ function seekTo(target: number) {
     media.currentTime = next
     position.value = next
   }
-  followingLive.value = !!timeline.value && livePosition.value - next <= 3
+  returningLive.value = false
   showControls()
+}
+
+function pointFromPointer(event: PointerEvent) {
+  const bounds = axis.value
+  const rect = seekTrack.value?.getBoundingClientRect()
+  if (!bounds || !rect || rect.width <= 0)
+    return
+  return bounds.start + Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)) * LIVE_TIMELINE_SECONDS
 }
 
 function beginScrub(event: PointerEvent) {
-  if (!timeline.value || !event.isPrimary || event.button !== 0)
+  if (!timeline.value || !event.isPrimary || event.button !== 0 || !seekRanges.value.length)
     return
-  scrub.value = { ...timeline.value, value: displayPosition.value, pointerId: event.pointerId }
-  const input = event.currentTarget as HTMLInputElement
-  input.setPointerCapture(event.pointerId)
+  event.preventDefault()
+  const value = pointFromPointer(event)
+  if (value === undefined)
+    return
+  const rect = seekTrack.value!.getBoundingClientRect()
+  const onThumb = Math.abs(value - displayPosition.value) / LIVE_TIMELINE_SECONDS * rect.width <= 12
+  scrub.value = { ...timeline.value, value: onThumb ? displayPosition.value : value, pointerId: event.pointerId, originX: event.clientX, changed: !onThumb }
+  seekInput.value?.focus({ preventScroll: true })
+  seekInput.value?.setPointerCapture(event.pointerId)
   showControls()
 }
 
-function previewSeek(event: Event) {
-  const value = Number((event.currentTarget as HTMLInputElement).value)
-  if (!Number.isFinite(value))
+function moveScrub(event: PointerEvent) {
+  const selection = scrub.value
+  if (!selection || selection.pointerId !== event.pointerId)
     return
+  const value = pointFromPointer(event)
+  if (value !== undefined && Math.abs(event.clientX - selection.originX) >= 2) {
+    selection.value = value
+    selection.changed = true
+  }
+}
+
+function previewSeek(event: Event) {
   if (scrub.value)
-    scrub.value.value = value
-  else
+    return
+  const value = Number((event.currentTarget as HTMLInputElement).value)
+  if (isLivePositionAvailable(seekRanges.value, value))
     seekTo(value)
+}
+
+function seekKeydown(event: KeyboardEvent) {
+  const bounds = axis.value
+  if (!bounds || scrub.value || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.isComposing)
+    return
+  const offsets: Record<string, number> = { ArrowLeft: -5, ArrowDown: -5, ArrowRight: 5, ArrowUp: 5, PageDown: -30, PageUp: 30 }
+  const target = event.key === 'Home' ? bounds.start : event.key === 'End' ? bounds.end : Object.hasOwn(offsets, event.key) ? position.value + offsets[event.key] : undefined
+  if (target === undefined)
+    return
+  event.preventDefault()
+  event.stopPropagation()
+  seekTo(target)
 }
 
 function finishScrub(cancel = false, event?: PointerEvent) {
   const selection = scrub.value
   if (!selection || (event && event.pointerId !== selection.pointerId))
     return
+  if (!cancel && event)
+    moveScrub(event)
   scrub.value = undefined
-  if (!cancel)
-    seekTo(selection.value)
+  if (seekInput.value?.hasPointerCapture(selection.pointerId))
+    seekInput.value.releasePointerCapture(selection.pointerId)
+  if (!cancel && selection.changed) {
+    updateTimeline()
+    if (isLivePositionAvailable(seekRanges.value, selection.value))
+      seekTo(selection.value)
+  }
   showControls()
 }
 
 function goLive() {
   updateTimeline()
   const media = video.value
-  const range = seekRanges.value.at(-1)
-  if (!media || !range)
+  if (!media || !timeline.value)
     return
-  const sync = hls?.liveSyncPosition
-  const target = sync !== undefined && sync !== null && Number.isFinite(sync) && sync >= range.start
-    && (sync <= media.duration || !Number.isFinite(media.duration))
-    ? sync
-    : Math.max(range.start, range.end - 0.9)
-  media.currentTime = position.value = target
-  followingLive.value = true
+  returningLive.value = true
+  seeking.value = Math.abs(media.currentTime - livePosition.value) > 0.05
+  media.currentTime = position.value = livePosition.value
   showControls()
   void play()
 }
@@ -254,8 +290,10 @@ async function pictureInPicture() {
 function cleanup() {
   clearTimeout(watchdog)
   clearTimeout(controlsTimer)
-  controlsHovered = false
-  controlsVisible.value = followingLive.value = true
+  controlsVisible.value = true
+  activePointers.clear()
+  interactions.value = 0
+  buffering.value = seeking.value = returningLive.value = false
   scrub.value = undefined
   historyRate = 0
   hls?.destroy()
@@ -396,8 +434,38 @@ watch(() => props.streams, () => {
 })
 watch([video, source], () => void load(), { flush: 'post' })
 watch([() => props.volume, () => props.muted], applyAudio)
+function holdControls(event: PointerEvent) {
+  activePointers.add(event.pointerId)
+  interactions.value = activePointers.size
+  showControls()
+}
+function releaseControls(event: PointerEvent) {
+  if (activePointers.delete(event.pointerId)) {
+    interactions.value = activePointers.size
+    showControls()
+  }
+}
+function abandonInteractions() {
+  activePointers.clear()
+  interactions.value = 0
+  finishScrub(true)
+  showControls()
+}
+function fullscreenChanged() {
+  isFullscreen.value = document.fullscreenElement === container.value
+}
+onMounted(() => {
+  document.addEventListener('pointerup', releaseControls, true)
+  document.addEventListener('pointercancel', releaseControls, true)
+  document.addEventListener('fullscreenchange', fullscreenChanged)
+  window.addEventListener('blur', abandonInteractions)
+})
 watch(paused, showControls)
 onBeforeUnmount(() => {
+  document.removeEventListener('pointerup', releaseControls, true)
+  document.removeEventListener('pointercancel', releaseControls, true)
+  document.removeEventListener('fullscreenchange', fullscreenChanged)
+  window.removeEventListener('blur', abandonInteractions)
   generation++
   cleanup()
 })
@@ -405,6 +473,8 @@ function playing() {
   clearTimeout(watchdog)
   loading.value = blocked.value = failed.value = false
   paused.value = false
+  buffering.value = false
+  updateTimeline()
   showControls()
   emit('playing', true)
 }
@@ -421,33 +491,37 @@ async function fullscreen() {
     ref="container" class="live-player" :class="{ 'is-idle': !showToolbar }" tabindex="0"
     :aria-label="t('live_client.player')" :aria-description="t('live_client.shortcuts')"
     aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown Space" @keydown="handleKeydown"
+    @keydown.capture="keyboardMode = true" @pointerdown.capture="keyboardMode = false"
     @pointerenter="showControls" @pointermove="showControls" @pointerleave="leavePlayer"
     @focusin="showControls" @focusout="showControls"
   >
     <video
       ref="video" autoplay playsinline :muted="muted"
       @click="selectPlayer" @dblclick.prevent="togglePlayback"
-      @play="paused = false" @playing="playing" @pause="pause" @error="fail(generation)"
+      @play="paused = false" @playing="playing" @waiting="buffering = true"
+      @seeking="seeking = true" @seeked="seeking = false; updateTimeline()" @pause="pause" @error="fail(generation)"
       @volumechange="audioChanged" @timeupdate="updateTimeline" @progress="updateTimeline"
       @loadedmetadata="updateTimeline" @durationchange="updateTimeline"
     />
     <slot />
     <div
       ref="controls" class="player-controls" :class="{ 'is-visible': showToolbar }" :inert="!showToolbar" :aria-hidden="!showToolbar"
-      @pointerenter="controlsHovered = true" @pointerleave="controlsHovered = false; showControls()"
+      @pointerdown="holdControls"
     >
       <div class="player-seek-area" :class="{ 'is-scrubbing': !!scrub }" :style="{ '--seek-position': `${seekPercent}%` }">
-        <div class="player-track" aria-hidden="true">
+        <div ref="seekTrack" class="player-track" aria-hidden="true">
           <span
             v-for="range in bufferSegments" :key="range.start" class="player-buffer" :style="range.style"
           ><span class="player-progress" :style="{ width: range.played }" /></span>
+          <span v-if="axis && seekRanges.length" class="player-thumb" :style="{ left: `${seekPercent}%` }" />
         </div>
-        <span v-if="scrub" class="player-seek-preview">−{{ formatLiveTime(behindLive) }}</span>
+        <span v-if="scrub" class="player-seek-preview">{{ previewAvailable ? `−${formatLiveTime(behindLive)}` : t('live_client.history_unavailable') }}</span>
         <input
-          class="player-seek" type="range" :min="axis?.start ?? 0" :max="axis?.end ?? 1" step="any"
-          :value="displayPosition" :disabled="!axis" :aria-label="t('live_client.seek')" :title="t('live_client.history_hint')"
+          ref="seekInput" class="player-seek" type="range" :min="axis?.start ?? 0" :max="axis?.end ?? 1"
+          step="any"
+          :value="displayPosition" :disabled="!axis || !seekRanges.length" :aria-label="t('live_client.seek')" :title="t('live_client.history_hint')"
           :aria-valuetext="atLive ? t('live_client.live_edge') : t('live_client.behind_live', { time: formatLiveTime(behindLive) })"
-          @pointerdown="beginScrub" @input="previewSeek" @change="finishScrub()" @pointerup="finishScrub(false, $event)"
+          @pointerdown="beginScrub" @pointermove="moveScrub" @input="previewSeek" @pointerup="finishScrub(false, $event)" @keydown="seekKeydown"
           @pointercancel="finishScrub(true, $event)" @lostpointercapture="finishScrub(true, $event)" @blur="finishScrub(true)"
         >
       </div>
@@ -460,7 +534,7 @@ async function fullscreen() {
           @click="goLive"
         >
           <span class="player-live-dot" aria-hidden="true" />
-          {{ t(atLive ? 'live_client.live_edge' : 'live_client.return_to_live') }}
+          <span class="player-live-label">{{ t(returningLive ? 'live_client.returning_live' : buffering ? 'live_client.buffering' : atLive ? 'live_client.live_edge' : 'live_client.return_to_live') }}</span>
         </button>
         <span v-if="!atLive && timeline" class="player-delay">−{{ formatLiveTime(behindLive) }}</span>
         <span class="player-control-spacer" />
@@ -478,7 +552,7 @@ async function fullscreen() {
           <i class="i-mingcute:miniplayer-line" aria-hidden="true" />
         </button>
         <button class="fullscreen-button" type="button" :aria-label="t('live_client.fullscreen')" :title="t('live_client.fullscreen')" @click="fullscreen().catch(() => {})">
-          <i class="i-mingcute:fullscreen-line" aria-hidden="true" />
+          <i :class="isFullscreen ? 'i-mingcute:fullscreen-exit-line' : 'i-mingcute:fullscreen-line'" aria-hidden="true" />
         </button>
       </div>
     </div>
@@ -595,13 +669,27 @@ video {
 .player-track {
   position: absolute;
   top: 50%;
-  width: 100%;
+  left: calc(var(--bew-space-3) / 2);
+  right: calc(var(--bew-space-3) / 2);
   height: var(--bew-space-1);
   transform: translateY(-50%);
-  overflow: hidden;
   border-radius: var(--bew-radius-full);
   background: #ffffff24;
   pointer-events: none;
+}
+.player-thumb {
+  position: absolute;
+  top: 50%;
+  width: var(--bew-space-3);
+  height: var(--bew-space-3);
+  border-radius: var(--bew-radius-full);
+  background: #fff;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 1px 4px #0006;
+}
+.player-seek-area:has(.player-seek:focus-visible) .player-thumb {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 .player-buffer,
 .player-progress {
@@ -659,6 +747,7 @@ video {
 .player-seek {
   position: relative;
   width: 100%;
+  opacity: 0;
   &:disabled {
     cursor: default;
     &::-webkit-slider-thumb {
@@ -688,12 +777,20 @@ video {
   align-items: center;
   gap: var(--bew-space-2);
   width: auto;
+  min-width: 0;
+  max-width: 160px;
+  flex-shrink: 1;
   padding-inline: var(--bew-space-3);
   font-size: var(--bew-font-size-control);
   font-weight: var(--bew-font-weight-medium);
   white-space: nowrap;
 }
+.player-live-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .player-live-dot {
+  flex-shrink: 0;
   width: var(--bew-space-2);
   height: var(--bew-space-2);
   border-radius: var(--bew-radius-full);
@@ -780,8 +877,14 @@ video {
   }
 }
 @media (max-width: 480px) {
-  .player-volume {
+  .player-volume,
+  .player-delay {
     display: none;
+  }
+  .player-controls .player-live {
+    max-width: 112px;
+    gap: var(--bew-space-1);
+    padding-inline: var(--bew-space-2);
   }
 }
 .live-player:fullscreen {

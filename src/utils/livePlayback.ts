@@ -3,6 +3,19 @@ export interface LiveTimeRange {
   end: number
 }
 
+export const LIVE_TIMELINE_SECONDS = 10 * 60
+
+export function livePlaybackPoint(ranges: LiveTimeRange[], sync: number | null | undefined, duration: number): number {
+  if (typeof sync === 'number' && Number.isFinite(sync) && sync >= 0 && (!Number.isFinite(duration) || sync <= duration))
+    return sync
+  const last = ranges.at(-1)
+  return last ? Math.max(last.start, last.end - 0.9) : 0
+}
+
+export function isLivePositionAvailable(ranges: LiveTimeRange[], position: number): boolean {
+  return Number.isFinite(position) && ranges.some(range => position >= range.start && position <= range.end)
+}
+
 export function readLiveRanges(media: Pick<HTMLMediaElement, 'buffered' | 'seekable'>): LiveTimeRange[] {
   const ranges: LiveTimeRange[] = []
   const { buffered, seekable } = media
