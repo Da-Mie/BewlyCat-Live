@@ -2022,6 +2022,11 @@ live_client:
   mute: 静音/取消静音
   volume: 音量
   seek: 直播缓冲进度
+  live_edge: 直播中
+  return_to_live: 回到直播
+  behind_live: 落后直播 {time}
+  available_history: 可回看 {time}
+  history_hint: 仅可回看本次观看已缓冲的画面，实际时长取决于线路、码率与浏览器缓存；刷新或切换线路后重新积累。
   picture_in_picture: 画中画
   shortcuts: 单击选中播放器，双击播放或暂停；左右方向键前后移动 5 秒，上下方向键调节音量 5%。仅可跳转到已缓冲的直播画面。
   player: 直播播放器

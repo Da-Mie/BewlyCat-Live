@@ -55,7 +55,7 @@ defineExpose({ push })
 <style scoped lang="scss">
 .room-overlay {
   position: absolute;
-  inset: var(--bew-space-4) var(--bew-space-4) 64px;
+  inset: var(--bew-space-4) var(--bew-space-4) var(--live-control-safe-area, 64px);
   overflow: hidden;
   pointer-events: none;
   font-size: var(--bew-font-size-control);

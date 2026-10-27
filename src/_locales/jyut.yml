@@ -2037,6 +2037,11 @@ live_client:
   mute: 靜音/取消靜音
   volume: 音量
   seek: 直播緩衝進度
+  live_edge: 直播中
+  return_to_live: 返到直播
+  behind_live: 落後直播 {time}
+  available_history: 可回睇 {time}
+  history_hint: 只可以回睇今次觀看已緩衝嘅畫面，實際時長視乎線路、碼率同瀏覽器快取；重新整理或者轉線路之後會重新累積。
   picture_in_picture: 畫中畫
   shortcuts: 撳一下揀選播放器，撳兩下播放或者暫停；左右方向鍵前後移動 5 秒，上下方向鍵調節音量 5%。只可以跳到已緩衝嘅直播畫面。
   player: 直播播放器
