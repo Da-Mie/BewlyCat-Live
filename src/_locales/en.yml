@@ -2108,6 +2108,11 @@ live_client:
   mute: Mute/Unmute
   volume: Volume
   seek: Buffered live playback
+  live_edge: Live
+  return_to_live: Back to live
+  behind_live: Behind live by {time}
+  available_history: '{time} available'
+  history_hint: Rewind within this viewing session’s buffered content. The available duration depends on the source, bitrate and browser cache; reloading or switching sources starts a new buffer.
   picture_in_picture: Picture in picture
   shortcuts: Click to focus and double-click to play or pause. Left/Right seeks 5 seconds; Up/Down changes volume by 5%. Seeking is limited to buffered live content.
   player: Live player

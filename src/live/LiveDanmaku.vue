@@ -54,7 +54,7 @@ defineExpose({ push })
 <style scoped lang="scss">
 .live-danmaku {
   position: absolute;
-  inset: 0 0 52px;
+  inset: 0 0 var(--live-control-safe-area, 52px);
   overflow: hidden;
   pointer-events: none;
 }
