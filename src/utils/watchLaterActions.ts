@@ -9,11 +9,7 @@ import { getCSRF } from '~/utils/main'
 import { resolvePgcEpisodeVideoIds } from '~/utils/pgcEpisode'
 import type { WatchLaterTarget } from '~/utils/watchLaterSnapshot'
 
-/**
- * 全站「加入稍后再看」的共享动作层：
- * 状态判断与缓存见 ~/logic/watchLaterState，这里只负责增删切换、loading 去重、
- * PGC 解析、bvid 补查 aid 以及成功后的顶栏同步。封面按钮与视频页工具栏按钮共用。
- */
+/** 共享稍后再看增删、去重、PGC/aid 补查及顶栏同步；状态见 watchLaterState。 */
 
 /** 同一视频在封面上可能只有 bvid，移除接口只认 aid；解析结果在本页缓存。 */
 const bvidAidCache = new Map<string, number>()
@@ -31,11 +27,7 @@ export function getWatchLaterTargetKey(target: WatchLaterTarget | null | undefin
   return target.epid ? `epid:${target.epid}` : ''
 }
 
-/**
- * 将卡片数据规整为稍后再看目标。
- * 仅在 aid/bvid/epid 都缺失时才把 id 当作 aid，调用方需通过 target 门控排除直播等
- * id 语义不同的卡片。
- */
+/** 仅缺少 aid/bvid/epid 时将 id 视为 aid；调用方须排除直播等其他 ID。 */
 export function normalizeWatchLaterTarget(input: {
   aid?: number | string
   // 卡片数据常用 `id` 作为兜底字段

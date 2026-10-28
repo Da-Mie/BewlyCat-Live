@@ -92,7 +92,6 @@ html.bewly-design.notificationsPage {
     z-index: 1;
   }
 
-  // #region theme color adaption part
   // Increase the priority of the style inside by writing a non-existent selector in `:not()`
   :not(foobar) {
     .space-left {
@@ -233,9 +232,7 @@ html.bewly-design.notificationsPage {
       filter: var(--bew-filter-icon-glow);
     }
   }
-  // #endregion
 
-  // #region dark mode adaption part
   &.dark,
   &.bili_dark .container {
     .space-left {
@@ -519,5 +516,4 @@ html.bewly-design.notificationsPage {
       border-top: 1px solid var(--bew-border-color);
     }
   }
-  // #endregion
 }

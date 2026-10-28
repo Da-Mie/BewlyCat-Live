@@ -144,7 +144,6 @@ defineExpose({
     data-key="moments"
     flex="~ col"
   >
-    <!-- top bar -->
     <header
       flex="~ items-center justify-between"
       p="x-6 y-5"
@@ -188,7 +187,6 @@ defineExpose({
       </div>
     </header>
 
-    <!-- moments wrapper -->
     <main
       ref="momentsWrap"
       overflow-x-hidden
@@ -198,7 +196,6 @@ defineExpose({
       flex-1
       min-h-0
     >
-      <!-- loading -->
       <Loading
         v-if="topBarStore.isLoadingMoments && topBarStore.moments.length === 0"
         h="full"
@@ -206,7 +203,6 @@ defineExpose({
         items="center"
       />
 
-      <!-- empty -->
       <Empty
         v-else-if="!topBarStore.isLoadingMoments && topBarStore.moments.length === 0"
         pos="absolute top-0 left-0"
@@ -214,9 +210,7 @@ defineExpose({
         flex="~ items-center"
       />
 
-      <!-- moments -->
       <TransitionGroup name="list">
-        <!-- TransitionGroup 会以 template 的 key 加子节点序号作为子节点 key；v-if 为假时保留注释占位，序号不变 -->
         <template v-for="(moment, index) in topBarStore.moments" :key="moment.id_str">
           <div
             v-if="selectedMomentTab.type === 'video' && topBarStore.isLastSeenMoment(index)"
@@ -234,7 +228,6 @@ defineExpose({
             duration-300
             pos="relative"
           >
-            <!-- new moment dot -->
             <div
               v-if="topBarStore.isNewMoment(index) && selectedMomentTab.type === 'video'"
               rounded="full"
@@ -278,7 +271,6 @@ defineExpose({
                     min-w-0
                     flex-1
                   >
-                    <!-- 联合投稿显示多个作者 -->
                     <template v-if="moment.isCollaborative && moment.authors">
                       <template v-for="(author, idx) in moment.authors" :key="author.jump_url">
                         <ALink
@@ -292,7 +284,7 @@ defineExpose({
                         <span v-if="Number(idx) < moment.authors.length - 1" text="$bew-text-2">/</span>
                       </template>
                     </template>
-                    <!-- 单个作者 -->
+
                     <ALink
                       v-else
                       :href="moment.authorJumpUrl"
@@ -309,12 +301,10 @@ defineExpose({
                     shrink-0
                     whitespace-nowrap
                   >
-                    <!-- publish time -->
                     <span v-if="selectedMomentTab.type !== 'live'" text="$bew-text-2">
                       {{ moment.pubTime }}
                     </span>
 
-                    <!-- Live -->
                     <span
                       v-else
                       text="$bew-theme-color"
@@ -340,7 +330,6 @@ defineExpose({
         </template>
       </TransitionGroup>
 
-      <!-- loading -->
       <Transition name="fade">
         <Loading v-if="topBarStore.isLoadingMoments && topBarStore.moments.length !== 0" m="b-4" />
       </Transition>

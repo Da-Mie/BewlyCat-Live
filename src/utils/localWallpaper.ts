@@ -1,7 +1,4 @@
-/**
- * 本地壁纸管理工具
- * 将图片base64存储在本地storage的单独项中，设置里只保存引用
- */
+/** 本地壁纸管理工具 将图片base64存储在本地storage的单独项中，设置里只保存引用 */
 
 import { useStorageLocal } from '~/composables/useStorageLocal'
 
@@ -25,10 +22,7 @@ export interface LocalWallpaperRef {
 
 let localWallpapersReadFailed = false
 let resolveLocalWallpapersLoaded: (loaded: boolean) => void = () => {}
-/**
- * 本地壁纸首次读取结束后兑现，结果表示数据是否可信。读取完成前 getLocalWallpaper /
- * hasLocalWallpaper 都会返回“不存在”，据此清理引用的逻辑必须先等待它。
- */
+/** 本地壁纸首次读取结束后兑现，结果表示数据是否可信。读取完成前 getLocalWallpaper / hasLocalWallpaper 都会返回“不存在”，据此清理引用的逻辑必须先等待它。 */
 export const localWallpapersLoaded = new Promise<boolean>((resolve) => {
   resolveLocalWallpapersLoaded = resolve
 })
@@ -43,11 +37,6 @@ const localWallpapers = useStorageLocal<Record<string, LocalWallpaperData>>('loc
   onReady: () => resolveLocalWallpapersLoaded(!localWallpapersReadFailed),
 })
 
-/**
- * 生成本地壁纸的唯一标识符
- * @param fileName 原始文件名
- * @returns 唯一标识符
- */
 export function generateWallpaperId(fileName: string): string {
   const timestamp = Date.now()
   const random = Math.random().toString(36).substring(2, 8)
@@ -55,12 +44,6 @@ export function generateWallpaperId(fileName: string): string {
   return `wallpaper_${timestamp}_${random}.${extension}`
 }
 
-/**
- * 存储本地壁纸
- * @param file 文件对象
- * @param base64 base64数据
- * @returns 壁纸引用对象
- */
 export async function storeLocalWallpaper(file: File, base64: string): Promise<LocalWallpaperRef> {
   const id = generateWallpaperId(file.name)
 
@@ -87,11 +70,6 @@ export async function storeLocalWallpaper(file: File, base64: string): Promise<L
   }
 }
 
-/**
- * 获取本地壁纸的base64数据
- * @param id 壁纸ID
- * @returns base64数据或null
- */
 export function getLocalWallpaper(id: string): string | null {
   const wallpapers = localWallpapers.value || {}
   const wallpaper = wallpapers[id]
@@ -116,11 +94,6 @@ export function removeLocalWallpaper(id: string): void {
   }
 }
 
-/**
- * 检查本地壁纸是否存在
- * @param id 壁纸ID
- * @returns 是否存在
- */
 export function hasLocalWallpaper(id: string): boolean {
   const wallpapers = localWallpapers.value || {}
   return !!wallpapers[id]
@@ -135,18 +108,12 @@ export function getAllLocalWallpapers(): LocalWallpaperData[] {
   return Object.values(wallpapers)
 }
 
-/**
- * 清理所有本地壁纸
- */
+/** 清理所有本地壁纸 */
 export function clearAllLocalWallpapers(): void {
   localWallpapers.value = {}
 }
 
-/**
- * 解析本地壁纸URL，获取实际的base64数据
- * @param url 壁纸URL（可能是local-wallpaper:id格式或普通URL）
- * @returns 实际的显示URL
- */
+/** 解析 local-wallpaper:id，普通 URL 原样返回。 */
 export function resolveWallpaperUrl(url: string): string | null {
   if (!url)
     return null
@@ -161,20 +128,10 @@ export function resolveWallpaperUrl(url: string): string | null {
   return url
 }
 
-/**
- * 检查是否为本地壁纸URL
- * @param url 壁纸URL
- * @returns 是否为本地壁纸URL
- */
 export function isLocalWallpaperUrl(url: string): boolean {
   return url.startsWith('local-wallpaper:')
 }
 
-/**
- * 从本地壁纸URL中提取ID
- * @param url 本地壁纸URL
- * @returns 壁纸ID或null
- */
 export function extractWallpaperId(url: string): string | null {
   if (isLocalWallpaperUrl(url)) {
     return url.replace('local-wallpaper:', '')

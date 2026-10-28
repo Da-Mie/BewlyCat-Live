@@ -132,7 +132,7 @@ function closeOptions() {
   showOptions.value = false
 }
 
-/** when you click on it outside, the selection option will be turned off  */
+/** when you click on it outside, the selection option will be turned off */
 function onMouseLeave() {
   if (!props.disabled)
     window.addEventListener('click', closeOptions)
@@ -174,7 +174,6 @@ function onMouseEnter() {
       />
 
       <div class="select-arrow-slot" flex="none" grid place-items="center" m="l-2">
-        <!-- arrow -->
         <div
           class="select-arrow"
           border="~ solid t-0 l-0 r-2 b-2"
@@ -225,7 +224,6 @@ function onMouseEnter() {
         </div>
       </Transition>
 
-      <!-- 遮罩 外部滚动时关闭下拉菜单 -->
       <div
         v-if="showOptions"
         data-layout-edit-control

@@ -524,8 +524,6 @@ function changeMenuItem(menuItem: MenuType) {
           bg="$bew-content-alt group-hover:$bew-elevated dark:$bew-elevated dark-group-hover:$bew-elevated"
           overflow-hidden antialiased
         >
-          <!-- frosted glass background -->
-          <!-- https://github.com/BewlyBewly/BewlyBewly/issues/1162 -->
           <div
             class="settings-primary-navigation__surface"
             :style="{
@@ -598,7 +596,6 @@ function changeMenuItem(menuItem: MenuType) {
             text-shadow: 0 0 10px var(--bew-elevated-solid), 0 0 15px var(--bew-elevated-solid)
           "
         >
-          <!-- Mask -->
           <div
             pos="absolute top-0 left-0" w-inherit h-inherit pointer-events-none
             :style="{
@@ -685,10 +682,7 @@ function changeMenuItem(menuItem: MenuType) {
           h-inherit of-y-auto of-x-hidden
           style="padding-top: 92px;"
         >
-          <!-- 底部留白高于右下角帮助按钮（16px 边距 + 32px），让末行内容可滚到按钮上方 -->
           <main w-full min-h="[calc(100%-92px)]" p="x-12 b-20">
-            <!-- <div h-80px mt--8 /> -->
-
             <Transition name="page-fade">
               <Component
                 :is="settingsMenu[activatedMenuItem as keyof typeof settingsMenu]"
@@ -699,7 +693,6 @@ function changeMenuItem(menuItem: MenuType) {
           </main>
         </div>
 
-        <!-- 右下角落在内容区 x-12 内边距内，不遮挡设置项右侧控件 -->
         <Tooltip
           class="settings-usage-guide"
           :content="$t('settings.usage_guide')"

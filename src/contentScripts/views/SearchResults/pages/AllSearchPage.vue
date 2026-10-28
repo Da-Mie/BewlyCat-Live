@@ -75,7 +75,6 @@ const {
   reset: resetUserRelations,
 } = useUserRelations()
 
-// 搜索请求管理
 const {
   isLoading,
   error,
@@ -85,7 +84,6 @@ const {
   reset: resetSearch,
 } = useSearchRequest<any>('all')
 
-// 分页管理
 const {
   currentPage,
   totalResults,
@@ -98,7 +96,6 @@ const {
   reset: resetPagination,
 } = usePagination()
 
-// 无限加载管理
 const {
   hasMore,
   exhausted,
@@ -629,12 +626,9 @@ defineExpose({
 
 <template>
   <div ref="searchContentRef" class="all-search-page">
-    <!-- Loading -->
     <Loading v-if="isLoading && !results" />
 
-    <!-- Results -->
     <div v-else class="all-results" space-y-6>
-      <!-- 活动和游戏 -->
       <div v-if="!isInPaginationNonFirstPage && activityAndGameItems.length > 0">
         <h3 class="bew-section-heading" text="$bew-text-1" mb-3 mt-6>
           {{ t('search.activity') }}
@@ -669,12 +663,9 @@ defineExpose({
         </div>
       </div>
 
-      <!-- 各类 section -->
       <template v-for="(section, index) in results?.result" :key="`${section?.result_type ?? 'unknown'}-${index}`">
-        <!-- 跳过视频（将在最后渲染） -->
         <template v-if="section?.result_type === 'video'" />
 
-        <!-- 番剧/影视 -->
         <div
           v-else-if="!isInPaginationNonFirstPage && (section?.result_type === 'media_bangumi' || section?.result_type === 'media_ft')
             && Array.isArray(section.data) && section.data.length"
@@ -682,7 +673,7 @@ defineExpose({
           <h3 class="bew-section-heading" text="$bew-text-1" mb-3 mt-6>
             {{ section.result_type === 'media_ft' ? t('search.film_tv') : t('search.bangumi') }}
           </h3>
-          <!-- 影视 -->
+
           <div v-if="section.result_type === 'media_ft'" class="media-ft-highlight-grid">
             <div
               v-for="item in section.data.slice(0, 2)"
@@ -735,7 +726,7 @@ defineExpose({
               </div>
             </div>
           </div>
-          <!-- 番剧 -->
+
           <div v-else class="bangumi-highlight-grid">
             <div
               v-for="bangumi in section.data.slice(0, 2).map(convertBangumiHighlight)"
@@ -782,10 +773,8 @@ defineExpose({
           </div>
         </div>
 
-        <!-- 跳过活动和游戏 -->
         <template v-else-if="section?.result_type === 'activity' || section?.result_type === 'web_game'" />
 
-        <!-- 赛事 -->
         <div v-else-if="!isInPaginationNonFirstPage && section?.result_type === 'esports' && Array.isArray(section.data) && section.data.length">
           <h3 class="bew-section-heading" text="$bew-text-1" mb-3 mt-6>
             {{ t('search.esports_schedule') }}
@@ -809,7 +798,6 @@ defineExpose({
           </a>
         </div>
 
-        <!-- 用户 -->
         <div v-else-if="!isInPaginationNonFirstPage && section?.result_type === 'bili_user' && Array.isArray(section.data) && section.data.length">
           <h3 class="bew-section-heading" text="$bew-text-1" mb-3 mt-6>
             {{ t('search.users') }}
@@ -902,7 +890,6 @@ defineExpose({
           </div>
         </div>
 
-        <!-- 专栏 -->
         <div
           v-else-if="!isInPaginationNonFirstPage && section?.result_type === 'article' && Array.isArray(section.data) && section.data.length"
           class="article-results"
@@ -916,7 +903,6 @@ defineExpose({
         </div>
       </template>
 
-      <!-- 视频（放在最后，因为有滚动加载） -->
       <div>
         <h3 v-if="videoList.length > 0" class="bew-section-heading" text="$bew-text-1" mb-3 mt-6>
           {{ t('search.videos') }}
@@ -940,7 +926,6 @@ defineExpose({
       </div>
     </div>
 
-    <!-- Pagination -->
     <Pagination
       v-if="paginationMode === 'pagination'"
       :current-page="currentPage"

@@ -38,10 +38,7 @@ function isEnteredControl(el: Element | null) {
   return !!el?.classList.contains('bpx-state-entered')
 }
 
-/**
- * 读取弹窗 iframe 内播放器是否处于网页全屏或全屏。
- * 跨域页面无法读取时返回 null，由调用方保留当前状态。
- */
+/** 读取弹窗 iframe 内播放器是否处于网页全屏或全屏。 跨域页面无法读取时返回 null，由调用方保留当前状态。 */
 export function readIframePlayerImmersive(iframe: HTMLIFrameElement): boolean | null {
   if (getDocumentFullscreenElement(document) === iframe)
     return true
@@ -178,7 +175,7 @@ export function disposeDialogIframe(iframe: HTMLIFrameElement) {
     iframe.contentWindow?.postMessage({ type: 'BEWLY_OPUS_DISPOSE' }, '*')
   }
   catch {
-    // ignore
+
   }
 
   // 同域时尽量停掉播放器并清空文档
@@ -199,7 +196,7 @@ export function disposeDialogIframe(iframe: HTMLIFrameElement) {
           media.load()
         }
         catch {
-          // ignore
+
         }
       })
 
@@ -210,7 +207,7 @@ export function disposeDialogIframe(iframe: HTMLIFrameElement) {
         doc.close()
       }
       catch {
-        // ignore
+
       }
     }
   }
@@ -222,12 +219,12 @@ export function disposeDialogIframe(iframe: HTMLIFrameElement) {
     iframe.src = 'about:blank'
   }
   catch {
-    // ignore
+
   }
   try {
     iframe.removeAttribute('src')
   }
   catch {
-    // ignore
+
   }
 }

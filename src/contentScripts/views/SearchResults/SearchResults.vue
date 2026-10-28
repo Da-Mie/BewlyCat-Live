@@ -185,8 +185,7 @@ const identityOptions = computed<{ label: string, value: boolean }[]>(() => [
   { label: t('search.identity_guest'), value: true },
 ])
 
-// TODO: 需要从各个 Page 组件获取实际的 counts
-// 暂时使用空对象
+// 分类计数尚未接入子页结果。
 const categoryCounts = ref<Record<SearchCategory, number>>({
   all: 0,
   video: 0,
@@ -231,7 +230,6 @@ function handleUrlChange() {
 useEventListener(window, 'popstate', handleUrlChange)
 useEventListener(window, 'pushstate', handleUrlChange)
 
-// 监听关键词变化
 watch(() => keyword.value, async (newKeyword, oldKeyword) => {
   const normalizedNew = (newKeyword || '').trim()
   const normalizedOld = (oldKeyword || '').trim()
@@ -447,7 +445,6 @@ onMounted(() => {
       v-model:sub-category="currentLiveSubCategory"
     />
 
-    <!-- 切换登录 / 游客身份后重建结果页，按新身份重新请求 -->
     <SearchResultsPanel
       :key="settings.depersonalizeSearchResults ? 'guest' : 'login'"
       ref="searchResultsPanelRef"
@@ -458,6 +455,7 @@ onMounted(() => {
       :live-filters="liveFilters"
       :initial-page="currentPage"
       @update-page="(page: number) => updateUrlParams({ pn: page })"
+      @switch-to-live-user="currentLiveSubCategory = 'live_user'"
     />
   </div>
 </template>

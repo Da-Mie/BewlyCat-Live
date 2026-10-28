@@ -61,10 +61,7 @@ function setupObserverWhenReady() {
   checkPhotoViewerState()
 }
 
-/**
- * 监听页面中 PhotoSwipe (pswp) 图片查看器的打开/关闭状态
- * 当检测到图片查看器打开时，通知父页面隐藏顶栏和 Dock
- */
+/** 监听页面中 PhotoSwipe (pswp) 图片查看器的打开/关闭状态 当检测到图片查看器打开时，通知父页面隐藏顶栏和 Dock */
 export function setupIframePhotoViewerDetector() {
   // 只在 iframe 内运行
   if (window.self === window.top)

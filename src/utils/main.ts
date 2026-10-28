@@ -1,10 +1,5 @@
 import { stripBilibiliLocaleUrl } from '~/utils/bilibiliLocale'
 
-/**
- * Get cookie by name
- * @param name cookie name
- * @returns cookie value
- */
 export function getCookie(name: string): string {
   const value = `; ${document.cookie}`
   const parts: Array<string> = value.split(`; ${name}=`)
@@ -15,11 +10,6 @@ export function getCookie(name: string): string {
   return ''
 }
 
-/**
- * Set cookie
- * @param name cookie name
- * @param value cookie value
- */
 export function setCookie(name: string, value: string, expDays: number) {
   const date = new Date()
   date.setTime(date.getTime() + expDays * 24 * 60 * 60 * 1000)
@@ -33,16 +23,9 @@ export function setCookie(name: string, value: string, expDays: number) {
  */
 export const getUserID = (): string => getCookie('DedeUserID')
 
-/**
- * Get csrf token
- */
+/** Get csrf token */
 export const getCSRF = (): string => getCookie('bili_jct')
 
-/**
- * Remove the 'http:' or 'https:' prefix from a URL
- * @param url
- * @returns The result of removing the 'http:' or 'https:' prefix from a url
- */
 export function removeHttpFromUrl(url: string): string {
   return url.replace(/^https?:/, '')
 }
@@ -62,39 +45,28 @@ export function isElectron(): boolean {
   return false
 }
 
-/**
- * Convert a hex color value to HSLA, thanks ChatGPT 🫡
- * @param hex hex color value
- * @param alpha color opacity
- * @returns HSLA or HSL color string
- */
+/** 将十六进制颜色转换为 HSL/HSLA。 */
 export function hexToHSL(hex: string, alpha: number | null = null): string {
-  // Remove the hash at the start if it's there
   hex = hex.replace(/^#/, '')
 
-  // Ensure the input is valid
   if (hex.length !== 6) {
     throw new Error('Invalid HEX color.')
   }
 
-  // Parse the r, g, b values
   let r = Number.parseInt(hex.substring(0, 2), 16)
   let g = Number.parseInt(hex.substring(2, 4), 16)
   let b = Number.parseInt(hex.substring(4, 6), 16)
 
-  // Convert r, g, b to percentages
   r /= 255
   g /= 255
   b /= 255
 
-  // Find the greatest and smallest channel values
   const max = Math.max(r, g, b)
   const min = Math.min(r, g, b)
   let h: number = 0
   let s: number = 0
   let l: number = (max + min) / 2
 
-  // Calculate the hue
   if (max === min) {
     h = s = 0 // achromatic
   }
@@ -117,7 +89,6 @@ export function hexToHSL(hex: string, alpha: number | null = null): string {
     h /= 6
   }
 
-  // Convert to degrees and percentages
   h = Math.round(h * 360)
   s = Math.round(s * 100)
   l = Math.round(l * 100)
@@ -187,11 +158,6 @@ export function delay(ms: number) {
   })
 }
 
-/**
- * Check if the current page is the home page
- * @param url the url to check
- * @returns true if the current page is the home page
- */
 export function isHomePage(url: string = location.href): boolean {
   try {
     const urlObj = new URL(stripBilibiliLocaleUrl(url))
@@ -204,9 +170,7 @@ export function isHomePage(url: string = location.href): boolean {
   }
 }
 
-/**
- * 判断实际首页，排除复用首页路径的搜索、历史等 BewlyCat 内置页面。
- */
+/** 判断实际首页，排除复用首页路径的搜索、历史等 BewlyCat 内置页面。 */
 export function isActualHomepage(url: string = location.href): boolean {
   if (!isHomePage(url))
     return false
@@ -215,14 +179,7 @@ export function isActualHomepage(url: string = location.href): boolean {
   return page === null || page === 'Home'
 }
 
-/**
- * Check if the URL points to Bilibili's watch later list page.
- * Supports both the canonical path and the legacy hash route used by the
- * user-space favorites entry. See https://github.com/keleus/BewlyCat/issues/841
- *
- * @param url the url to check
- * @returns true if the URL is a watch later list page
- */
+/** 支持稍后再看标准路径与空间收藏页旧 hash 路由。 */
 export function isWatchLaterListPage(url: string): boolean {
   try {
     const urlObj = new URL(stripBilibiliLocaleUrl(url))
@@ -242,11 +199,6 @@ export function isWatchLaterListPage(url: string): boolean {
   }
 }
 
-/**
- * Check if the current page is a video or bangumi page
- * @param url the url to check
- * @returns true if the current page is a video or bangumi page
- */
 export function isVideoOrBangumiPage(url: string = location.href): boolean {
   url = stripBilibiliLocaleUrl(url)
   if (
@@ -265,13 +217,7 @@ export function isVideoOrBangumiPage(url: string = location.href): boolean {
   return false
 }
 
-/**
- * Check if the current page is a playback page that should use video-page-only dark mode.
- * This intentionally excludes festival pages because they already use selective dark handling.
- *
- * @param url the url to check
- * @returns true if the current page is a video playback page
- */
+/** 仅视频播放页使用专属暗色；专题页自行处理。 */
 export function isVideoPlaybackPage(url: string = location.href): boolean {
   url = stripBilibiliLocaleUrl(url)
   return (
@@ -284,11 +230,6 @@ export function isVideoPlaybackPage(url: string = location.href): boolean {
   )
 }
 
-/**
- * Check if the current page is the notifications page
- * @param url the url to check
- * @returns true if the current page is the notifications page
- */
 export function isNotificationPage(url: string = location.href): boolean {
   if (
     /https?:\/\/message\.bilibili\.com\.*/.test(url)
@@ -298,11 +239,6 @@ export function isNotificationPage(url: string = location.href): boolean {
   return false
 }
 
-/**
- * Check if the current page is a search results page
- * @param url the url to check
- * @returns true if the current page is a search results page
- */
 export function isSearchResultsPage(url: string = location.href): boolean {
   // 检查是否是 B站原生搜索结果页
   if (/https?:\/\/search\.bilibili\.com\/.*/.test(url)) {
@@ -316,11 +252,6 @@ export function isSearchResultsPage(url: string = location.href): boolean {
   return false
 }
 
-/**
- * Check if the current page is a user space page
- * @param url the url to check
- * @returns true if the current page is a user space page
- */
 export function isUserSpacePage(url: string = location.href): boolean {
   if (
     /https?:\/\/space\.bilibili\.com\.*/.test(url)
@@ -330,30 +261,17 @@ export function isUserSpacePage(url: string = location.href): boolean {
   return false
 }
 
-/**
- * Compresses and resizes an image file.
- *
- * @param file - The image file to compress and resize.
- * @param maxWidth - The maximum width of the resized image.
- * @param maxHeight - The maximum height of the resized image.
- * @param quality - The quality of the compressed image (0-1).
- * @param callback - The callback function to execute with the compressed file.
- */
 export function compressAndResizeImage(file: File, maxWidth: number, maxHeight: number, quality: number, callback: any) {
-  // Create an Image object
   const img = new Image()
 
-  // Create a FileReader to read the file
   const reader = new FileReader()
   reader.onload = function (e) {
     img.src = e.target?.result as string
 
     img.onload = function () {
-      // Create a canvas
       const canvas = document.createElement('canvas')
       const ctx = canvas.getContext('2d')
 
-      // Calculate new size
       let width = img.width
       let height = img.height
 
@@ -370,7 +288,6 @@ export function compressAndResizeImage(file: File, maxWidth: number, maxHeight: 
         }
       }
 
-      // Set canvas dimensions
       canvas.width = width
       canvas.height = height
 
@@ -379,34 +296,23 @@ export function compressAndResizeImage(file: File, maxWidth: number, maxHeight: 
         return
       }
 
-      // Draw the image on the canvas
       ctx.drawImage(img, 0, 0, width, height)
 
-      // Compress the image
       canvas.toBlob((blob) => {
-        // Create a new blob file
         const compressedFile = new File([blob as Blob], file.name, {
           type: 'image/jpeg',
           lastModified: Date.now(),
         })
 
-        // Execute the callback with the new compressed file
         callback(compressedFile)
       }, 'image/jpeg', quality)
     }
   }
 
-  // Read the file as a Data URL (base64)
   reader.readAsDataURL(file)
 }
 
-/**
- * Generate a blurred version of an image for better performance
- * @param imageUrl - The original image URL (can be http/https/data URI)
- * @param blurRadius - The blur radius in pixels (recommended: 40-80 for wallpapers)
- * @param scale - Scale factor for performance optimization (0.3-0.5 recommended)
- * @returns Promise<string> - Base64 data URL of the blurred image
- */
+/** 生成缩小并模糊的壁纸 data URL。 */
 export async function generateBlurredWallpaper(
   imageUrl: string,
   blurRadius: number = 60,
@@ -436,10 +342,8 @@ export async function generateBlurredWallpaper(
         // Apply blur using CSS filter (GPU accelerated during rendering)
         ctx.filter = `blur(${blurRadius * scale}px)`
 
-        // Draw the scaled and blurred image
         ctx.drawImage(img, 0, 0, scaledWidth, scaledHeight)
 
-        // Convert to base64 with compression
         const blurredDataUrl = canvas.toDataURL('image/jpeg', 0.7)
         resolve(blurredDataUrl)
       }
@@ -456,12 +360,7 @@ export async function generateBlurredWallpaper(
   })
 }
 
-/**
- * Compare two versions
- * @param version1
- * @param version2
- * @returns 1 if version1 is greater than version2, -1 if version1 is less than version2, 0 if version1 is equal to version2
- */
+/** 版本比较：大于返回 1，小于 -1，相等 0。 */
 export function compareVersions(version1: string, version2: string): number {
   const v1Parts = version1.split('.').map(Number)
   const v2Parts = version2.split('.').map(Number)
@@ -516,9 +415,7 @@ export function isInIframe(): boolean {
   }
 }
 
-/**
- * 需要从链接中移除的 B 站追踪参数
- */
+/** 需要从链接中移除的 B 站追踪参数 */
 const BILIBILI_TRACKING_PARAMS = [
   'spm_id_from',
   'hcfrom',
@@ -546,11 +443,6 @@ const BILIBILI_TRACKING_PARAMS = [
   '-Arouter',
 ]
 
-/**
- * Clean a Bilibili URL by removing tracking parameters
- * @param url the URL to clean
- * @returns the cleaned URL
- */
 export function cleanBilibiliUrl(url: string): string {
   try {
     const urlObj = new URL(url)
@@ -581,15 +473,7 @@ export function cleanBilibiliUrl(url: string): string {
   }
 }
 
-/**
- * Clean the share text from Bilibili's share button
- * Bilibili share text format: 【Title】 URL
- * @param text the share text to clean
- * @param options options for cleaning
- * @param options.includeTitle whether to include the video title in the cleaned text
- * @param options.removeTrackingParams whether to remove tracking parameters from the URL
- * @returns the cleaned share text
- */
+/** 清理“【标题】URL”分享文本，可保留标题与追踪参数。 */
 export function cleanBilibiliShareText(
   text: string,
   options: { includeTitle?: boolean, removeTrackingParams?: boolean } = {},

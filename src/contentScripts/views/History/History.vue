@@ -303,7 +303,7 @@ function jumpToLoginPage() {
           </button>
         </div>
       </div>
-      <!-- Each date row grows with its card grid, keeping the timeline aligned. -->
+
       <div :class="{ 'history-grid': historyLayout === 'grid' }">
         <div v-for="group in historyGroups" :key="group.date" class="history-date-group">
           <div v-if="historyLayout === 'grid'" class="history-date">
@@ -348,7 +348,6 @@ function jumpToLoginPage() {
               flex
               cursor-pointer
             >
-              <!-- time slot -->
               <div
                 mr-8 px-4
                 b-l="~ 2px dashed $bew-fill-2"
@@ -359,8 +358,6 @@ function jumpToLoginPage() {
                 flex="important-xl:~ items-center justify-center"
                 hidden
               >
-                <!-- hidden lg:flex -->
-                <!-- Dot -->
                 <i
                   pos="absolute left--1px"
                   w-2
@@ -396,7 +393,6 @@ function jumpToLoginPage() {
                 p-2 m-1
                 content-visibility-auto
               >
-                <!-- Cover -->
                 <div
                   pos="relative"
                   bg="$bew-skeleton"
@@ -447,7 +443,6 @@ function jumpToLoginPage() {
                     text="white xs"
                     rounded="$bew-radius-half"
                   >
-                    <!--  When progress = -1 means that the user watched the full video -->
                     {{
                       `${
                         historyItem.progress === -1
@@ -470,7 +465,6 @@ function jumpToLoginPage() {
                   </div>
                 </div>
 
-                <!-- Description -->
                 <div flex justify-between w-full h-full>
                   <div flex="~ col">
                     <a
@@ -571,10 +565,8 @@ function jumpToLoginPage() {
         </div>
       </div>
 
-      <!-- no more content -->
       <Empty v-if="noMoreContent" class="py-4" :description="$t('common.no_more_content')" />
 
-      <!-- loading -->
       <Transition name="fade">
         <loading
           v-if="isLoading && historyList.length !== 0 && !noMoreContent"

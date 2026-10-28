@@ -973,7 +973,7 @@ function unbindOpusViewportResize() {
     window.parent?.removeEventListener('resize', syncOpusCommentColumnWidth)
   }
   catch {
-    // ignore
+
   }
 }
 
@@ -1094,7 +1094,7 @@ function notifyLayoutReady() {
     window.parent.postMessage({ type: LAYOUT_READY_MSG, source: 'bewly-opus' }, '*')
   }
   catch {
-    // ignore
+
   }
 }
 
@@ -1150,7 +1150,7 @@ function isPlainOpusRequested(): boolean {
       return true
   }
   catch {
-    // ignore
+
   }
   return false
 }
@@ -1161,9 +1161,7 @@ function shouldSkipSplitForForward(_root?: HTMLElement | null): boolean {
   return isPlainOpusRequested()
 }
 
-/**
- * 转发/plain：保持原站单栏，不重排左右图文
- */
+/** 转发/plain：保持原站单栏，不重排左右图文 */
 function applyPlainLayout(root?: HTMLElement | null): boolean {
   // 转发：不重排、不展示整理遮罩，尽快结束
   if (root?.querySelector(':scope > .bewly-opus-split'))
@@ -1182,10 +1180,7 @@ function applyPlainLayout(root?: HTMLElement | null): boolean {
   return true
 }
 
-/**
- * 是否专栏（ARTICLE）。
- * 只有专栏才会有目录；普通图文/纯文字即使误匹配到 catalog 类名也不走专栏布局。
- */
+/** 是否专栏（ARTICLE）。 只有专栏才会有目录；普通图文/纯文字即使误匹配到 catalog 类名也不走专栏布局。 */
 function isColumnArticleOpus(root?: HTMLElement | null): boolean {
   try {
     const params = new URLSearchParams(window.location.search)
@@ -1193,7 +1188,7 @@ function isColumnArticleOpus(root?: HTMLElement | null): boolean {
       return true
   }
   catch {
-    // ignore
+
   }
 
   // 专栏阅读页
@@ -1214,7 +1209,7 @@ function isColumnArticleOpus(root?: HTMLElement | null): boolean {
       return true
   }
   catch {
-    // ignore
+
   }
 
   const scope = root || document
@@ -1241,7 +1236,7 @@ function isColumnArticleOpus(root?: HTMLElement | null): boolean {
     }
   }
   catch {
-    // ignore
+
   }
 
   // 仅有专栏壳也按专栏处理
@@ -1714,7 +1709,7 @@ function createImageGallery(rawUrls: string[]): HTMLElement {
       scrollThumb.releasePointerCapture(e.pointerId)
     }
     catch {
-      // ignore
+
     }
     markStageScrolling(getCenterStage())
   }
@@ -1802,11 +1797,7 @@ function createImageGallery(rawUrls: string[]): HTMLElement {
     activeThumb?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
   }
 
-  /**
-   * 平移切换
-   * @param nextIndex 目标下标
-   * @param dir 1=下一张(向左平移) -1=上一张(向右平移) 0=自动判断方向
-   */
+  /** dir：1 下一张，-1 上一张，0 自动判断。 */
   const go = (nextIndex: number, dir: -1 | 0 | 1 = 0) => {
     if (!urls.length || isAnimating)
       return
@@ -2471,10 +2462,7 @@ function scheduleStableApply() {
   }, 320)
 }
 
-/**
- * 在 iframe 内把 B 站 opus 详情重排为左右分栏。
- * 纯文字保持单栏；图文左侧相册（可切换/滚动），右侧文字评论独立滚动。
- */
+/** 在 iframe 内把 B 站 opus 详情重排为左右分栏。 纯文字保持单栏；图文左侧相册（可切换/滚动），右侧文字评论独立滚动。 */
 export function disposeOpusDetailDrawerLayout() {
   clearDeferredSetup()
   markArticleMode(false)
@@ -2483,7 +2471,7 @@ export function disposeOpusDetailDrawerLayout() {
     observer?.disconnect()
   }
   catch {
-    // ignore
+
   }
   observer = null
 
@@ -2510,7 +2498,7 @@ export function disposeOpusDetailDrawerLayout() {
       teardownSplit(root, true)
   }
   catch {
-    // ignore
+
   }
 
   // 释放页面内媒体，降低关闭后内存驻留
@@ -2523,12 +2511,12 @@ export function disposeOpusDetailDrawerLayout() {
         media.load()
       }
       catch {
-        // ignore
+
       }
     })
   }
   catch {
-    // ignore
+
   }
 
   appliedSuccessfully = false

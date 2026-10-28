@@ -699,7 +699,6 @@ function handleClearKeyword() {
         class="bew-popover-surface"
         :style="narrowTopBarPopupStyle"
       >
-        <!-- 热搜区块 -->
         <div
           v-if="(showHotSearch ?? settings.showHotSearchInTopBar) && hotSearchList.length > 0"
           class="hot-search-section"
@@ -741,14 +740,12 @@ function handleClearKeyword() {
           </div>
         </div>
 
-        <!-- 分割线 -->
         <div
           v-if="(showHotSearch ?? settings.showHotSearchInTopBar) && hotSearchList.length > 0 && searchHistory.length > 0"
           class="divider"
           mx-2 my-1 h-px bg="$bew-border-color"
         />
 
-        <!-- 搜索历史区块 -->
         <div
           v-if="searchHistory.length !== 0"
           class="history-section"

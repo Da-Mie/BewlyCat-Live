@@ -20,12 +20,7 @@ export function shouldUsePluginSearchResultsPage(): boolean {
     && !settings.value.useOriginalBilibiliHomepage
 }
 
-/**
- * Build a native Bilibili search URL from a keyword.
- *
- * This intentionally starts from a fresh URL so page/tracking parameters from
- * the current BewlyCat route (for example `from_source`) are never forwarded.
- */
+/** 从空 URL 构造搜索链接，避免继承当前页追踪参数。 */
 export function buildNativeSearchUrl(keyword: string): string {
   const normalized = keyword.trim()
   const targetUrl = new URL('https://search.bilibili.com/all')
@@ -36,10 +31,7 @@ export function buildNativeSearchUrl(keyword: string): string {
   return targetUrl.toString()
 }
 
-/**
- * 构建关键词搜索链接的唯一入口：
- * 开启插件搜索页时跳扩展内搜索页，否则跳 B 站原生搜索页
- */
+/** 构建关键词搜索链接的唯一入口： 开启插件搜索页时跳扩展内搜索页，否则跳 B 站原生搜索页 */
 export function buildKeywordSearchUrl(keyword: string): string {
   const encoded = encodeURIComponent(keyword)
 
@@ -59,10 +51,7 @@ const PLUGIN_SEARCH_RESET_PARAMS = [
   'live_user_order',
 ] as const
 
-/**
- * 开启插件搜索结果页时，在当前插件首页就地切到搜索结果，
- * 或从其他 B 站页面跳到插件搜索结果。返回 true 表示已接管导航。
- */
+/** 开启插件搜索结果页时，在当前插件首页就地切到搜索结果， 或从其他 B 站页面跳到插件搜索结果。返回 true 表示已接管导航。 */
 export function navigateToPluginSearchResults(keyword: string): boolean {
   if (!shouldUsePluginSearchResultsPage())
     return false
@@ -95,11 +84,7 @@ export function navigateToPluginSearchResults(keyword: string): boolean {
   return true
 }
 
-/**
- * 按「搜索栏链接打开行为」打开搜索结果：
- * 链接经 buildKeywordSearchUrl 构建（开启插件搜索页时指向插件搜索结果页），
- * 后台模式走后台标签页，其余按 target 映射用 window.open 打开。
- */
+/** 搜索链接统一构造；后台模式走后台标签页，其余按 target 打开。 */
 export function openSearchResults(keyword: string): void {
   const searchUrl = buildKeywordSearchUrl(keyword)
   const mode = settings.value.searchBarLinkOpenMode
@@ -120,11 +105,7 @@ export function openSearchResults(keyword: string): void {
   window.open(searchUrl, target)
 }
 
-/**
- * 搜索栏等入口的插件搜索页接管：仅就地打开模式才原地切换；
- * 新标签页 / 后台标签页模式返回 false，交由调用方按「搜索栏链接打开行为」处理，
- * 调用方构建的链接同样经 buildKeywordSearchUrl 指向插件搜索结果页。
- */
+/** 仅就地打开模式原地接管；新页和后台模式交由调用方打开构造后的链接。 */
 export function navigateToPluginSearchResultsInPlace(keyword: string): boolean {
   const mode = settings.value.searchBarLinkOpenMode
   if (

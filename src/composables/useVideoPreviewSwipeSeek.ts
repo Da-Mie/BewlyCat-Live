@@ -80,10 +80,7 @@ export function useVideoPreviewSwipeSeek(
     videoEl.currentTime = nextTime
   }
 
-  /**
-   * 进度条即时刷新；真正改 video.currentTime 做节流。
-   * 节流等待结束后会补一次最新位置，避免拖动时画面卡住。
-   */
+  /** 进度条即时刷新；真正改 video.currentTime 做节流。 节流等待结束后会补一次最新位置，避免拖动时画面卡住。 */
   function scheduleVideoTimeUpdate(videoEl: HTMLVideoElement, targetTime: number) {
     pendingScrubTime = targetTime
     scrubProgress.value = Math.min(100, Math.max(0, targetTime / videoEl.duration * 100))

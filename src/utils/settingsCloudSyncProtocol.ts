@@ -5,11 +5,7 @@ export const SETTINGS_CLOUD_SYNC_STATUS_MESSAGE = 'getSettingsCloudSyncStatus'
 export const SETTINGS_CLOUD_SYNC_ENABLE_MESSAGE = 'enableSettingsCloudSync'
 
 export interface SettingsCloudSyncStatus {
-  /**
-   * `empty`: no settings keys in the sync area; `compatible`: at least one
-   * entry readable by this version; `incompatible`: at least one preserved
-   * entry uses an unknown format (for example, a newer schema version).
-   */
+  /** empty 无设置；compatible 可读取；incompatible 含未知格式。 */
   state: 'empty' | 'compatible' | 'incompatible'
 }
 
@@ -27,12 +23,7 @@ export interface SettingsCloudSyncVersion {
   deviceId: string
 }
 
-/**
- * Bootstrap direction chosen when enabling sync:
- * - `pull`: the cloud snapshot overwrites local settings.
- * - `push`: local settings overwrite the cloud snapshot.
- * - `auto`: per-field last-writer-wins with dirty-field protection.
- */
+/** pull 云端覆盖本地；push 本地覆盖云端；auto 按字段版本合并并保护脏字段。 */
 export type SettingsCloudSyncMode = 'pull' | 'push' | 'auto'
 
 export interface SettingsCloudSyncEntry {
@@ -102,11 +93,7 @@ export function isKnownLocalOnlySettingsCloudSyncField(field: string) {
   return LOCAL_ONLY_WALLPAPER_FIELDS.has(field) || LOCAL_ONLY_RUNTIME_FIELDS.has(field)
 }
 
-/**
- * True when a value claims the current schema but fails validation, i.e. it is
- * confirmed corruption instead of data written by a newer extension version.
- * Unknown shapes or future schema versions must be preserved.
- */
+/** 仅当前 schema 校验失败视为损坏；未知或未来格式须保留。 */
 export function isCorruptCurrentSchemaSettingsCloudSyncEntry(value: unknown) {
   if (!value || typeof value !== 'object' || Array.isArray(value))
     return false

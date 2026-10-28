@@ -308,7 +308,6 @@ const shouldShowDivider = computed(() => {
           :class="{ 'top-bar-editing-group': isLayoutEditing }"
           gap-1
         >
-          <!-- Moments -->
           <div
             v-if="isLayoutEditing || isComponentVisible('moments')"
             ref="moments"
@@ -355,7 +354,6 @@ const shouldShowDivider = computed(() => {
             </TopBarItemEditor>
           </div>
 
-          <!-- Favorites -->
           <div
             v-if="isLayoutEditing || isComponentVisible('favorites')"
             ref="favorites"
@@ -391,7 +389,6 @@ const shouldShowDivider = computed(() => {
             </TopBarItemEditor>
           </div>
 
-          <!-- History -->
           <div
             v-if="isLayoutEditing || isComponentVisible('history')"
             ref="history"
@@ -425,7 +422,6 @@ const shouldShowDivider = computed(() => {
             </TopBarItemEditor>
           </div>
 
-          <!-- Watch later -->
           <div
             v-if="isLayoutEditing || isComponentVisible('watchLater')"
             ref="watchLater"
@@ -472,7 +468,6 @@ const shouldShowDivider = computed(() => {
             </TopBarItemEditor>
           </div>
 
-          <!-- Creative center -->
           <div
             v-if="isLayoutEditing || isComponentVisible('creatorCenter')"
             class="right-side-item"
@@ -495,7 +490,6 @@ const shouldShowDivider = computed(() => {
           </div>
         </div>
 
-        <!-- More -->
         <div
           ref="more"
           class="right-side-item lg:!hidden flex"
@@ -529,7 +523,6 @@ const shouldShowDivider = computed(() => {
           :class="{ 'top-bar-editing-group': isLayoutEditing }"
           gap-1 items-center
         >
-          <!-- Divider -->
           <div
             v-if="shouldShowDivider"
             :class="{ 'white-icon': forceWhiteIcon }"
@@ -537,7 +530,6 @@ const shouldShowDivider = computed(() => {
             rounded="$bew-radius-sm"
           />
 
-          <!-- Upload -->
           <div
             v-if="isLayoutEditing || isComponentVisible('upload')"
             ref="upload"
@@ -571,7 +563,6 @@ const shouldShowDivider = computed(() => {
             </TopBarItemEditor>
           </div>
 
-          <!-- Notifications -->
           <div
             v-if="isLayoutEditing || isComponentVisible('notifications')"
             ref="notifications"
@@ -623,8 +614,6 @@ const shouldShowDivider = computed(() => {
         </div>
       </template>
 
-      <!-- Avatar -->
-
       <div
         v-if="isLayoutEditing || (isLogin && isComponentVisible('avatar'))"
         ref="avatar"
@@ -637,7 +626,6 @@ const shouldShowDivider = computed(() => {
           :title="$t('settings.topbar_user_menu')"
         >
           <template v-if="isLogin">
-            <!-- B币领取提醒dot -->
             <div
               v-if="hasBCoinToReceive && settings.showBCoinReceiveReminder"
               class="unread-dot avatar-dot"
@@ -694,7 +682,6 @@ const shouldShowDivider = computed(() => {
         </TopBarItemEditor>
       </div>
 
-      <!-- Bewly / Bilibili top bar switcher: keep it as the final action. -->
       <TopBarModeSwitcher
         v-if="isLayoutEditing || isComponentVisible('topBarSwitcher')"
         :force-white-icon="forceWhiteIcon"

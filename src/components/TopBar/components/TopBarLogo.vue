@@ -98,7 +98,7 @@ watch(isLayoutEditing, (editing) => {
                 }"
                 aria-hidden="true"
               />
-              <!-- 品牌标识档在窄屏下改为显示该图标，避免文字标识被裁切 -->
+
               <svg
                 t="1720198072316"
                 class="icon"
@@ -132,7 +132,6 @@ watch(isLayoutEditing, (editing) => {
           </TopBarItemEditor>
         </div>
 
-        <!-- 首页按钮（仅在触屏模式下显示） -->
         <a
           v-if="settings.touchScreenOptimization && settings.showHomeButtonInTouchMode"
           href="//www.bilibili.com"

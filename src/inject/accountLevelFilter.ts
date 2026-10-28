@@ -59,7 +59,7 @@ export function createPageAccountFilter(getSettings: () => AccountLevelFilters |
     request.resolve(readAccountIdentity(event.data.identity))
   })
 
-  // Never wait indefinitely for another extension world to initialize.
+  // 设置初始化最多等待 2.5 秒。
   const bootTimeout = setTimeout(() => {
     bootReady = true
     refresh()

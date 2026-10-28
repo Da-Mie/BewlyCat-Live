@@ -47,7 +47,7 @@ export function projectCommentTree<T, K>(items: T[], keyOf: (item: T) => K, pare
   }
   for (const root of children.get(null) ?? [])
     append(root)
-  // Malformed cycles must not suppress otherwise visible comments.
+  // 环形坏数据不能吞掉可见评论。
   for (const item of items) {
     if (visibility.get(item) && !visited.has(item))
       append(item)

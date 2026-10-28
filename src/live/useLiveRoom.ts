@@ -76,7 +76,15 @@ export function useLiveRoom(onOverlay: (message: LiveMessage) => void) {
     }
     let identity = { mid: message.uid, ...identities.peek(message.uid) }
     if (needsAccountIdentity(identity, settings.value.accountLevelFilters, 'liveDanmaku', session.value.uid)) {
-      await Promise.race([identities.resolve(message.uid), new Promise<void>(resolve => setTimeout(resolve, 1200))])
+      let timeout: ReturnType<typeof setTimeout> | undefined
+      try {
+        await Promise.race([identities.resolve(message.uid), new Promise<void>((resolve) => {
+          timeout = setTimeout(resolve, 1200)
+        })])
+      }
+      finally {
+        clearTimeout(timeout)
+      }
       identity = { ...identity, ...identities.peek(message.uid) }
     }
     return decideAccountFilter(identity, settings.value.accountLevelFilters, 'liveDanmaku', session.value.uid) === 'allow'
@@ -106,7 +114,7 @@ export function useLiveRoom(onOverlay: (message: LiveMessage) => void) {
 
   function dispatch(message: LiveMessage) {
     if (nativeFilterState.value === 'loading') {
-      // Waiting for account rules must not create an unbounded set of promises.
+      // 规则就绪前最多暂存 256 条候选消息。
       if (pendingNativeMessages.length >= 256)
         pendingNativeMessages.shift()
       pendingNativeMessages.push(message)
@@ -171,7 +179,7 @@ export function useLiveRoom(onOverlay: (message: LiveMessage) => void) {
         superChats.value = superChats.value.filter(message => !isNativeLiveMessageBlocked(message, filters))
         displayVersion.value++
       }
-      // An unchanged focus sync keeps the user's chat scroll and flying comments.
+      // 规则未变时保留滚动位置和在途弹幕。
       if (!previous || !messages.value.length)
         void history(roomId, version)
       if (!previous) {
@@ -281,7 +289,8 @@ export function useLiveRoom(onOverlay: (message: LiveMessage) => void) {
         if (!result.locked) {
           const account = accountVersion
           const auth = await liveRequest<LiveSession>({ action: 'session' }).catch(() => ({ uid: '0', buvid: '' }))
-          if (version !== generation || request !== requestVersion || account !== accountVersion || disposed)
+          // 同房间刷新不取消登录态初始化。
+          if (version !== generation || account !== accountVersion || disposed || room.value?.roomId !== result.roomId || room.value.locked)
             return
           setSession(auth)
           void syncNativeFilters()
@@ -374,7 +383,13 @@ export function useLiveRoom(onOverlay: (message: LiveMessage) => void) {
           void syncNativeFilters()
           reconnectChat()
         }
-      }).catch(() => {})
+      }).catch((reason) => {
+        if (!disposed && account === accountVersion) {
+          nativeFilterState.value = 'error'
+          chatState.value = 'error'
+          chatError.value = reason instanceof Error ? reason.message : String(reason)
+        }
+      })
     }, 200)
   }
   browser.cookies.onChanged.addListener(accountChange)

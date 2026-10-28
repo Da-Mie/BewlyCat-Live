@@ -15,7 +15,6 @@
     }
   }
 
-  // #region theme color adaption part
   // Increase the priority of the style inside by writing a non-existent selector in :not()
   :not(foobar) {
     .clickable,
@@ -39,9 +38,7 @@
       fill: var(--bew-theme-color) !important;
     }
   }
-  // #endregion
 
-  // #region dark mode adaption part
   &.dark {
     #app {
       background-color: var(--bew-bg);
@@ -91,5 +88,4 @@
       color: var(--bew-text-3);
     }
   }
-  // #endregion
 }

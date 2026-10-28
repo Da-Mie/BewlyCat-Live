@@ -19,9 +19,7 @@ export function removeHighlight(text?: string): string {
   return decodeHtmlEntities(withoutHighlight)
 }
 
-/**
- * 检查视频是否是广告
- */
+/** 检查视频是否是广告 */
 export function isAdVideo(video: any): boolean {
   if (!video)
     return false
@@ -788,9 +786,7 @@ function resolveBangumiEpisodeCount(item: any, episodes: BangumiEpisode[]): numb
   return undefined
 }
 
-/**
- * 转换游戏卡片数据
- */
+/** 转换游戏卡片数据 */
 export function convertWebGameData(game: any) {
   const cover = typeof game.game_icon === 'string'
     ? game.game_icon.startsWith('//') ? `https:${game.game_icon}` : game.game_icon

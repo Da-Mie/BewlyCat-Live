@@ -143,7 +143,6 @@ async function handleFollowClick(e: Event) {
 </script>
 
 <template>
-  <!-- Compact模式布局 -->
   <template v-if="compact">
     <div
       class="user-card cursor-pointer compact"
@@ -167,7 +166,6 @@ async function handleFollowClick(e: Event) {
         relative flex items-center gap-5 w-full
         pointer-events-none
       >
-        <!-- 左侧：头像（带角标） -->
         <UserAvatarLink :mid="mid" :name="name" :live-status="liveStatus" :roomid="roomid" class="avatar-wrapper-compact">
           <img
             :src="face"
@@ -176,21 +174,19 @@ async function handleFollowClick(e: Event) {
             w-24 h-24
             rounded-full object-cover
           >
-          <!-- 官方认证角标 -->
+
           <span
             v-if="isVerified && verifyInfo && verifyInfo.includes('官方')"
             class="bili-avatar-icon bili-avatar-right-icon bili-avatar-icon-business bili-avatar-size-86"
           />
-          <!-- 个人认证角标 -->
+
           <span
             v-else-if="isVerified && verifyInfo"
             class="bili-avatar-icon bili-avatar-right-icon bili-avatar-icon-personal bili-avatar-size-86"
           />
         </UserAvatarLink>
 
-        <!-- 右侧：用户信息 + 简介 + 关注按钮 -->
         <div flex="~ col gap-2" flex-1 min-w-0>
-          <!-- 用户名 + 等级 + 性别 -->
           <div flex items-center gap-2>
             <div
               class="username" text="base $bew-text-1" font-medium truncate
@@ -210,7 +206,6 @@ async function handleFollowClick(e: Event) {
             </div>
           </div>
 
-          <!-- 简介（单行） -->
           <div
             class="sign-compact-single"
             text="sm $bew-text-2"
@@ -219,7 +214,6 @@ async function handleFollowClick(e: Event) {
             {{ sign || t('user_card.empty_bio') }}
           </div>
 
-          <!-- 统计信息行 -->
           <div
             v-if="fans || videos"
             flex items-center gap-3
@@ -235,7 +229,6 @@ async function handleFollowClick(e: Event) {
             </div>
           </div>
 
-          <!-- 关注按钮 -->
           <div
             v-if="showFollowButton"
             flex items-center
@@ -255,7 +248,6 @@ async function handleFollowClick(e: Event) {
     </div>
   </template>
 
-  <!-- 非Compact模式布局 -->
   <template v-else>
     <div
       class="user-card cursor-pointer"
@@ -270,7 +262,6 @@ async function handleFollowClick(e: Event) {
       cursor="pointer"
       @click="openUserSpace()"
     >
-      <!-- 头像 -->
       <UserAvatarLink :mid="mid" :name="name" :live-status="liveStatus" :roomid="roomid" class="avatar-wrapper">
         <img
           :src="face"
@@ -281,9 +272,7 @@ async function handleFollowClick(e: Event) {
         >
       </UserAvatarLink>
 
-      <!-- 用户信息 -->
       <div class="user-info" flex-1 min-w-0>
-        <!-- 用户名和认证 -->
         <div flex items-center gap-2 mb-1>
           <div class="username" text="base $bew-text-1" font-medium truncate>
             {{ name }}
@@ -301,7 +290,6 @@ async function handleFollowClick(e: Event) {
           </div>
         </div>
 
-        <!-- 签名 -->
         <div
           v-if="sign"
           class="sign"
@@ -311,7 +299,6 @@ async function handleFollowClick(e: Event) {
           {{ sign }}
         </div>
 
-        <!-- 统计信息 -->
         <div
           class="stats"
           flex items-center gap-3 text="xs $bew-text-3"

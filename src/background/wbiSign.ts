@@ -21,9 +21,7 @@ const NAV_PATH = '/x/web-interface/nav'
 const BILI_TICKET_PATH = '/x/web-interface/bili_ticket'
 const FEEDBACK_DISLIKE_PATH = '/x/web-interface/feedback/dislike'
 
-/**
- * Parse an API URL only when it points at the exact Bilibili API origin.
- */
+/** Parse an API URL only when it points at the exact Bilibili API origin. */
 export function parseBilibiliApiUrl(url: string): URL | null {
   try {
     const parsedUrl = new URL(url)
@@ -34,9 +32,7 @@ export function parseBilibiliApiUrl(url: string): URL | null {
   }
 }
 
-/**
- * Check whether a URL targets the nav endpoint (query parameters are allowed).
- */
+/** Check whether a URL targets the nav endpoint (query parameters are allowed). */
 export function isBilibiliNavUrl(url: string): boolean {
   return parseBilibiliApiUrl(url)?.pathname === NAV_PATH
 }
@@ -49,17 +45,13 @@ let anonymousWbiKeysCache: WbiKeys | null = null
 let fetchingKeysPromise: Promise<boolean> | null = null
 let fetchingNoCookieKeysPromise: Promise<boolean> | null = null
 
-/**
- * 从URL中提取文件名（不含扩展名）
- */
+/** 从URL中提取文件名（不含扩展名） */
 function extractKeyFromUrl(url: string): string {
   const match = url.match(/\/([^/]+)\.png$/)
   return match ? match[1] : ''
 }
 
-/**
- * 生成混合密钥
- */
+/** 生成混合密钥 */
 function generateMixinKey(imgKey: string, subKey: string): string {
   const rawWbiKey = imgKey + subKey
   let mixinKey = ''
@@ -71,10 +63,7 @@ function generateMixinKey(imgKey: string, subKey: string): string {
   return mixinKey
 }
 
-/**
- * 对参数进行URL编码（符合WBI要求）
- * 注意：根据官方规范，需要先过滤掉 !'()* 字符，然后再进行URL编码
- */
+/** 对参数进行URL编码（符合WBI要求） 注意：根据官方规范，需要先过滤掉 !'()* 字符，然后再进行URL编码 */
 function encodeWbiParam(value: any): string {
   // 先过滤掉 !'()* 字符
   const filtered = String(value).replace(/[!'()*]/g, '')
@@ -82,9 +71,7 @@ function encodeWbiParam(value: any): string {
   return encodeURIComponent(filtered)
 }
 
-/**
- * 存储WBI密钥（从 nav 接口获取）
- */
+/** 存储WBI密钥（从 nav 接口获取） */
 export function storeWbiKeys(imgUrl: string, subUrl: string, options: WbiKeyOptions = {}): void {
   const imgKey = extractKeyFromUrl(imgUrl)
   const subKey = extractKeyFromUrl(subUrl)
@@ -103,9 +90,7 @@ export function storeWbiKeys(imgUrl: string, subUrl: string, options: WbiKeyOpti
   }
 }
 
-/**
- * 获取WBI密钥（如果缓存过期则返回null）
- */
+/** 获取WBI密钥（如果缓存过期则返回null） */
 export function getWbiKeys(options: WbiKeyOptions = {}): WbiKeys | null {
   const now = Date.now()
   const maxAge = 24 * 60 * 60 * 1000 // 24小时
@@ -126,9 +111,7 @@ export function getWbiKeys(options: WbiKeyOptions = {}): WbiKeys | null {
   return null
 }
 
-/**
- * 清除 WBI 密钥缓存
- */
+/** 清除 WBI 密钥缓存 */
 export function clearWbiKeys(options: WbiKeyOptions = {}): void {
   if (options.noCookie)
     anonymousWbiKeysCache = null
@@ -137,9 +120,7 @@ export function clearWbiKeys(options: WbiKeyOptions = {}): void {
   console.log(`[WBI] Cleared ${options.noCookie ? 'anonymous' : 'authenticated'} WBI keys cache`)
 }
 
-/**
- * 为参数添加WBI签名
- */
+/** 为参数添加WBI签名 */
 export function addWbiSign(params: Record<string, any>, options: WbiKeyOptions = {}): Record<string, any> {
   const keys = getWbiKeys(options)
   if (!keys) {
@@ -179,9 +160,7 @@ export function addWbiSign(params: Record<string, any>, options: WbiKeyOptions =
   }
 }
 
-/**
- * 获取B站的cookie并组装成字符串
- */
+/** 获取B站的cookie并组装成字符串 */
 async function getBilibiliCookies(): Promise<string> {
   try {
     // 动态导入 browser，避免在非浏览器环境下报错
@@ -196,11 +175,7 @@ async function getBilibiliCookies(): Promise<string> {
   }
 }
 
-/**
- * 初始化WBI密钥（从nav接口获取）
- * 应该在扩展启动时调用
- * 使用单例模式避免并发重复获取
- */
+/** 合并并发的 nav 请求以初始化 WBI 密钥。 */
 export async function initWbiKeys(options: WbiKeyOptions = {}): Promise<boolean> {
   const noCookie = options.noCookie === true
 
@@ -284,9 +259,7 @@ export async function initWbiKeys(options: WbiKeyOptions = {}): Promise<boolean>
   return await fetchPromise
 }
 
-/**
- * 检查是否需要WBI签名的URL
- */
+/** 检查是否需要WBI签名的URL */
 export function needsWbiSign(url: string): boolean {
   const parsedUrl = parseBilibiliApiUrl(url)
   if (!parsedUrl)

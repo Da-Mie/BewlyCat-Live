@@ -120,7 +120,6 @@ function save() {
     @confirm="save"
     @close="emit('close')"
   >
-    <!-- 阻止字段内的回车冒泡到 Dialog 的全局回车确认；Esc 仍可关闭弹窗 -->
     <div class="rule-editor" @keydown.enter.stop>
       <p class="rule-editor__desc">
         {{ t('settings.favorite_organizer.rule_editor_desc') }}

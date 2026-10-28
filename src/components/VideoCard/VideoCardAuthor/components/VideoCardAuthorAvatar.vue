@@ -31,7 +31,6 @@ const isKetang = computed(() => {
 </script>
 
 <template>
-  <!-- 课堂图标 -->
   <div
     v-if="isKetang"
     :style="{
@@ -53,7 +52,6 @@ const isKetang = computed(() => {
     </div>
   </div>
 
-  <!-- 普通头像 -->
   <div
     v-else
     :style="{
@@ -80,7 +78,7 @@ const isKetang = computed(() => {
       :class="{ live: isLive }"
       @click.stop=""
     >
-      <!-- Avatar -->
+
       <Picture
         :src="`${removeHttpFromUrl(item.authorFace)}@50w_50h_1c`"
         loading="lazy"
@@ -89,7 +87,6 @@ const isKetang = computed(() => {
         rounded="1/2"
       />
 
-      <!-- Following Flag -->
       <div
         v-if="item.followed && !Array.isArray(author)"
         pos="absolute top-21px left-22px"
@@ -112,7 +109,6 @@ const isKetang = computed(() => {
       </div>
     </a>
 
-    <!-- More avatars not shown -->
     <span
       v-if="Array.isArray(author) && author.length > maxCount"
       pos="absolute right--4px"

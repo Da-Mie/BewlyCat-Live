@@ -101,9 +101,6 @@ function handleClick(evt: MouseEvent) {
     --uno: "text-size-$b-button-icon-size";
   }
 
-  // &--type-default {
-  // }
-
   &--type-primary {
     --b-button-color: var(--bew-theme-color);
     --b-button-color-hover: var(--bew-theme-color);

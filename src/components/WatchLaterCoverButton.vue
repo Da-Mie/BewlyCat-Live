@@ -11,12 +11,7 @@ import {
 } from '~/utils/watchLaterActions'
 import type { WatchLaterTarget } from '~/utils/watchLaterSnapshot'
 
-/**
- * 封面右上角「加入稍后再看」统一按钮。
- * 唯一的显隐契约是 target：传入有效目标（aid/bvid/epid 任一）且设置项开启时渲染，
- * 不支持 / 不想显示时调用方直接传 undefined。封面容器需带 bew-cover-action-host 类，
- * 宿主 hover / 键盘 focus 下显示，动态页可保留已加入后常驻。状态与增删逻辑复用 watchLaterActions。
- */
+/** 有效 target 且设置开启时显示；封面需带 bew-cover-action-host，状态复用 watchLaterActions。 */
 const props = withDefaults(defineProps<{
   target?: WatchLaterTarget
   persistent?: boolean
@@ -92,7 +87,6 @@ onBeforeUnmount(() => {
     v-if="visible"
     class="bew-watch-later-cover"
   >
-    <!-- floating：按钮常驻封面内（封面 overflow:hidden），提示必须传送至顶层才不会被裁切 -->
     <Tooltip :content="label" :placement="tooltipPlacement" type="dark" floating>
       <button
         type="button"

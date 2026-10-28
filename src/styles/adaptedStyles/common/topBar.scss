@@ -10,7 +10,6 @@
     backdrop-filter: none;
   }
 
-  // #region theme color adaption part
   // Increase the priority of the style inside by writing a non-existent selector in `:not()`
   :not(foobar) {
     .bili-header .header-upload-entry {
@@ -21,10 +20,4 @@
       background-color: var(--bew-theme-color-80);
     }
   }
-  // #endregion
-
-  // #region dark mode adaption part
-  // &.dark {
-  // }
-  // #endregion
 }

@@ -297,7 +297,6 @@ function undoResetAllShortcuts() {
       icon="i-mingcute:keyboard-fill"
     />
 
-    <!-- General Keyboard Toggle -->
     <SettingsItemGroup>
       <SettingsItem :title="t('settings.shortcuts.enable_all_shortcuts_toggle')" right-width="auto">
         <template #desc>
@@ -320,7 +319,6 @@ function undoResetAllShortcuts() {
       </SettingsItem>
     </SettingsItemGroup>
 
-    <!-- Configurable Extension Shortcuts -->
     <template v-for="group in configurableShortcutsGroups" :key="group.title">
       <ShortcutSection
         :title="group.title"
@@ -329,9 +327,7 @@ function undoResetAllShortcuts() {
         <template v-for="shortcutDef in group.shortcuts" :key="shortcutDef.id">
           <SettingsItem :title="shortcutDef.name" :desc="shortcutDef.description" right-width="auto">
             <div class="shortcut-item-config">
-              <!-- Key Configuration with Enabled Toggle -->
               <div class="shortcut-config-row">
-                <!-- Shortcut Key Display/Edit -->
                 <div
                   v-if="editingShortcutId === shortcutDef.id"
                   v-focus-shortcut-editor
@@ -347,7 +343,6 @@ function undoResetAllShortcuts() {
                   {{ formatShortcutKey(getShortcutSetting(shortcutDef.id)?.key || shortcutDef.defaultKey) || t('settings.shortcuts.not_set') }}
                 </div>
 
-                <!-- Action Buttons -->
                 <div class="shortcut-actions flex gap-1">
                   <button
                     v-if="editingShortcutId !== shortcutDef.id"
@@ -391,7 +386,6 @@ function undoResetAllShortcuts() {
       </ShortcutSection>
     </template>
 
-    <!-- Official Bilibili Shortcuts (Read-only) -->
     <ShortcutSection :title="t('settings.shortcuts.group.official_bilibili')">
       <SettingsItem
         v-for="shortcut in officialShortcuts"

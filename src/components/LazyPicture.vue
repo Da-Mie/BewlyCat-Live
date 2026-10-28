@@ -277,11 +277,7 @@ function forgetLoadedPicture(src: string) {
 </script>
 
 <script setup lang="ts">
-/**
- * Lazy picture with two shared visibility bands:
- * - preloadScreens controls when a queued task may mount an image;
- * - retainScreens controls the delayed off-screen release boundary.
- */
+/** preloadScreens 控制挂载，retainScreens 控制离屏释放。 */
 
 interface Props {
   src: string
@@ -843,10 +839,7 @@ watch(
     style="aspect-ratio: 16 / 9; display: block; position: relative; overflow: hidden; contain: layout style;"
     :style="{ backgroundColor: showSkeleton ? 'var(--bew-skeleton)' : undefined }"
   >
-    <!-- Keep the backdrop stable while the decoded image fades in. Removing
-         a translucent skeleton at load time changes the backdrop before the
-         image becomes opaque, producing a separate brightness flash. -->
-    <!-- Queue entries do not mount this branch, so they do not own a src. -->
+
     <template v-if="isImageMounted && actualSrc">
       <source :srcset="`${actualSrc}.avif`" type="image/avif">
       <source :srcset="`${actualSrc}.webp`" type="image/webp">

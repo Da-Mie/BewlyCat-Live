@@ -15,8 +15,7 @@ export function useLiveSettingsDialog() {
     dialogEntering.value = true
     dialog.value?.showModal()
     if (!dialogOpen.value) {
-      // Native showModal() and the visible class in one paint skip the backdrop's
-      // initial state. Let the open dialog paint before starting the shared fade.
+      // 先绘制原生遮罩，再启动淡入。
       await new Promise<void>((resolve) => {
         let frame = requestAnimationFrame(() => {
           frame = requestAnimationFrame(() => {
@@ -45,8 +44,7 @@ export function useLiveSettingsDialog() {
     cancelDialogEnter?.()
     dialogEntering.value = false
     dialogOpen.value = false
-    // Escape/close can arrive before the entering panel has been rendered.
-    // In that case there is no leave transition to close the native modal.
+    // 面板尚未渲染时，直接关闭原生模态框。
     if (!dialog.value?.querySelector('.dialog-panel'))
       finishSettingsClose()
   }
@@ -55,7 +53,7 @@ export function useLiveSettingsDialog() {
       dialog.value?.close()
   }
   function onSettingsClosed() {
-    // An old native close event may arrive after the dialog has been reopened.
+    // 忽略重新打开前排队的 close 事件。
     if (dialog.value?.open)
       return
     closeSettings()

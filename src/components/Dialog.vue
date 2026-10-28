@@ -51,13 +51,7 @@ const emit = defineEmits(['close', 'confirm'])
 const showShortcut = ref<boolean>(false)
 const { mainAppRef } = useBewlyApp()
 const showDialog = ref<boolean>(false)
-/**
- * Closing protocol:
- * 1) handleClose only sets showDialog=false (starts leave transition)
- * 2) @after-leave emits `close` so parents can v-if-unmount after DOM is clean
- * Never emit close + parent-unmount while Transition/Teleport still patching
- * (that caused insertBefore NotFoundError and "works only once" ghost overlays).
- */
+/** 离场动画结束后再通知父层卸载，避免 Transition/Teleport 节点竞态。 */
 let isClosing = false
 let closeEmitted = false
 
@@ -200,7 +194,6 @@ defineExpose({ close: handleClose })
           antialiased
           class="dialog__panel"
         >
-          <!-- loading masking -->
           <Transition name="fade">
             <div
               v-if="loading && showLoadingOverlay"
@@ -282,7 +275,6 @@ defineExpose({ close: handleClose })
             relative
             :overflow="contentFlush ? 'hidden' : 'x-hidden y-overlay'"
           >
-            <!-- <div h-80px mt--8 /> -->
             <slot />
           </main>
           <footer

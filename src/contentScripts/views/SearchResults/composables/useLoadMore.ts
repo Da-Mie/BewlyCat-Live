@@ -16,10 +16,7 @@ export interface LoadMoreState {
   autoFillAttempts: number
 }
 
-/**
- * 无限加载的通用 composable
- * 管理分页、加载状态、防抖和自动填充
- */
+/** 无限加载的通用 composable 管理分页、加载状态、防抖和自动填充 */
 export function useLoadMore(
   loadFn: () => Promise<{ success: boolean, itemsCount: number }>,
   options: LoadMoreOptions = {},
@@ -54,9 +51,7 @@ export function useLoadMore(
     clearTimer()
   })
 
-  /**
-   * 清除定时器
-   */
+  /** 清除定时器 */
   function clearTimer() {
     if (loadMoreTimer !== undefined) {
       clearTimeout(loadMoreTimer)
@@ -64,9 +59,7 @@ export function useLoadMore(
     }
   }
 
-  /**
-   * 调度加载更多尝试
-   */
+  /** 调度加载更多尝试 */
   function scheduleAttempt(delay: number) {
     if (disposed || isLoading() || !hasMore.value || exhausted.value) {
       state.value.pending = false
@@ -85,9 +78,7 @@ export function useLoadMore(
     }, effectiveDelay)
   }
 
-  /**
-   * 尝试加载更多
-   */
+  /** 尝试加载更多 */
   async function attemptLoadMore() {
     if (disposed || state.value.running)
       return
@@ -133,9 +124,7 @@ export function useLoadMore(
     }
   }
 
-  /**
-   * 请求加载更多（带防抖）
-   */
+  /** 请求加载更多（带防抖） */
   function requestLoadMore() {
     if (disposed || !hasMore.value || exhausted.value || isLoading() || state.value.running)
       return
@@ -211,9 +200,7 @@ export function useLoadMore(
     scheduleAttempt(Math.max(remainingCooldown, retryDelayMs))
   }
 
-  /**
-   * 重置状态
-   */
+  /** 重置状态 */
   function reset() {
     generation++
     page.value = 0
@@ -230,16 +217,12 @@ export function useLoadMore(
     clearTimer()
   }
 
-  /**
-   * 设置是否还有更多数据
-   */
+  /** 设置是否还有更多数据 */
   function setHasMore(value: boolean) {
     hasMore.value = value
   }
 
-  /**
-   * 设置已耗尽状态
-   */
+  /** 设置已耗尽状态 */
   function setExhausted(value: boolean) {
     exhausted.value = value
   }
@@ -256,9 +239,7 @@ export function useLoadMore(
   }
 }
 
-/**
- * 等待渲染完成
- */
+/** 等待渲染完成 */
 async function waitForRender() {
   await nextTick()
   if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {

@@ -1,12 +1,9 @@
 .bewly-design.accountSettingsPage {
-  // #region theme color adaption part
   // Increase the priority of the style inside by writing a non-existent selector in `:not()`
   :not(foobar) {
     // do nothing..
   }
-  // #endregion
 
-  // #region dark mode adaption part
   &.dark {
     .top_bg {
       filter: invert(1) hue-rotate(180deg);
@@ -99,5 +96,4 @@
       border-color: var(--bew-border-color);
     }
   }
-  // #endregion
 }

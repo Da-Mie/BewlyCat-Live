@@ -8,10 +8,7 @@ export interface UserRelation {
   isLoading: boolean
 }
 
-/**
- * 用户关系管理的 composable
- * 处理批量查询用户关注状态
- */
+/** 用户关系管理的 composable 处理批量查询用户关注状态 */
 export function useUserRelations() {
   const userRelations = ref<Record<number, UserRelation>>({})
   const relationStore = useUserRelationStore()
@@ -53,11 +50,6 @@ export function useUserRelations() {
       await relationStore.queryRelations(requestedMids.value)
   }
 
-  /**
-   * 更新单个用户的关注状态
-   * @param mid 用户 mid
-   * @param isFollowing 是否关注
-   */
   function updateUserRelation(mid: number, isFollowing: boolean, accountMid = relationStore.accountMid) {
     if (!relationStore.setFollowing(mid, isFollowing, accountMid))
       return
@@ -66,11 +58,6 @@ export function useUserRelations() {
     }
   }
 
-  /**
-   * 设置用户关系的加载状态
-   * @param mid 用户 mid
-   * @param isLoading 是否加载中
-   */
   function setUserRelationLoading(mid: number, isLoading: boolean) {
     if (userRelations.value[mid]) {
       userRelations.value[mid].isLoading = isLoading
@@ -83,9 +70,7 @@ export function useUserRelations() {
     }
   }
 
-  /**
-   * 重置所有用户关系状态
-   */
+  /** 重置所有用户关系状态 */
   function reset() {
     requestedMids.value = []
     userRelations.value = {}

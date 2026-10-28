@@ -1,7 +1,4 @@
 .bewly-design {
-  // #region new user card styles
-
-  // #region theme color adaption part
   .bili-user-profile-view__info__button.follow:hover {
     background-color: var(--bew-theme-color-80);
   }
@@ -9,11 +6,7 @@
   .bili-user-profile-view__info__button.follow:hover {
     border-color: var(--bew-theme-color-80);
   }
-  // #endregion
 
-  // #endregion
-
-  // #region old user card styles
   &.dark {
     #id-card {
       background-color: var(--bew-elevated-solid);
@@ -59,5 +52,4 @@
       }
     }
   }
-  // #endregion
 }

@@ -1,8 +1,4 @@
-/**
- * 图文收藏列表
- * GET /x/polymer/web-dynamic/v1/opus/feed/fav
- * 结构与空间图文 feed 类似，见 bilibili-api-collect docs/opus/space.md
- */
+/** 图文收藏 feed；结构参见 bilibili-api-collect docs/opus/space.md。 */
 export interface FavoriteArticlesResult {
   code: number
   message: string

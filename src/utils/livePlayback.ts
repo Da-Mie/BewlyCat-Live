@@ -56,7 +56,7 @@ export function clampLivePosition(ranges: LiveTimeRange[], target: number, curre
 export function liveHistorySeconds(bytesPerSecond: number): number {
   if (!Number.isFinite(bytesPerSecond) || bytesPerSecond <= 0)
     return 120
-  // Reserve headroom for audio and forward buffering; native eviction can shorten this window.
+  // 预留音频与前向缓冲；浏览器可能提前回收缓存。
   return Math.max(10, Math.min(15 * 60, Math.floor(96 * 1024 * 1024 / (bytesPerSecond * 1.25))))
 }
 

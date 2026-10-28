@@ -30,12 +30,7 @@ interface MountedWatchLaterButton {
   ready: Promise<void>
 }
 
-/**
- * 从URL中提取视频ID
- * 支持 /video/BV...、/video/av...，以及 /list/...?bvid= / ?avid= 等合集/列表页
- * @param url 视频页面URL，默认为当前页面URL
- * @returns 包含bvid或aid的对象
- */
+/** 从视频、合集或列表 URL 提取 bvid/aid。 */
 export function extractVideoIds(url: string = location.href): VideoIds {
   // 提取路径中的 BVID（普通视频页）
   const bvidMatch = url.match(/\/video\/(BV[a-zA-Z0-9]+)/)
@@ -264,12 +259,7 @@ async function handleButtonClick(mounted: MountedWatchLaterButton) {
   await toggleWatchLater(mounted.button, currentIds)
 }
 
-/**
- * 注入按钮的 hover 语义样式（一次即可）：
- * B 站原生的 .video-toolbar-right-item:hover 会把 hover 染成主题色，
- * 与「已添加稍后再看」的主题色语义重复，这里改为中性色加深；
- * 已添加状态下 hover 保持主题色。宽屏模式有更高优先级的专属规则。
- */
+/** 未添加状态 hover 使用中性色；已添加状态保留主题色。 */
 function ensureHoverStyle() {
   if (hoverStyleInjected)
     return
@@ -308,10 +298,7 @@ export function addWatchLaterButton(): boolean {
   return Boolean(mountWatchLaterButton(ids))
 }
 
-/**
- * 结束当前的挂载等待，并以其结果 settle 对应的 Promise。
- * 重复 settle 无害（Promise 忽略后续 resolve）。
- */
+/** 结束当前的挂载等待，并以其结果 settle 对应的 Promise。 重复 settle 无害（Promise 忽略后续 resolve）。 */
 function stopWaitingForToolbar(mounted = false) {
   pendingToolbarObserver?.disconnect()
   pendingToolbarObserver = undefined
@@ -324,12 +311,7 @@ function stopWaitingForToolbar(mounted = false) {
   resolve?.(mounted)
 }
 
-/**
- * 在工具栏 DOM 就绪后立即挂载按钮，替代旧的固定延迟一次性尝试：
- * 工具栏已渲染则同步挂载；否则监听其出现，期间每次调用会替换旧等待，超时放弃。
- * 与播放器伴随设置在同一时间线触发，实际挂载时机由 DOM 就绪决定。
- * @returns 是否已成功挂载（false 表示设置关闭或超时放弃）
- */
+/** 工具栏就绪即挂载；新等待替换旧等待，关闭设置或超时返回 false。 */
 export function mountWatchLaterButtonWhenToolbarReady(): Promise<boolean> {
   if (!settings.value.externalWatchLaterButton)
     return Promise.resolve(false)
@@ -357,9 +339,7 @@ export function mountWatchLaterButtonWhenToolbarReady(): Promise<boolean> {
   })
 }
 
-/**
- * 移除按钮并取消未完成的挂载等待（设置关闭时调用）。
- */
+/** 移除按钮并取消未完成的挂载等待（设置关闭时调用）。 */
 export function removeWatchLaterButton() {
   stopWaitingForToolbar(false)
   stopWatchingButtonState()

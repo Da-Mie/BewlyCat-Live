@@ -376,7 +376,6 @@ function handleClickChannel() {
         hover:bg="$bew-fill-1"
         relative
       >
-        <!-- B币领取提醒dot -->
         <div
           v-if="hasBCoinToReceive && item?.code === 'vip_rewards' && settings.showBCoinReceiveReminder"
           class="unread-dot"
@@ -405,7 +404,6 @@ function handleClickChannel() {
         hover:bg="$bew-fill-1"
         relative
       >
-        <!-- B币领取提醒dot -->
         <div
           v-if="hasBCoinToReceive && item?.code === 'vip_rewards'"
           class="unread-dot"

@@ -1,11 +1,6 @@
-/**
- * B站脚本资源清理工具（温和版本）
- * 用于在替换首页时减少B站原生脚本的性能影响，避免内存泄漏
- */
+/** B站脚本资源清理工具（温和版本） 用于在替换首页时减少B站原生脚本的性能影响，避免内存泄漏 */
 
-/**
- * 清理 B 站的全局变量和对象
- */
+/** 清理 B 站的全局变量和对象 */
 function cleanupGlobalObjects() {
   try {
     // 清理一些已知的B站全局对象（更谨慎的列表）
@@ -21,7 +16,7 @@ function cleanupGlobalObjects() {
           (window as any)[key] = null
         }
         catch {
-          // 忽略错误
+
         }
       }
     })
@@ -31,10 +26,7 @@ function cleanupGlobalObjects() {
   }
 }
 
-/**
- * 主清理函数（温和版本）
- * 在清空 DOM 之前调用，减少 B 站脚本的性能影响
- */
+/** 主清理函数（温和版本） 在清空 DOM 之前调用，减少 B 站脚本的性能影响 */
 export function cleanupBilibiliScripts() {
   try {
     // 清理全局对象

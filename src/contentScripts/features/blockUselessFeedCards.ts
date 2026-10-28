@@ -56,7 +56,7 @@ function ensureObserveRoot() {
     observeRoot = preferred
   }
   catch {
-    // ignore
+
   }
 }
 

@@ -165,7 +165,7 @@ async function loadInitialData(version: number, preferredSeriesNumber?: number) 
       hasLoaded.value = true
   }
   catch {
-    // 忽略错误
+
   }
   finally {
     if (isRequestCurrent(version)) {
@@ -256,7 +256,6 @@ defineExpose({ initData })
 
 <template>
   <div flex="~ col" w-full>
-    <!-- 期号选择器 -->
     <div
       ref="containerRef"
       pos="relative" mb-20px w-280px
@@ -280,7 +279,7 @@ defineExpose({ initData })
           {{ activatedSeries.name || $t('home.weekly_issue', { number: activatedSeries.number }) }}
         </span>
         <span v-else text="$bew-text-3" truncate mr-2>{{ $t('home.select_issue') }}</span>
-        <!-- arrow -->
+
         <div
           border="~ solid t-0 l-0 r-2 b-2"
           :border-color="showDropdown ? '$bew-theme-color' : '$bew-fill-4'"
@@ -308,7 +307,6 @@ defineExpose({ initData })
             @mouseenter="onMouseEnter"
             @mouseleave="onMouseLeave"
           >
-            <!-- 搜索框 -->
             <div p-3 border-b="1px solid $bew-border-color">
               <input
                 v-model="searchQuery"
@@ -322,7 +320,6 @@ defineExpose({ initData })
               >
             </div>
 
-            <!-- 列表 -->
             <div of-y-auto max-h-320px p-2 flex="~ col gap-1">
               <div
                 v-for="item in filteredSeriesList"
@@ -348,7 +345,6 @@ defineExpose({ initData })
           </div>
         </Transition>
 
-        <!-- 遮罩 外部滚动时关闭下拉菜单 -->
         <div
           v-if="showDropdown"
           pos="fixed top-0 left-0" w-full h-full
@@ -358,7 +354,6 @@ defineExpose({ initData })
       </Teleport>
     </div>
 
-    <!-- 视频网格 -->
     <div w-full>
       <VideoCardGrid
         :items="videoList"

@@ -43,7 +43,7 @@ export function useAccountLevelFilter(identity: () => AccountIdentity, scope: Ac
   return computed(() => active() ? getAccountFilterDecision(identity(), scope, false) : 'allow')
 }
 
-/** Only public identity data crosses into MAIN; extension credentials never do. */
+/** 仅向 MAIN 传递公开身份，不传凭据。 */
 export function installAccountIdentityBridge() {
   window.addEventListener('message', (event) => {
     if (event.source !== window || event.origin !== location.origin || event.data?.type !== 'BEWLY_ACCOUNT_LOOKUP')

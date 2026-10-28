@@ -1,7 +1,5 @@
 .bewly-design.homePage {
   .header-channel {
-    // margin-top: 10px;
-    // display: none;
   }
 
   // fix when the container does not fill the recommended container in large screen situations
@@ -14,9 +12,6 @@
     background-color: transparent;
     backdrop-filter: var(--bew-filter-glass-1);
     background: var(--bew-elevated);
-    // border-radius: var(--bew-radius);
-    // margin: 10px 20px;
-    // width: calc(100% - 40px);
     box-shadow: var(--bew-shadow-2), var(--bew-shadow-edge-glow-1);
   }
 

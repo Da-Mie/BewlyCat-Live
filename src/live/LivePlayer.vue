@@ -92,10 +92,6 @@ function showControls() {
     controlsTimer = setTimeout(hideControls, 2500)
 }
 
-function leavePlayer() {
-  hideControls()
-}
-
 function applyAudio() {
   const media = video.value
   if (media)
@@ -492,7 +488,7 @@ async function fullscreen() {
     :aria-label="t('live_client.player')" :aria-description="t('live_client.shortcuts')"
     aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown Space" @keydown="handleKeydown"
     @keydown.capture="keyboardMode = true" @pointerdown.capture="keyboardMode = false"
-    @pointerenter="showControls" @pointermove="showControls" @pointerleave="leavePlayer"
+    @pointerenter="showControls" @pointermove="showControls" @pointerleave="hideControls"
     @focusin="showControls" @focusout="showControls"
   >
     <video
@@ -520,7 +516,7 @@ async function fullscreen() {
           ref="seekInput" class="player-seek" type="range" :min="axis?.start ?? 0" :max="axis?.end ?? 1"
           step="any"
           :value="displayPosition" :disabled="!axis || !seekRanges.length" :aria-label="t('live_client.seek')" :title="t('live_client.history_hint')"
-          :aria-valuetext="atLive ? t('live_client.live_edge') : t('live_client.behind_live', { time: formatLiveTime(behindLive) })"
+          :aria-valuetext="scrub && !previewAvailable ? t('live_client.history_unavailable') : !scrub && atLive ? t('live_client.live_edge') : t('live_client.behind_live', { time: formatLiveTime(behindLive) })"
           @pointerdown="beginScrub" @pointermove="moveScrub" @input="previewSeek" @pointerup="finishScrub(false, $event)" @keydown="seekKeydown"
           @pointercancel="finishScrub(true, $event)" @lostpointercapture="finishScrub(true, $event)" @blur="finishScrub(true)"
         >
@@ -750,12 +746,6 @@ video {
   opacity: 0;
   &:disabled {
     cursor: default;
-    &::-webkit-slider-thumb {
-      opacity: 0;
-    }
-    &::-moz-range-thumb {
-      opacity: 0;
-    }
   }
 }
 .player-seek-preview {

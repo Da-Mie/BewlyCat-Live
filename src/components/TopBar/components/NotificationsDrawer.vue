@@ -3,9 +3,8 @@ import { DrawerType, useBewlyApp } from '~/composables/useAppProvider'
 import { useDark } from '~/composables/useDark'
 import { IFRAME_DARK_MODE_CHANGE } from '~/constants/globalEvents'
 import { settings } from '~/logic'
+import { releaseIframeMedia } from '~/utils/iframe'
 import { lockPageScroll, unlockPageScroll } from '~/utils/pageScrollLock'
-
-// TODO: support shortcuts like `Ctrl+Alt+T` to open in new tab, `Esc` to close
 
 const props = defineProps<{
   url: string
@@ -162,6 +161,7 @@ function handleClose() {
     isPageScrollLocked.value = false
   }
   show.value = false
+  releaseIframeResources()
   showIframe.value = false // 重置iframe显示状态
   isIframeLoaded.value = false // 重置加载状态
   isIframeDisplayReady.value = false // 重置显示状态
@@ -187,25 +187,9 @@ function requestClose() {
   }, 1300)
 }
 
-async function releaseIframeResources() {
-  // Clear iframe content
+function releaseIframeResources() {
+  releaseIframeMedia(iframeRef.value)
   currentUrl.value = 'about:blank'
-  /**
-   * eg: When use 'iframeRef.value?.contentWindow?.document' of t.bilibili.com iframe on bilibili.com, there may be cross domain issues
-   * set the src to 'about:blank' to avoid this issue, it also can release the memory
-   */
-  if (iframeRef.value) {
-    iframeRef.value.src = 'about:blank'
-  }
-  await nextTick()
-  iframeRef.value?.contentWindow?.close()
-
-  // Remove iframe from the DOM
-  iframeRef.value?.parentNode?.removeChild(iframeRef.value)
-  await nextTick()
-
-  // Nullify the reference
-  iframeRef.value = null
 }
 
 function handleOpenInNewTab() {
@@ -220,9 +204,7 @@ function handleOpenInNewTab() {
   }
 }
 
-/**
- * Listen to Escape key using native event listener
- */
+/** Listen to Escape key using native event listener */
 function handleKeydown(e: KeyboardEvent) {
   if (e.key !== 'Escape' && e.code !== 'Escape')
     return
@@ -378,7 +360,6 @@ function handleFocusDrawer(e?: Event) {
       pos="fixed top-0 left-0" of-hidden w-full h-full
       z-999999
     >
-      <!-- Mask -->
       <Transition name="fade">
         <div
           v-if="show"
@@ -411,7 +392,6 @@ function handleFocusDrawer(e?: Event) {
               {{ $t('topbar.notifications') }}
             </h3>
             <div flex="~ items-center gap-2">
-              <!-- ESC Hint -->
               <Transition name="fade">
                 <div
                   v-if="showEscHint"
@@ -488,10 +468,6 @@ function handleFocusDrawer(e?: Event) {
             </div>
           </Transition>
 
-          <!--
-            Iframe 的显隐只由 isIframeDisplayReady 驱动（含延迟揭幕），
-            不要再套外层 Transition：那会与内联的 opacity/transition 争夺同一属性。
-          -->
           <iframe
             v-show="showIframe"
             ref="iframeRef"
@@ -540,9 +516,7 @@ function handleFocusDrawer(e?: Event) {
   }
 }
 
-/* 修改全局样式，避免重复设置 */
 :global(.photo-imager-container) {
-  /* 不再设置 top 和 height，避免与 iframe 样式冲突 */
   position: fixed !important;
   height: calc(100% - var(--bew-top-bar-height)) !important;
   margin-top: var(--bew-top-bar-height) !important;

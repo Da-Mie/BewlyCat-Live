@@ -1,10 +1,7 @@
 import type { Ref } from 'vue'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
-/**
- * 优化的滚动处理 Composable
- * 使用 requestAnimationFrame 批量处理 DOM 读取，避免 Forced Reflow
- */
+/** 优化的滚动处理 Composable 使用 requestAnimationFrame 批量处理 DOM 读取，避免 Forced Reflow */
 
 interface UseOptimizedScrollOptions {
   // 滚动到底部的阈值（距离底部多少像素时触发）
@@ -161,9 +158,7 @@ export function useOptimizedScroll(
   }
 }
 
-/**
- * 简化版：仅用于检测是否到达底部（用于无限滚动）
- */
+/** 简化版：仅用于检测是否到达底部（用于无限滚动） */
 export function useScrollToBottom(
   scrollElement: Ref<HTMLElement | undefined>,
   onReachBottom: () => void | Promise<void>,

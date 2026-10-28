@@ -99,9 +99,7 @@ function startScheduleClock() {
   }, 30_000)
 }
 
-/**
- * Check if current page is festival page
- */
+/** Check if current page is festival page */
 function isFestivalPage(): boolean {
   return /https?:\/\/(?:www\.)?bilibili\.com\/festival\/.*/.test(document.URL)
 }
@@ -122,9 +120,7 @@ function startRouteWatcher() {
   window.setInterval(updateCurrentUrl, 800)
 }
 
-/**
- * 设置深色模式基准颜色
- */
+/** 设置深色模式基准颜色 */
 function setDarkModeBaseColor(color: string) {
   // 设置主文档的CSS变量（用于哔哩哔哩原站样式）
   document.documentElement.style.setProperty('--bew-dark-base-color', color)

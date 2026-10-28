@@ -29,6 +29,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   updatePage: [page: number]
+  switchToLiveUser: []
 }>()
 
 const { t } = useI18n()
@@ -38,7 +39,6 @@ const { haveScrollbar, handleBackToTop } = useBewlyApp()
 // 分页模式：scroll 滚动加载，pagination 翻页
 const paginationMode = computed(() => settings.value.searchResultsPaginationMode)
 
-// 翻页加载状态
 const isPageChanging = ref(false)
 
 // 用户关系管理
@@ -49,7 +49,6 @@ const {
   reset: resetUserRelations,
 } = useUserRelations()
 
-// 搜索请求管理
 const {
   isLoading,
   error,
@@ -59,7 +58,6 @@ const {
   reset: resetSearch,
 } = useSearchRequest<any>('live')
 
-// 分页管理
 const {
   currentPage,
   totalResults,
@@ -75,7 +73,6 @@ const {
 const liveRoomTotalResults = ref(0)
 const liveUserTotalResults = ref(0)
 
-// 无限加载管理
 const {
   hasMore,
   exhausted,
@@ -148,7 +145,6 @@ function getCurrentResultLength(): number {
   return liveRoomList.value.length + liveUserList.value.length
 }
 
-// 监听关键词变化
 watch(() => props.keyword, async (newKeyword, oldKeyword) => {
   const normalizedNew = (newKeyword || '').trim()
   const normalizedOld = (oldKeyword || '').trim()
@@ -165,7 +161,6 @@ watch(() => props.keyword, async (newKeyword, oldKeyword) => {
   }
 })
 
-// 组件挂载时立即执行搜索
 onMounted(() => {
   const keyword = props.keyword.trim()
   if (keyword) {
@@ -285,7 +280,6 @@ async function performSearch(loadMore: boolean): Promise<boolean> {
     const mids = mergedUsers.map((u: any) => u.mid).filter(Boolean)
     await batchQueryUserRelations(mids)
 
-    // 提取分页信息
     extractPagination(rawData, incomingList.length)
     liveUserTotalResults.value = totalResults.value
   }
@@ -308,7 +302,6 @@ async function performSearch(loadMore: boolean): Promise<boolean> {
       },
     }
 
-    // 提取分页信息
     extractPagination(rawData, incomingList.length)
     liveRoomTotalResults.value = totalResults.value
   }
@@ -382,7 +375,6 @@ async function performSearch(loadMore: boolean): Promise<boolean> {
       setExhausted(true)
     }
 
-    // 处理加载完成
     if (isLoadMore)
       await handleLoadMoreCompletion(haveScrollbar)
   }
@@ -399,7 +391,6 @@ async function handlePageChange(page: number) {
   if (!keyword)
     return
 
-  // 先滚动到顶部
   handleBackToTop()
   await nextTick()
 
@@ -471,7 +462,6 @@ async function handlePageChange(page: number) {
     const mids = incomingList.map((u: any) => u.mid).filter(Boolean)
     await batchQueryUserRelations(mids)
 
-    // 提取分页信息
     extractPagination(rawData, incomingList.length)
     liveUserTotalResults.value = totalResults.value
   }
@@ -489,7 +479,6 @@ async function handlePageChange(page: number) {
       },
     }
 
-    // 提取分页信息
     extractPagination(rawData, incomingList.length)
     liveRoomTotalResults.value = totalResults.value
   }
@@ -605,9 +594,7 @@ function handleFollowStateChanged(data: { mid: number, isFollowing: boolean }) {
 }
 
 function handleSwitchToLiveUser() {
-  // 切换到主播模式 - 这个逻辑需要通知父组件
-  // 暂时不实现，因为需要修改 SearchResults.vue 中的逻辑
-  console.log('Switch to live_user mode')
+  emit('switchToLiveUser')
 }
 
 // 预加载更多直播间
@@ -620,7 +607,6 @@ function handleLoadMore() {
   requestLoadMore()
 }
 
-// 暴露给父组件
 defineExpose({
   isLoading,
   error,
@@ -646,11 +632,9 @@ defineExpose({
     </div>
 
     <div v-else class="live-results" space-y-6>
-      <!-- 空状态（live_user 或 all 子分类下两个列表都为空） -->
       <Empty v-if="showEmptyState" :description="t('common.no_data')" />
 
       <template v-else>
-        <!-- 主播 (上面) -->
         <div
           v-if="!isInPaginationNonFirstPage
             && liveUserList.length > 0
@@ -678,7 +662,7 @@ defineExpose({
               @follow-state-changed="(mid: number, isFollowing: boolean) => handleFollowStateChanged({ mid, isFollowing })"
             />
           </div>
-          <!-- 查看更多按钮 (仅在全部模式下且主播总数>6时显示) -->
+
           <div
             v-if="filters.subCategory === 'all' && (liveUserTotalResults || 0) > 6"
             mt-4 flex justify-center
@@ -696,7 +680,6 @@ defineExpose({
           </div>
         </div>
 
-        <!-- 直播间 (下面) - 始终渲染 VideoCardGrid 以支持骨架屏和空状态 -->
         <div v-if="filters.subCategory === 'all' || filters.subCategory === 'live_room'">
           <div v-if="liveRoomList.length > 0" flex items-center gap-3 mb-3>
             <h3 class="bew-section-heading" text="$bew-text-1">
@@ -725,7 +708,6 @@ defineExpose({
         </div>
       </template>
 
-      <!-- 滚动加载模式：主播列表没有更多时显示提示（主播不用 VideoCardGrid） -->
       <template v-if="paginationMode === 'scroll' && filters.subCategory === 'live_user'">
         <SmoothLoading
           :show="isLoading && liveUserList.length > 0"
@@ -739,7 +721,6 @@ defineExpose({
       </template>
     </div>
 
-    <!-- 翻页模式 -->
     <Pagination
       v-if="paginationMode === 'pagination'"
       :current-page="currentPage"

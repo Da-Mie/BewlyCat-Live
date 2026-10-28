@@ -20,7 +20,6 @@ html.animePlaybackAndMoviePage .plp-player:has([class*="video_playerFullScreen"]
     pointer-events: none;
   }
 
-  // #region new anime playback & movie page
   [class*="numberListItem_number_list_item"][class*="numberListItem_select"],
   [class*="follow_btnFollow"],
   .squirtle-controller.squirtle-pgc .squirtle-progress-timeline,
@@ -108,10 +107,6 @@ html.animePlaybackAndMoviePage .plp-player:has([class*="video_playerFullScreen"]
   .bui-danmaku-switch-on path:nth-child(2) {
     fill: var(--bew-theme-color);
   }
-
-  // #bilibili_pbp svg rect[clip-path='url(#pbp-played-path)'] {
-  //   fill: var(--bew-theme-color) !important;
-  // }
 
   [class*="PlayingIcon_playIcon"] svg path {
     stroke: var(--bew-theme-color);
@@ -219,9 +214,6 @@ html.animePlaybackAndMoviePage .plp-player:has([class*="video_playerFullScreen"]
     }
   }
 
-  // #endregion
-
-  // #region Old anime playback & movie page
   .main-container .tool-bar .coin-info.active i,
   .main-container .tool-bar .coin-info:hover i,
   .main-container .tool-bar .like-info.active i,
@@ -392,6 +384,4 @@ html.animePlaybackAndMoviePage .plp-player:has([class*="video_playerFullScreen"]
       background-color: var(--bew-bg);
     }
   }
-
-  // #endregion
 }

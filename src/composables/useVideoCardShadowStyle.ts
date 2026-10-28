@@ -2,11 +2,7 @@ import { computed } from 'vue'
 
 import { settings } from '~/logic'
 
-/**
- * Global composable for video card shadow styles
- * Computes shadow gradient once and applies via CSS variables
- * This avoids per-card computation overhead when rendering many cards
- */
+/** 共享卡片阴影计算，通过 CSS 变量应用。 */
 export function useVideoCardShadowStyle() {
   const shadowGradient = computed(() => {
     const points = settings.value.videoCardShadowCurve

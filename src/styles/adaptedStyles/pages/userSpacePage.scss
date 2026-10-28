@@ -1,7 +1,4 @@
 .bewly-design.userSpacePage {
-  // #region new user space page
-
-  // #region resolve https://github.com/BewlyBewly/BewlyBewly/issues/1157
   .header .header-toutu {
     z-index: 0;
   }
@@ -23,7 +20,6 @@
     left: 50%;
     transform: translateX(-50%);
   }
-  // #endregion
 
   .header .header-upinfo-bg-shadow .top {
     opacity: 0.6;
@@ -33,9 +29,7 @@
     background-color: var(--bew-elevated);
     backdrop-filter: var(--bew-filter-glass-1);
   }
-  // #endregion
 
-  // #region old user space page
   .wrapper .edit-video-modal .target-favlist {
     padding: 12px 36px;
   }
@@ -64,7 +58,6 @@
     position: fixed;
   }
 
-  // #region theme color adaption part
   // Increase the priority of the style inside by writing a non-existent selector in :not()
   // 淺色模式下主要對 theme color 調整配合 bewlybewly 配色
   // 深色模式下才對主要邊框和背景色調整
@@ -347,9 +340,6 @@
     }
   }
 
-  // #endregion
-
-  // #region dark mode adaption part
   // 深色模式下對主題顏色調整
   &.dark {
     .bili-dyn-item,
@@ -815,6 +805,4 @@
       opacity: 0.6;
     }
   }
-  // #endregion
-  // #endregion
 }

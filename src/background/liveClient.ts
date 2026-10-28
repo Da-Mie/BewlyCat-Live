@@ -92,7 +92,7 @@ async function postLiveData(path: string, params: Record<string, unknown>, uid: 
 export function setupLiveClient() {
   const ready = configureHeaders()
   const commerce = createLiveCommerce({ get: getLiveData, post: postLiveData, session: getSession })
-  // Keep rejection handled until a page request can display it.
+  // 请求页接收错误前先处理拒绝，避免未捕获异常。
   void ready.catch(error => console.warn('[BewlyCat] Live request headers unavailable.', error))
 
   onMessage(LIVE_CLIENT_OPEN, async (value: { roomId?: string, active?: boolean, replaceCurrent?: boolean }, sender) => {

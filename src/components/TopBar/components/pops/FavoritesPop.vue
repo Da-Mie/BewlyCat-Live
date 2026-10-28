@@ -180,9 +180,7 @@ async function getFavoriteCategories(requestVersion?: number) {
     })
 }
 
-/**
- * Get favorite video resources
- */
+/** Get favorite video resources */
 async function getFavoriteResources(force = false, replace = false) {
   if (!activatedMediaId.value || (isLoading.value && !force))
     return
@@ -290,7 +288,6 @@ defineExpose({
     class="favorites-pop bew-popover"
     flex="~ col"
   >
-    <!-- top bar -->
     <header
       flex="~" items-center justify-between
       p="x-6 y-5"
@@ -359,7 +356,6 @@ defineExpose({
         </ul>
       </aside>
 
-      <!-- Favorite videos wrapper -->
       <div
         ref="favoriteVideosWrap"
         :aria-busy="isLoading"
@@ -369,7 +365,6 @@ defineExpose({
         pos="relative"
         h-full
       >
-        <!-- loading -->
         <Loading
           v-if="isLoading && (favoriteResources.length === 0 || isReplacingResources)"
           pos="absolute top-0 left-0"
@@ -382,13 +377,11 @@ defineExpose({
           rounded="$bew-panel-radius"
         />
 
-        <!-- empty -->
         <Empty
           v-if="!isLoading && !failedResourcesPage && favoriteResources.length === 0"
           w="full" h="full"
         />
 
-        <!-- favorites -->
         <TransitionGroup
           name="list"
           tag="div"
@@ -417,7 +410,6 @@ defineExpose({
               narrow
               cover-class="bew-cover-action-host"
             >
-              <!-- 仅视频稿件(type 2)显示稍后再看；音频/合集不支持 -->
               <template #coverTopRight>
                 <WatchLaterCoverButton
                   :target="item.type === 2 ? { aid: item.id, bvid: item.bvid } : undefined"
@@ -448,7 +440,6 @@ defineExpose({
           </Button>
         </div>
 
-        <!-- loading -->
         <Transition name="fade">
           <Loading v-if="isLoading && favoriteResources.length !== 0 && !isReplacingResources" m="b-4" />
         </Transition>

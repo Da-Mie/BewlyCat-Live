@@ -87,9 +87,7 @@ function formatDate(timestamp: number | string | undefined) {
     rounded="$bew-card-radius"
     cursor-pointer
   >
-    <!-- 左侧内容 -->
     <div class="article-content" flex-1 min-w-0>
-      <!-- 标题 -->
       <h3
         class="article-title"
         text="base $bew-text-1"
@@ -100,7 +98,6 @@ function formatDate(timestamp: number | string | undefined) {
         {{ title }}
       </h3>
 
-      <!-- 描述 -->
       <p
         v-if="desc"
         class="article-desc"
@@ -111,14 +108,12 @@ function formatDate(timestamp: number | string | undefined) {
         {{ desc }}
       </p>
 
-      <!-- 元信息 -->
       <div class="article-meta" flex items-center gap-3 text="xs $bew-text-3">
         <span class="author">{{ author }}</span>
         <span v-if="categoryName">{{ categoryName }}</span>
         <span v-if="publishTime">{{ formatDate(publishTime) }}</span>
       </div>
 
-      <!-- 统计信息 -->
       <div
         class="article-stats" flex items-center gap-3 text="xs $bew-text-3"
         mt-2
@@ -137,7 +132,6 @@ function formatDate(timestamp: number | string | undefined) {
         </div>
       </div>
 
-      <!-- 标签 -->
       <div
         v-if="tags && tags.length > 0"
         class="article-tags"
@@ -156,7 +150,6 @@ function formatDate(timestamp: number | string | undefined) {
       </div>
     </div>
 
-    <!-- 右侧图片 -->
     <div
       v-if="cover"
       class="article-cover"

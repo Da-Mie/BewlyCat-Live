@@ -21,10 +21,7 @@ export interface SearchRequestState<T = any> {
   context: string
 }
 
-/**
- * 搜索请求的通用 composable
- * 管理搜索状态、错误处理和请求取消
- */
+/** 搜索请求的通用 composable 管理搜索状态、错误处理和请求取消 */
 export function useSearchRequest<T = any>(category: SearchCategory) {
   const isLoading = ref(false)
   const error = ref('')
@@ -50,13 +47,6 @@ export function useSearchRequest<T = any>(category: SearchCategory) {
     cancelActiveRequest()
   })
 
-  /**
-   * 执行搜索请求
-   * @param keyword 搜索关键词
-   * @param searchFn 实际的搜索函数
-   * @param options 额外的搜索参数
-   * @returns 搜索是否成功
-   */
   async function search(
     keyword: string,
     searchFn: (params: any, request: ApiRequestOptions) => Promise<any>,
@@ -115,9 +105,7 @@ export function useSearchRequest<T = any>(category: SearchCategory) {
     }
   }
 
-  /**
-   * 重置搜索状态
-   */
+  /** 重置搜索状态 */
   function reset() {
     isLoading.value = false
     results.value = null

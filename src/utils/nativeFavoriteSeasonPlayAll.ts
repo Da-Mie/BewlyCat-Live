@@ -97,7 +97,7 @@ function extractVideoIdsFromHref(href: string): { link?: string, bvid?: string }
       return { link: `bilibili://video/${avidMatch[1]}` }
   }
   catch {
-    // ignore
+
   }
   return {}
 }

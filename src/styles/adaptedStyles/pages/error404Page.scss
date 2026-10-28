@@ -10,7 +10,6 @@
     background-color: var(--bew-homepage-bg);
   }
 
-  // #region theme color adaption part
   // Increase the priority of the style inside by writing a non-existent selector in :not()
   :not(foobar) {
     .error-panel .rollback-btn,
@@ -23,13 +22,10 @@
       background-color: var(--bew-theme-color-80);
     }
   }
-  // #endregion
 
-  // #region dark mode adaption part
   &.dark {
     .error-container {
       background-color: var(--bew-content-solid);
     }
   }
-  // #endregion
 }

@@ -68,7 +68,6 @@ const maxDate = computed(() => formatDate(new Date()))
 
 <template>
   <div class="filter-bar" mb-4 flex="~ col" gap-3>
-    <!-- 排序 + 更多筛选按钮 -->
     <div flex items-center gap-2>
       <span text="sm $bew-text-2" min-w-12>{{ $t('search.sort') }}</span>
       <div flex items-center gap-2 flex-wrap flex-1>
@@ -96,9 +95,7 @@ const maxDate = computed(() => formatDate(new Date()))
       </button>
     </div>
 
-    <!-- 更多筛选内容 -->
     <div v-show="isMoreFiltersExpanded" flex="~ col" gap-3>
-      <!-- 时长 -->
       <div flex items-center gap-2>
         <span text="sm $bew-text-2" min-w-12>{{ $t('search.duration') }}</span>
         <div flex items-center gap-2 flex-wrap>
@@ -115,7 +112,6 @@ const maxDate = computed(() => formatDate(new Date()))
         </div>
       </div>
 
-      <!-- 日期 -->
       <div flex items-center gap-2>
         <span text="sm $bew-text-2" min-w-12>{{ $t('search.date') }}</span>
         <div flex items-center gap-2 flex-wrap>

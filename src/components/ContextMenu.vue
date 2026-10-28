@@ -194,7 +194,6 @@ onBeforeUnmount(() => {
       </ul>
     </div>
 
-    <!-- 点击遮罩关闭菜单 -->
     <div
       pos="fixed top-0 left-0" w-full h-full
       style="z-index: 9998;"

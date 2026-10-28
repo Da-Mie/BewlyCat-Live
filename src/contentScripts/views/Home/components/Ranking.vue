@@ -362,7 +362,6 @@ defineExpose({ initData })
             :horizontal="gridLayout !== 'adaptive'"
           />
 
-          <!-- skeleton -->
           <template v-if="isLoading">
             <BangumiCardSkeleton
               v-for="item in 30" :key="item"

@@ -24,10 +24,7 @@ export const HDAppKey = {
 
 type AppSignParamValue = string | number | boolean | null | undefined
 
-/**
- * 为 APP 接口生成带签名的完整参数。
- * 后台请求会丢弃 undefined / null / 空字符串参数，签名前同步剔除，保证签名与实际发送的参数一致。
- */
+/** 为 APP 接口生成带签名的完整参数。 后台请求会丢弃 undefined / null / 空字符串参数，签名前同步剔除，保证签名与实际发送的参数一致。 */
 export function signAppParams(params: Record<string, AppSignParamValue>): Record<string, string> {
   const payload: Record<string, string> = {}
   for (const [key, value] of Object.entries(params)) {

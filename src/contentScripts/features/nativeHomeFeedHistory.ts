@@ -15,12 +15,7 @@ const sameNodes = (a: Cards, b: Cards) => a.length === b.length && a.every((node
 const signature = (cards: Cards) => cards.map(card => card.querySelector<HTMLAnchorElement>('a[href]')?.href || '').join('\n')
 const takeSnapshot = (cards: Cards): Snapshot => ({ cards, signature: signature(cards) })
 
-/**
- * Like BiliPlus's feed-roll-history controls, retain actual card nodes so native
- * listeners survive restoration. Restore the latest native nodes before a roll
- * so Bilibili's renderer always updates the DOM it owns.
- * Reference: https://github.com/0xlau/biliplus/blob/main/scripts/feed-roll-history-btn.js
- */
+/** 保留真实卡片节点以保全监听器；刷新前归还原生节点。参考：https://github.com/0xlau/biliplus/blob/main/scripts/feed-roll-history-btn.js */
 export function setupNativeHomeFeedHistory() {
   if (!isHomePage())
     return

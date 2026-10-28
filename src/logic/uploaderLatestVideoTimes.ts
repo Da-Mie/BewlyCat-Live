@@ -24,10 +24,7 @@ export const uploaderLatestVideoTimesReady = new Promise<void>((resolve) => {
   resolveUploaderLatestVideoTimesReady = resolve
 })
 
-/**
- * 只保存页面已经加载到的投稿时间，不主动请求任何UP主数据。
- * 投稿时间是可长期复用的历史事实，因此不设置过期时间；后续来源只会以更晚时间覆盖。
- */
+/** 只保存页面已经加载到的投稿时间，不主动请求任何UP主数据。 投稿时间是可长期复用的历史事实，因此不设置过期时间；后续来源只会以更晚时间覆盖。 */
 export const uploaderLatestVideoTimes = useStorageLocal<UploaderLatestVideoTimes>(
   'uploaderLatestVideoTimes',
   {},

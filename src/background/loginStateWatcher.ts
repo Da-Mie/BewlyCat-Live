@@ -12,14 +12,7 @@ const BROADCAST_COALESCE_MS = 200
 
 let broadcastTimer: ReturnType<typeof setTimeout> | null = null
 
-/**
- * 监听会话 Cookie 变化并广播给所有内容脚本。
- *
- * 登录态变化（他处登录/登出/会话过期/切换账号）必然伴随这两个 Cookie 的
- * 写入或清除，因此事件驱动可以替代轮询（见 issue #921）。广播不携带状态，
- * 各标签页自行按本地 Cookie 事实校正（reconcileLocalLoginState），SESSDATA
- * 例行轮换等值变化会被标签页侧的 mid 比对自然过滤。
- */
+/** 会话 Cookie 变化时通知各页自行校正登录态，不广播凭据。 */
 export function setupLoginStateWatcher() {
   browser.cookies.onChanged.addListener(({ cookie }) => {
     const normalizedDomain = cookie.domain.trim().toLowerCase().replace(/^\.+/, '')

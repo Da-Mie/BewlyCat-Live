@@ -16,9 +16,6 @@
     }
   }
 
-  // #region new comments components
-
-  // #region theme color adaption part
   // Increase the priority of the style inside by writing a non-existent selector in `:not()`
   :not(foobar) {
     .like-icon:hover,
@@ -70,9 +67,7 @@
       filter: var(--bew-filter-icon-glow);
     }
   }
-  // #endregion
 
-  // #region dark mode adaption part
   &.dark {
     // 将个性化配色变量传入 Bilibili 评论组件的 Shadow DOM。
     --bew-comment-tag-color: var(--bew-text-2);
@@ -82,7 +77,6 @@
     // 評論人用戶名
     .reply-item .root-reply-container .content-warp .user-info .user-name,
     .sub-reply-item .sub-user-info .sub-user-name {
-      // --520c991b: var(--bew-theme-color);
       color: var(--bew-text-1) !important;
     }
 
@@ -134,11 +128,7 @@
       filter: invert(1) hue-rotate(180deg);
     }
   }
-  // #endregion
 
-  // #endregion
-
-  // #region Old comments components
   .bb-comment .comment-send .comment-submit,
   .comment-bilibili-fold .comment-send .comment-submit,
   .bb-comment .comment-send-lite .comment-submit,
@@ -250,7 +240,6 @@
     .bb-comment .comment-send-lite.comment-send-lite,
     .comment-bilibili-fold .comment-send-lite.comment-send-lite,
     .comment-wrapper .comment-m {
-      // background-color: var(--bew-content-solid);
       background-color: var(--bew-bg);
     }
 
@@ -287,7 +276,6 @@
       background-color: var(--bew-fill-2);
     }
 
-    // .bb-comment .comment-list .list-item .user .name,
     .comment-bilibili-fold .comment-list .list-item .user .name,
     .bb-comment .comment-header .tabs-order li,
     .comment-bilibili-fold .comment-header .tabs-order li,
@@ -361,5 +349,4 @@
       background-color: rgba(120, 120, 140, 0.44);
     }
   }
-  // #endregion
 }

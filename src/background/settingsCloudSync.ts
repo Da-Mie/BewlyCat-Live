@@ -80,12 +80,7 @@ function parseCloudEntries(items: Record<string, unknown>) {
   return entries
 }
 
-/**
- * Classifies the complete settings snapshot using the same rules for status
- * checks and the actual bootstrap. Known leftovers are cleanable and therefore
- * behave like an empty snapshot; unknown formats block older clients from
- * starting a partial sync.
- */
+/** 已知残留视为空快照；未知格式阻止部分同步。 */
 function classifyCloudItems(items: Record<string, unknown>): SettingsCloudSyncStatus {
   let hasCompatibleEntries = false
 
@@ -117,12 +112,7 @@ function getKnownCloudEntry(field: string) {
   return normalizeSettingsCloudSyncEntry(knownCloudItems[createSettingsCloudSyncKey(field)]) ?? undefined
 }
 
-/**
- * True when a cloud item exists for the field but this version cannot read
- * it (for example an entry written by a newer schema version). Uploading the
- * same key would destroy that data, so such fields are treated as read-only
- * conflicts until the extension is updated.
- */
+/** 无法识别的云端字段只读，防止旧客户端覆盖新数据。 */
 function isKnownCloudEntryUnreadable(field: string) {
   const key = createSettingsCloudSyncKey(field)
   if (!Object.prototype.hasOwnProperty.call(knownCloudItems, key))
@@ -391,12 +381,7 @@ function decodeSettingsCloudSyncKeyField(key: string) {
   }
 }
 
-/**
- * Drops only leftovers this version can positively identify: undecodable
- * keys, blocked field names, known local-only fields, and entries claiming
- * the current schema that fail validation. Data written by newer extension
- * versions (unknown fields or future schemas) is preserved.
- */
+/** 仅清理已确认的残留或损坏数据，保留未知字段和未来格式。 */
 async function removeInvalidCloudItems(startGeneration: number) {
   try {
     const invalidKeys = Object.keys(knownCloudItems).filter((key) => {

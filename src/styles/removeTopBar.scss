@@ -279,7 +279,6 @@
 }
 
 // 原版 B 站顶栏复用 BewlyCat 的视频页显示策略。只移动实际固定栏体，保留
-// #biliMainHeader 的页面占位，避免显示/隐藏时正文发生纵向跳动。
 .bewly-original-video-top-bar-controlled {
   .bili-header > .bili-header__bar,
   #internationalHeader,

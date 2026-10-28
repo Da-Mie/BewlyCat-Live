@@ -1,6 +1,4 @@
 .bewly-design.watchLaterPage {
-  // #region new watch later page
-
   .watchlater-list-nav.fixed {
     background-color: var(--bew-elevated);
     backdrop-filter: var(--bew-filter-glass-1);
@@ -10,11 +8,6 @@
     background-color: transparent;
   }
 
-  // #endregion
-
-  // #region old watch later page
-
-  // #region theme color adaption part
   // Increase the priority of the style inside by writing a non-existent selector in :not()
   :not(foobar) {
     .watch-later-list header .s-btn,
@@ -51,9 +44,7 @@
       background-color: transparent;
     }
   }
-  // #endregion
 
-  // #region dark mode adaption part
   &.dark {
     .watch-later-list .list-box .av-item .key,
     .watch-later-list .list-box .av-item .av-about .t,
@@ -87,7 +78,4 @@
       background-color: var(--bew-elevated-solid);
     }
   }
-  // #endregion
-
-  // #endregion
 }

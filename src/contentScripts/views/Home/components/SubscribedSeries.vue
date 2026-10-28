@@ -182,7 +182,6 @@ async function getSubscribedSeriesVideos(version: number): Promise<boolean> {
     return true
   }
   catch {
-    // 忽略错误
     return false
   }
 }

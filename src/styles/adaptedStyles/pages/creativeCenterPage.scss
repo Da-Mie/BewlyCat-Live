@@ -1,11 +1,7 @@
 .bewly-design.creativeCenterPage {
-  // #region theme color adaption part
   // Increase the priority of the style inside by writing a non-existent selector in `:not()`
   // :not(foobar) {
-  // }
-  // #endregion
 
-  // #region dark mode adaption part
   &.dark {
     #appeal-main .err-wrapper.err-no-list,
     .loading_wrap .loading .animate,
@@ -55,5 +51,4 @@
       background: unset;
     }
   }
-  // #endregion
 }

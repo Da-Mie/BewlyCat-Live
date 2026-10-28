@@ -1,8 +1,4 @@
-/**
- * URL壁纸缓存管理工具
- * 用于管理从URL加载的背景图片的缓存
- * 注意:本地上传的壁纸不使用此缓存系统,它们有独立的存储机制
- */
+/** URL 壁纸缓存；本地上传壁纸使用独立存储。 */
 
 import { useStorageLocal } from '~/composables/useStorageLocal'
 import { isLocalWallpaperUrl } from '~/utils/localWallpaper'
@@ -18,12 +14,7 @@ export interface WallpaperCacheData {
 // 壁纸缓存存储
 const wallpaperCache = useStorageLocal<Record<string, WallpaperCacheData>>('wallpaperCache', {})
 
-/**
- * 获取缓存的壁纸
- * @param url 原始URL
- * @param cacheTimeHours 缓存时长(小时), 0表示不使用缓存
- * @returns 缓存的data URL或null
- */
+/** 缓存有效时返回 data URL；cacheTimeHours=0 禁用缓存。 */
 async function getCachedWallpaper(url: string, cacheTimeHours: number): Promise<string | null> {
   // 如果是本地壁纸URL,不使用此缓存系统
   if (isLocalWallpaperUrl(url)) {
@@ -57,11 +48,7 @@ async function getCachedWallpaper(url: string, cacheTimeHours: number): Promise<
   return cached.dataUrl
 }
 
-/**
- * 缓存壁纸
- * @param url 原始URL
- * @param cacheTimeHours 缓存时长(小时), 0表示不缓存
- */
+/** 缓存 URL 壁纸；cacheTimeHours=0 时跳过。 */
 async function cacheWallpaper(url: string, cacheTimeHours: number): Promise<void> {
   // 如果是本地壁纸URL,不使用此缓存系统
   if (isLocalWallpaperUrl(url)) {
@@ -101,12 +88,7 @@ async function cacheWallpaper(url: string, cacheTimeHours: number): Promise<void
   }
 }
 
-/**
- * 获取或缓存壁纸
- * @param url 原始URL
- * @param cacheTimeHours 缓存时长(小时), 0表示不缓存
- * @returns 壁纸URL (可能是缓存的data URL或原始URL)
- */
+/** 优先返回有效缓存，否则使用原始 URL。 */
 export async function getOrCacheWallpaper(url: string, cacheTimeHours: number): Promise<string> {
   if (!url) {
     return url
@@ -164,11 +146,6 @@ export function cleanupExpiredCache(currentCacheTimeHours?: number): void {
   }
 }
 
-/**
- * 将Blob转换为Data URL
- * @param blob Blob对象
- * @returns Data URL
- */
 function blobToDataUrl(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()

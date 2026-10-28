@@ -9,8 +9,6 @@ import { releaseIframeMedia } from '~/utils/iframe'
 import { isHomePage, isInIframe } from '~/utils/main'
 import { lockPageScroll, unlockPageScroll } from '~/utils/pageScrollLock'
 
-// TODO: support shortcuts like `Ctrl+Alt+T` to open in new tab, `Esc` to close
-
 const props = defineProps<{
   url: string
   title?: string
@@ -492,7 +490,6 @@ if (!isInIframe()) {
     pos="absolute top-0 left-0" of-hidden w-full h-full
     z-999999
   >
-    <!-- Mask (only show in drawer mode, not in fullscreen) -->
     <Transition name="fade">
       <div
         v-if="show && !isPageFullscreen"
@@ -521,9 +518,6 @@ if (!isInIframe()) {
             <i i-mingcute:external-link-line />
           </template>
           {{ $t('iframe_drawer.open_in_new_tab') }}
-          <!-- <div flex="~">
-            <kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>T</kbd>
-          </div> -->
         </Button>
         <Button
           v-if="!isEscPressed"
@@ -554,7 +548,6 @@ if (!isInIframe()) {
       </div>
     </Transition>
 
-    <!-- Iframe Container -->
     <Transition :name="isPageFullscreen ? 'fade' : 'drawer'">
       <div
         v-if="show"

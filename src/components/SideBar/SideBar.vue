@@ -64,7 +64,6 @@ function toggleHideSidebar(hide: boolean) {
     pos="fixed top-0" h-full flex items-center px-6px
     z-10 pointer-events-none
   >
-    <!-- Edge Div -->
     <div
       v-if="settings.autoHideSidebar && hideSidebar && !isLayoutEditing"
       class="sidebar-edge"

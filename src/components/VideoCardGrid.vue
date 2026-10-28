@@ -23,99 +23,61 @@ import emitter from '~/utils/mitt'
 
 import SmoothLoading from './SmoothLoading.vue'
 
-/**
- * 统一的 VideoCard Grid 组件
- * 支持滚动加载和预加载（基于剩余 item 数量）
- */
+/** 统一的 VideoCard Grid 组件 支持滚动加载和预加载（基于剩余 item 数量） */
 
 interface VideoCardGridProps<T = any> {
-  /**
-   * 数据列表
-   */
+  /** 数据列表 */
   items: T[]
   /** Distinguish multiple grids when their home tab caches data across unmounts. */
   stateKey?: string
 
-  /**
-   * Grid 布局模式
-   */
+  /** Grid 布局模式 */
   gridLayout: GridLayoutType
 
-  /**
-   * 是否正在加载
-   */
+  /** 是否正在加载 */
   loading?: boolean
 
-  /**
-   * 是否没有更多内容
-   */
+  /** 是否没有更多内容 */
   noMoreContent?: boolean
 
   /** Hide the end message when a parent coordinates multiple date groups. */
   showNoMoreContent?: boolean
 
-  /**
-   * 是否需要先登录
-   */
+  /** 是否需要先登录 */
   needToLoginFirst?: boolean
 
-  /**
-   * VideoCard 类型（可选，作为后备值）
-   * 如果不指定，会根据数据自动推断
-   */
+  /** VideoCard 类型（可选，作为后备值） 如果不指定，会根据数据自动推断 */
   videoType?: 'rcmd' | 'appRcmd' | 'bangumi' | 'common'
 
-  /**
-   * 是否显示预览
-   */
+  /** 是否显示预览 */
   showPreview?: boolean
 
-  /**
-   * 是否显示稍后再看
-   */
+  /** 是否显示稍后再看 */
   showWatchLater?: boolean
 
-  /**
-   * 是否显示更多按钮
-   */
+  /** 是否显示更多按钮 */
   moreBtn?: boolean
 
-  /**
-   * 是否隐藏作者信息
-   */
+  /** 是否隐藏作者信息 */
   hideAuthor?: boolean
   hideWatchedBadge?: boolean
 
-  /**
-   * 是否关闭卡片的 content-visibility 估算。
-   * 普通分页页面可以启用它，避免卡片进入视口时由估算高度切换到真实高度。
-   * @default false
-   */
+  /** 分页可关闭 content-visibility 估算，避免入屏高度跳变。 */
   disableContentVisibility?: boolean
 
-  /**
-   * 数据转换函数：将原始数据转换为 VideoCard 所需的格式
-   */
+  /** 数据转换函数：将原始数据转换为 VideoCard 所需的格式 */
   transformItem: (item: T) => Video | undefined
 
-  /**
-   * 自定义卡片点击处理。未传入时 VideoCard 使用设置中的默认打开行为。
-   */
+  /** 自定义卡片点击处理。未传入时 VideoCard 使用设置中的默认打开行为。 */
   cardClickHandler?: (item: T, event: MouseEvent) => void
 
-  /**
-   * 观察卡片主链接点击，不接管 VideoCard 原有打开行为。
-   */
+  /** 观察卡片主链接点击，不接管 VideoCard 原有打开行为。 */
   cardClickObserver?: (item: T, event: MouseEvent) => void
 
-  /**
-   * 页面持有的卡片移除状态（如取消稍后再看/取消收藏的确认与还原遮罩）
-   */
+  /** 页面持有的卡片移除状态（如取消稍后再看/取消收藏的确认与还原遮罩） */
   getRemovedState?: (item: T) => VideoCardRemovedState | undefined
 
-  /**
-   * 卡片首次进入滚动视口时触发。
-   */
+  /** 卡片首次进入滚动视口时触发。 */
   cardExposureHandler?: (item: T) => void
 
   /**
@@ -124,14 +86,10 @@ interface VideoCardGridProps<T = any> {
    */
   coverTopLeftAlwaysVisible?: boolean
 
-  /**
-   * 生成唯一ID的函数（可选接收 index 参数以确保唯一性）
-   */
+  /** 生成唯一ID的函数（可选接收 index 参数以确保唯一性） */
   getItemKey: (item: T, index?: number) => string | number
 
-  /**
-   * 是否为骨架屏项（判断函数）
-   */
+  /** 是否为骨架屏项（判断函数） */
   isSkeletonItem?: (item: T) => boolean
 
   /**
@@ -140,26 +98,16 @@ interface VideoCardGridProps<T = any> {
    */
   initialSkeletonCount?: number
 
-  /**
-   * 空状态描述
-   */
+  /** 空状态描述 */
   emptyDescription?: string
 
-  /**
-   * 登录按钮文本
-   */
+  /** 登录按钮文本 */
   loginButtonText?: string
 
-  /**
-   * 刷新按钮文本
-   */
+  /** 刷新按钮文本 */
   refreshButtonText?: string
 
-  /**
-   * 是否启用整行填充（用于无限滚动场景）
-   * 启用后，当有更多数据时会用骨架屏填满最后一行
-   * @default false
-   */
+  /** 无限滚动时用骨架补齐末行。 */
   enableRowPadding?: boolean
 
   /**
@@ -186,19 +134,10 @@ interface VideoCardGridProps<T = any> {
    */
   loadMoreIndicatorHeight?: string
 
-  /**
-   * 是否为 Following 页面
-   * 用于在右键菜单中默认显示"取消关注"选项
-   * @default false
-   */
+  /** 关注页右键菜单默认显示取消关注。 */
   isFollowingPage?: boolean
 
-  /**
-   * 最近一次请求是否失败（API 错误/网络异常等）
-   * 父组件在请求失败时设为 true，成功时设为 false
-   * 连续失败超过阈值后停止触发 loadMore
-   * @default false
-   */
+  /** 连续失败达到阈值后停止 loadMore。 */
   requestFailed?: boolean
 }
 
@@ -1018,7 +957,7 @@ function createRenderItem(item: T, index: number): VideoCardRenderItem {
       }
     }
     catch {
-      // ignore
+
     }
   }
 
@@ -1253,14 +1192,13 @@ watchEffect(() => {
         {{ $t('account_filter.load_next') }}
       </Button>
     </div>
-    <!-- 需要登录 -->
+
     <Empty v-if="needToLoginFirst" mt-6 :description="$t('common.please_log_in_first')">
       <Button type="primary" @click="handleLogin">
         {{ loginButtonText || $t('common.login') }}
       </Button>
     </Empty>
 
-    <!-- 空列表 -->
     <Empty
       v-else-if="showEmptyState"
       mt-6
@@ -1271,7 +1209,6 @@ watchEffect(() => {
       </Button>
     </Empty>
 
-    <!-- 统一的 Grid 容器 - 保持 ref 稳定 -->
     <div
       v-else
       ref="gridContainerRef"
@@ -1330,7 +1267,6 @@ watchEffect(() => {
       :min-height="loadMoreIndicatorHeight"
     />
 
-    <!-- 无更多内容提示（仅在有数据时显示，避免与空列表提示重复） -->
     <Empty v-if="showNoMoreContent && noMoreContent && !needToLoginFirst && items.length > 0" class="pb-4" :description="$t('common.no_more_content')">
       <Button type="primary" @click="handleRefresh">
         {{ refreshButtonText || $t('common.operation.refresh') }}

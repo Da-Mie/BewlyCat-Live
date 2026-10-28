@@ -37,21 +37,14 @@ export interface PaginationInfo {
   context?: string
 }
 
-/**
- * 分页管理的通用 composable
- * 处理总数、总页数的提取和计算
- */
+/** 分页管理的通用 composable 处理总数、总页数的提取和计算 */
 export function usePagination() {
   const currentPage = ref(0)
   const totalResults = ref(0)
   const totalPages = ref(0)
   const context = ref('')
 
-  /**
-   * 从 API 响应中提取分页信息
-   * @param data API 响应数据
-   * @param fallbackLength 当无法从响应中提取时，使用的备用长度
-   */
+  /** 接口缺少分页信息时使用 fallbackLength。 */
   function extractPagination(data: PaginationInfo, fallbackLength = 0) {
     // 提取总结果数
     const totalResultsCandidate = [
@@ -118,25 +111,19 @@ export function usePagination() {
     context.value = typeof contextCandidate === 'string' ? contextCandidate : ''
   }
 
-  /**
-   * 更新当前页码
-   */
+  /** 更新当前页码 */
   function updatePage(page: number) {
     currentPage.value = page
   }
 
-  /**
-   * 获取下一页页码
-   */
+  /** 获取下一页页码 */
   function getNextPage(isLoadMore: boolean) {
     if (isLoadMore)
       return currentPage.value + 1
     return 1
   }
 
-  /**
-   * 是否还有更多数据
-   */
+  /** 是否还有更多数据 */
   const hasMore = computed(() => {
     if (totalPages.value > 0)
       return currentPage.value < totalPages.value
@@ -144,9 +131,7 @@ export function usePagination() {
     return Boolean(context.value)
   })
 
-  /**
-   * 重置分页状态
-   */
+  /** 重置分页状态 */
   function reset() {
     currentPage.value = 0
     totalResults.value = 0

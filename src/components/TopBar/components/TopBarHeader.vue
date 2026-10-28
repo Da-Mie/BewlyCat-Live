@@ -278,7 +278,6 @@ function refreshSearchContent() {
     p="x-12" m-auto
     h="$bew-top-bar-height"
   >
-    <!-- 旧版三档：常驻雾层沿用 v1.5.x 结构，滚动层只在毛玻璃开启时生效 -->
     <template v-if="useLegacyRendering">
       <div
         class="top-bar-header__legacy-mask"
@@ -289,7 +288,6 @@ function refreshSearchContent() {
       <div class="top-bar-header__fog" :style="legacyFadeGradientStyle" />
     </template>
 
-    <!-- 渐变：余弦渐变遮罩管线 -->
     <template v-else>
       <div
         v-if="settings.enableFrostedGlass"
@@ -306,9 +304,6 @@ function refreshSearchContent() {
       :style="scrolledShadeStyle"
     />
 
-    <!-- Top bar theme color gradient：只在暗色渲染，黑雾与底色雾同为深色，
-         叠淡主题渐变不影响白图标对比度，故不再按 forceWhiteIcon 关闭——
-         否则阴影与「自动＋壁纸」恒为白图标，开关会失效 -->
     <Transition name="fade">
       <div
         v-if="settings.showTopBarThemeColorGradient && reachTop && isDark"
@@ -321,7 +316,6 @@ function refreshSearchContent() {
       <TopBarLogo :force-white-icon="forceWhiteIcon" />
     </div>
 
-    <!-- search bar -->
     <div
       ref="searchSection"
       class="top-bar-header__search"
@@ -349,7 +343,6 @@ function refreshSearchContent() {
       </div>
     </div>
 
-    <!-- right content -->
     <div ref="rightSection" class="top-bar-header__side top-bar-header__side--right">
       <TopBarRight
         @notifications-click="handleNotificationsItemClick"

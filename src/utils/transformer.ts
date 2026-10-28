@@ -18,11 +18,7 @@ export type TransformerHandle = Ref<MaybeElement> & {
   applyPosition: () => void
 }
 
-/**
- * Covert transform to top and left style, if no chromium, use transform
- * @param trigger
- * @param transformer
- */
+/** Chromium 使用 top/left 定位，其他浏览器使用 transform。 */
 export function createTransformer(trigger: Ref<MaybeElement>, transformer: Transformer): TransformerHandle {
   const target = ref<MaybeElement>()
   const style = ref<CSSProperties>({})

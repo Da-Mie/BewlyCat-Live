@@ -10,11 +10,7 @@ const props = withDefaults(defineProps<{
   content: string
   placement?: Placement
   type?: 'default' | 'dark' | 'white'
-  /**
-   * 浮层模式：将提示传送至 shadow root 顶层并以 fixed 定位，
-   * 用于触发器处在 overflow:hidden 容器（如视频/动态封面）内的场景。
-   * 默认关闭，保持原位纯 CSS 浮层行为不变；找不到顶层容器时也自动回退原位模式。
-   */
+  /** 浮层传送至 shadow root 顶层以避开裁切；不可用时保留原位提示。 */
   floating?: boolean
   /** 浮层模式下的层级；处于设置窗口等高层容器内时可上调，避免提示被容器背景遮挡。 */
   floatingZIndex?: CSSProperties['zIndex']
@@ -172,7 +168,7 @@ onBeforeUnmount(() => {
     @focusin="handleFocusIn"
     @focusout="hideTip"
   >
-    <!-- 浮层模式：传送至 shadow root 顶层，不受任何封面 overflow:hidden 裁切 -->
+
     <Teleport v-if="floatingEnabled && content" :to="teleportTarget!">
       <Transition name="b-tooltip-fade">
         <div
@@ -188,7 +184,6 @@ onBeforeUnmount(() => {
       </Transition>
     </Teleport>
 
-    <!-- 默认（及 floating 不可用时的回退）：原位纯 CSS 浮层 -->
     <div
       v-else-if="content"
       class="b-tooltip"

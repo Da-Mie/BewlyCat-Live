@@ -113,9 +113,7 @@ function splitShortcutKey(value: string): { modifiers: string[], mainKey: string
   return { modifiers, mainKey }
 }
 
-/**
- * 将配置中的快捷键统一成标准格式，兼容大小写、空格、Cmd/Option 等别名和旧的 Shift 符号写法。
- */
+/** 将配置中的快捷键统一成标准格式，兼容大小写、空格、Cmd/Option 等别名和旧的 Shift 符号写法。 */
 export function normalizeShortcutKey(value: string): string {
   if (!value.trim())
     return ''
@@ -160,9 +158,7 @@ function getEventModifiers(event: KeyboardEvent): ShortcutModifier[] {
   return modifiers
 }
 
-/**
- * 根据键盘事件生成标准快捷键字符串；只按下修饰键或无法识别时返回 null。
- */
+/** 根据键盘事件生成标准快捷键字符串；只按下修饰键或无法识别时返回 null。 */
 export function getShortcutKeyFromEvent(event: KeyboardEvent): string | null {
   const mainKey = getEventMainKey(event)
   if (!mainKey)
@@ -170,9 +166,7 @@ export function getShortcutKeyFromEvent(event: KeyboardEvent): string | null {
   return joinShortcutKey(getEventModifiers(event), mainKey)
 }
 
-/**
- * 键盘事件可匹配的快捷键，按优先级排列：先精确匹配，再把未按 Shift 的 '=' 键视作 '+'。
- */
+/** 键盘事件可匹配的快捷键，按优先级排列：先精确匹配，再把未按 Shift 的 '=' 键视作 '+'。 */
 export function getShortcutKeyCandidates(event: KeyboardEvent): string[] {
   const primary = getShortcutKeyFromEvent(event)
   if (!primary)
@@ -190,9 +184,7 @@ export function isSameShortcutKey(a: string, b: string): boolean {
   return !!normalizedA && normalizedA === normalizeShortcutKey(b).toLowerCase()
 }
 
-/**
- * 判断键盘事件是否触发指定快捷键；不考虑其他快捷键的优先级，适合单个快捷键的独立监听。
- */
+/** 判断键盘事件是否触发指定快捷键；不考虑其他快捷键的优先级，适合单个快捷键的独立监听。 */
 export function matchesShortcutKey(event: KeyboardEvent, configKey: string): boolean {
   const normalizedConfigKey = normalizeShortcutKey(configKey).toLowerCase()
   if (!normalizedConfigKey)
@@ -203,9 +195,7 @@ export function matchesShortcutKey(event: KeyboardEvent, configKey: string): boo
 const isMacPlatform = typeof navigator !== 'undefined'
   && /Mac|iPhone|iPad|iPod/i.test((navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform || navigator.platform || navigator.userAgent)
 
-/**
- * 展示用的快捷键文本：macOS 上用 Cmd、Option 代替 Meta、Alt。
- */
+/** 展示用的快捷键文本：macOS 上用 Cmd、Option 代替 Meta、Alt。 */
 export function formatShortcutKey(value: string): string {
   const normalized = normalizeShortcutKey(value)
   if (!isMacPlatform || !normalized)

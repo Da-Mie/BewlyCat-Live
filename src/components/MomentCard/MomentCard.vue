@@ -580,7 +580,7 @@ function handleAdditionalClick(event: MouseEvent) {
           aria-hidden="true"
           @click="handleDetailLinkClick($event)"
         />
-        <!-- 官方式横条视频卡：左封面、右标题与简介；转发视频复用同一结构 -->
+
         <template v-if="moment.isVideo && !moment.isLive">
           <div
             v-if="!moment.descInherited && (moment.richText.length || getCardPreviewText(moment))"

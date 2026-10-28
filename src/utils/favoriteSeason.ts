@@ -1,9 +1,4 @@
-/**
- * 订阅合集：单一数据层
- * - 分页语义（含「接口一次返回全量」）
- * - 播放全部起播解析
- * Dock 收藏页与顶栏弹层共用，UI 只负责触发加载/展示。
- */
+/** 订阅合集的共享分页和播放目标解析。 */
 
 import type { CollectedSeasonPlayAllMode } from '~/logic/storage'
 import type { List as HistoryItem } from '~/models/history/history'
@@ -30,11 +25,7 @@ export interface FavoriteSeasonPlayTarget {
   /** beginning 模式入口补充（无 link 时用） */
   bvid?: string
   mode?: CollectedSeasonPlayAllMode
-  /**
-   * UI 已通过同一套分页语义加载过的列表。
-   * complete=true 时可跳过再次全量请求。
-   * expectedCount 来自合集 media_count，用于 complete 标记未同步时的兜底判定。
-   */
+  /** 复用已加载列表；complete 或 expectedCount 可确认列表完整。 */
   preloaded?: {
     medias: FavoriteSeasonMedia[]
     complete: boolean
@@ -67,10 +58,7 @@ interface FetchAllSeasonMediasResult {
   complete: boolean
 }
 
-/**
- * 合集入口 URL（B 站默认「从开头播放」）
- * 优先 collected season 的 bilibili://video/{aid} link，否则封面/入口 bvid
- */
+/** 合集入口 URL（B 站默认「从开头播放」） 优先 collected season 的 bilibili://video/{aid} link，否则封面/入口 bvid */
 export function buildFavoriteSeasonEntryUrl(seasonId: number, link?: string, bvid?: string, type?: number): string {
   if (type === 11)
     return `https://www.bilibili.com/medialist/play/ml${seasonId}`
@@ -87,18 +75,12 @@ export function buildFavoriteSeasonEntryUrl(seasonId: number, link?: string, bvi
   return `https://www.bilibili.com/list/season/${seasonId}`
 }
 
-/**
- * 打开合集内指定稿件（普通视频页，仍可带合集侧栏）
- * 实测 /list/season/{id}?bvid= 对订阅合集会 404
- */
+/** 打开合集内指定稿件（普通视频页，仍可带合集侧栏） 实测 /list/season/{id}?bvid= 对订阅合集会 404 */
 export function buildFavoriteSeasonVideoUrl(bvid: string): string {
   return `https://www.bilibili.com/video/${bvid}/`
 }
 
-/**
- * 合并一页合集稿件，并给出是否还有更多。
- * 顶栏滚动加载 / 收藏页列表 / 播放全部全量拉取 共用此语义。
- */
+/** 合并一页合集稿件，并给出是否还有更多。 顶栏滚动加载 / 收藏页列表 / 播放全部全量拉取 共用此语义。 */
 export function mergeFavoriteSeasonPage(input: {
   pn: number
   pageMedias: FavoriteSeasonMedia[]
@@ -224,10 +206,7 @@ export async function fetchFavoriteSeasonPage(
   }
 }
 
-/**
- * 拉取订阅合集全部稿件
- * complete=false 表示中途失败或异常截断，不得把末项当「最新」
- */
+/** 拉取订阅合集全部稿件 complete=false 表示中途失败或异常截断，不得把末项当「最新」 */
 export async function fetchAllFavoriteSeasonMedias(seasonId: number, type?: number): Promise<FetchAllSeasonMediasResult> {
   let medias: FavoriteSeasonMedia[] = []
   let pn = 1
@@ -282,9 +261,7 @@ function matchSeasonMediaFromHistory(
   return undefined
 }
 
-/**
- * 在最近观看历史中找合集内最近一次看过的稿件（历史按时间倒序）
- */
+/** 在最近观看历史中找合集内最近一次看过的稿件（历史按时间倒序） */
 export async function findLastWatchedSeasonMedia(
   medias: FavoriteSeasonMedia[],
 ): Promise<FavoriteSeasonMedia | undefined> {
@@ -350,12 +327,7 @@ async function resolveSeasonMedias(
   return fetchAllFavoriteSeasonMedias(seasonId, type)
 }
 
-/**
- * 解析「播放全部」目标地址
- * - beginning：合集入口
- * - latest：完整列表末项
- * - lastWatched：观看历史中该合集最近一次；找不到则回退入口
- */
+/** 起播点：合集入口、完整列表末项或最近观看记录；无历史时回退入口。 */
 export async function resolveFavoriteSeasonPlayAllUrl(
   target: FavoriteSeasonPlayTarget,
 ): Promise<FavoriteSeasonPlayAllResult> {

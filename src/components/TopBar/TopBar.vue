@@ -725,7 +725,6 @@ defineExpose({
 
 <template>
   <div class="top-bar-container">
-    <!-- 顶部监听区域 -->
     <div
       v-if="!bewlyWidescreenActive && isShowOnMouseActive"
       ref="topAreaTarget"

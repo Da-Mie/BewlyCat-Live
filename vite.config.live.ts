@@ -13,7 +13,7 @@ export default defineConfig({
   plugins: [UnoCSS({
     ...unoConfig,
     configFile: false,
-    // Limit extraction to the live page's imported modules.
+    // 仅提取直播入口实际导入模块的样式。
     content: { filesystem: [] },
     safelist: ['i-line-md:sunny-outline-to-moon-transition', 'i-line-md:moon-to-sunny-outline-transition'],
   }), ...sharedConfig.plugins!, thirdPartyLicensesVitePlugin('live')],

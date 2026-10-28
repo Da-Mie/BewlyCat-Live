@@ -10,10 +10,7 @@ export interface CommentReplyAvatarAnchor {
 export interface CommentReplyTreeBranch {
   childAnchors: CommentReplyAvatarAnchor[]
   collapsed: boolean
-  /**
-   * true（线条-收起主评论）：收起时折叠父节点本体，显示 + 与昵称
-   * false（线条-不收起主评论）：收起时父节点保持完整显示，仅隐藏子回复
-   */
+  /** true（线条-收起主评论）：收起时折叠父节点本体，显示 + 与昵称 false（线条-不收起主评论）：收起时父节点保持完整显示，仅隐藏子回复 */
   collapseParentBody: boolean
   key: string
   parentAnchor: CommentReplyAvatarAnchor
