@@ -12,17 +12,17 @@ import { buildCommit, isDev, isFirefox, isSafari, port, r } from './scripts/util
 export const sharedConfig: UserConfig = {
   root: r('src'),
   resolve: {
-    alias: {
-      '~/': `${r('src')}/`,
-      '~': r('src'),
-    },
+    alias: [
+      { find: /^vue$/, replacement: 'vue/dist/vue.runtime.esm-bundler.js' },
+      { find: '~/', replacement: `${r('src')}/` },
+      { find: '~', replacement: r('src') },
+    ],
   },
   plugins: [
     Vue(),
 
     AutoImport({
-      // Production entries may build concurrently; the tracked declarations are
-      // complete already, and must not be truncated by competing generators.
+      // 生产入口并行构建时不写共享声明。
       dts: isDev ? r('src/auto-imports.d.ts') : false,
       imports: [
         'vue',

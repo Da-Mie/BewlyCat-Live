@@ -299,7 +299,7 @@ async function performApiRequest(message: Message, api: API, cookies?: Browser.C
           }
         }
         catch {
-          // 忽略错误
+
         }
       }
 

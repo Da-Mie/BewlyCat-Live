@@ -312,7 +312,6 @@ const weekDays = computed(() => t('search.weekdays').split(','))
 
 <template>
   <div ref="pickerRef" class="date-picker" pos="relative">
-    <!-- 输入框显示 -->
     <div class="date-picker-input-wrapper">
       <input
         v-model="inputValue"
@@ -334,10 +333,8 @@ const weekDays = computed(() => t('search.weekdays').split(','))
       </button>
     </div>
 
-    <!-- 日历弹出框 -->
     <Transition name="picker-fade">
       <div v-if="showPicker" class="date-picker-panel bew-popover-surface">
-        <!-- 头部：年月选择 -->
         <div class="picker-header">
           <div class="year-controls">
             <button type="button" class="header-btn" @click="prevYear">
@@ -361,14 +358,12 @@ const weekDays = computed(() => t('search.weekdays').split(','))
           </div>
         </div>
 
-        <!-- 星期标题 -->
         <div class="picker-weekdays">
           <div v-for="day in weekDays" :key="day" class="weekday">
             {{ day }}
           </div>
         </div>
 
-        <!-- 日期网格 -->
         <div class="picker-days">
           <button
             v-for="(day, index) in calendarDays"
@@ -387,7 +382,6 @@ const weekDays = computed(() => t('search.weekdays').split(','))
           </button>
         </div>
 
-        <!-- 底部按钮 -->
         <div class="picker-footer">
           <button type="button" class="footer-btn clear" @click="clearDate">
             {{ t('search.clear') }}

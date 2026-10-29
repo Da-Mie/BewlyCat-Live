@@ -266,11 +266,7 @@ function serializeStoredSettings(value: unknown) {
   return value == null ? undefined : JSON.stringify(parseStoredSettings(value))
 }
 
-/**
- * 单次 get 读取的设置与元数据是一致快照，不必排在云同步等较慢的写入之后；
- * 多标签页同时启动时首屏读取因此不会被写入队列阻塞。只有需要补全元数据时
- * 才进入队列，避免并发生成不同的 epoch。
- */
+/** 先读一致快照；仅补全元数据时排队，避免并发生成 epoch。 */
 async function readSettingsWithoutQueue(): Promise<SettingsStoragePatchResponse> {
   const stored = await browser.storage.local.get([
     SETTINGS_STORAGE_KEY,
@@ -332,14 +328,7 @@ async function writeCloudMergeResult(
     : { [SETTINGS_STORAGE_META_KEY]: meta })
 }
 
-/**
- * Reconciles a complete sync-area snapshot. `mode` decides how the bootstrap
- * snapshot is merged when a device enables sync: `auto` keeps the historical
- * behavior (cloud wins untouched fields, dirty fields win back), `pull` lets
- * the cloud snapshot overwrite local settings, and `push` uploads the local
- * snapshot over the cloud. Later reconciliations always use per-field Lamport
- * versions.
- */
+/** 启动时按 auto/pull/push 合并；后续同步按字段 Lamport 版本合并。 */
 export function reconcileSettingsCloudSyncSnapshot(
   entries: Record<string, SettingsCloudSyncEntry>,
   mode: SettingsCloudSyncMode = 'auto',

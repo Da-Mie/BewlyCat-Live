@@ -276,10 +276,7 @@ else if (shouldInitializePageScript) {
     collapsedNodeKeys: Set<string>
     /** 收起某条评论之后的全部同级评论（及子树） */
     collapsedTailKeys: Set<string>
-    /**
-     * 按 rpid 缓存回复的 parent/root 等关系。
-     * 翻页后用缓存补齐缺失的父评论占位层级。
-     */
+    /** 按 rpid 缓存回复的 parent/root 等关系。 翻页后用缓存补齐缺失的父评论占位层级。 */
     replyMetaByRpid: Map<string, CommentReplyTreeCachedMeta>
     enabled: boolean
     nextOriginalOrder: number
@@ -306,10 +303,7 @@ else if (shouldInitializePageScript) {
     ctime: number | null
     originalOrder: number
     children: CommentReplyTreeNode[]
-    /**
-     * 直接 parent 是否在当前页 DOM。
-     * 缺失的父评论由独立占位节点表达层级。
-     */
+    /** 直接 parent 是否在当前页 DOM。 缺失的父评论由独立占位节点表达层级。 */
     directParentVisible: boolean
     /** 直接父回复作者（当前页或跨页缓存） */
     directParentAuthorName: string | null
@@ -334,10 +328,7 @@ else if (shouldInitializePageScript) {
     allRepliesExpanded?: boolean
     /** 直接选页只显示目标页；之后的「加载更多」从该页继续追加。 */
     pageJump?: { previousPage: number, allRepliesExpanded?: boolean }
-    /**
-     * 从已渲染回复组件捕获的用户交互状态。楼中楼接口可能返回点赞前的
-     * 缓存数据，后续分页合并时需要以本地刚完成的操作为准。
-     */
+    /** 从已渲染回复组件捕获的用户交互状态。楼中楼接口可能返回点赞前的 缓存数据，后续分页合并时需要以本地刚完成的操作为准。 */
     interactionByRpid?: Map<string, CommentReplyInteractionState>
     /** 批量加载期间固定树缩进，避免每个用户信息更新都横向重排。 */
     frozenTreeIndentStep?: number
@@ -759,10 +750,7 @@ else if (shouldInitializePageScript) {
     return null
   }
 
-  /**
-   * 在评论相关自定义元素的生命周期后执行增强逻辑。
-   * 优先 patch update（Lit）；若无 update 则回退 connectedCallback / updated。
-   */
+  /** 在评论相关自定义元素的生命周期后执行增强逻辑。 优先 patch update（Lit）；若无 update 则回退 connectedCallback / updated。 */
   function patchCommentComponentUpdate(
     name: string,
     classConstructor: any,
@@ -1360,10 +1348,7 @@ else if (shouldInitializePageScript) {
     renderer.requestUpdate?.()
   }
 
-  /**
-   * 结束当前「加载更多」的 UI 会话，但保留已累计页。请求本身由 B 站
-   * 组件持有，无法可靠 abort；树分支收起时可恢复迟到结果，原生收起则必须忽略它。
-   */
+  /** 结束当前「加载更多」的 UI 会话，但保留已累计页。请求本身由 B 站 组件持有，无法可靠 abort；树分支收起时可恢复迟到结果，原生收起则必须忽略它。 */
   function invalidateCommentReplyPaginationLoading(renderer: any) {
     const state = commentReplyPaginationStates.get(renderer)
     if (!state || (!state.pending && !state.loading))
@@ -1701,13 +1686,7 @@ else if (shouldInitializePageScript) {
     }
   }
 
-  /**
-   * 每次顺序加载最多 5 个未加载的回复页，后续点击继续补齐。
-   *
-   * 必须逐页等待：B 站回复接口按页返回，且组件自身只允许一个在途
-   * 请求。复用已 patch 的 getList 可以继续使用去重、树关系缓存和布局
-   * 占位逻辑，不会额外发起绕过 B 站组件的请求。
-   */
+  /** 每次顺序补齐最多 5 页；复用原生 getList 的去重、关系缓存和占位。 */
   function expandAllCommentReplies(renderer: any): Promise<void> {
     const state = getCommentReplyPaginationState(renderer)
     if (state.expandAllLoading)
@@ -2467,11 +2446,7 @@ else if (shouldInitializePageScript) {
     directParentMessageText: string | null
   }
 
-  /**
-   * 在当前可见节点中解析父节点：直接 parent 不在页内时，
-   * 沿 replyMetaByRpid 向上找最近仍在 DOM 的祖先。
-   * 同时记录真实直接父是否在本页，供 UI 保留「回复 @xxx」。
-   */
+  /** 沿元数据查找页内最近祖先，同时保留直接父是否在页内。 */
   function resolveCommentReplyTreeParentNode(
     node: CommentReplyTreeNode,
     nodeByRpid: Map<string, CommentReplyTreeNode>,
@@ -2581,10 +2556,7 @@ else if (shouldInitializePageScript) {
     }
   }
 
-  /**
-   * 原生「收起回复」会在后续展开时复用组件实例。此时上一次展开的
-   * 折叠状态、父子关系和布局偏移都已失效，必须作为同一个会话整体清理。
-   */
+  /** 原生「收起回复」会在后续展开时复用组件实例。此时上一次展开的 折叠状态、父子关系和布局偏移都已失效，必须作为同一个会话整体清理。 */
   function clearCommentReplyTreeState(component: any) {
     commentReplyTreeEpochs.set(component, (commentReplyTreeEpochs.get(component) ?? 0) + 1)
     const state = commentReplyTreeStates.get(component)
@@ -2632,11 +2604,7 @@ else if (shouldInitializePageScript) {
     commentRepliesRenderers.delete(component)
   }
 
-  /**
-   * B 站 SPA 会直接移除整层回复组件，不一定触发 handleRevert。普通 Set
-   * 若不在 disconnectedCallback 清理，会把旧组件、Shadow DOM 与分页数据
-   * 永久保留到下一次设置刷新。
-   */
+  /** SPA 移除组件时清理 Set，避免保留旧 Shadow DOM 与分页数据。 */
   function patchCommentRepliesRendererDisconnect(classConstructor: any) {
     const prototype = classConstructor?.prototype as object | undefined
     if (!prototype || (prototype as any)[COMMENT_REPLIES_DISCONNECT_PATCHED])
@@ -2673,11 +2641,7 @@ else if (shouldInitializePageScript) {
     })
   }
 
-  /**
-   * 主评论图文加载/展开会把楼中楼整体下推；仅 observe 回复容器时
-   * ResizeObserver 不会因「上方变高导致位移」触发，线条会错位。
-   * 同时监听楼层 host、主评论与回复容器，并在图片 load 后重算。
-   */
+  /** 监听楼层、主评、回复及图片加载，覆盖上方内容变化造成的位移。 */
   function scheduleCommentReplyTreeLayoutUpdate(component: any) {
     if (!component || pendingCommentReplyTreeLayoutUpdates.has(component))
       return
@@ -2936,10 +2900,7 @@ else if (shouldInitializePageScript) {
       component.style.removeProperty(COMMENT_REPLY_CONTAINER_HEIGHT_VAR)
   }
 
-  /**
-   * 引导线坐标原点。回复容器开启后图层挂在滚动容器内部，
-   * 原点需要从视口 rect 换算到滚动内容坐标系。
-   */
+  /** 引导线坐标原点。回复容器开启后图层挂在滚动容器内部， 原点需要从视口 rect 换算到滚动内容坐标系。 */
   interface CommentReplyGuideOrigin {
     height: number
     left: number
@@ -3433,11 +3394,7 @@ else if (shouldInitializePageScript) {
     const visibleRootNodes = rootNodes.filter(isCommentReplyTreeNodeVisible)
     const threadRootRenderer = getCommentReplyTreeRootRenderer(component)
     const rootBranchCollapsed = !accountFilter.isHidden(threadRootRenderer) && state.collapsedNodeKeys.has(COMMENT_REPLY_TREE_ROOT_KEY)
-    /*
-     * 容器模式下主评论位于滚动区上方，根分支的锚点、主干与 −/+ 都会落在
-     * 滚动内容坐标系之外，既裁切又没法稳定对齐。这里直接不画主评论那条线，
-     * 收起整层改用容器底边的原生「收起回复」。
-     */
+    /** 容器模式不绘制滚动区外的主评连线，整层折叠使用原生入口。 */
     const threadRootAnchor = containerEnabled || accountFilter.isHidden(threadRootRenderer)
       ? null
       : (threadRootRenderer ? getCommentReplyAvatarAnchor(threadRootRenderer, origin) : null)
@@ -3620,15 +3577,7 @@ else if (shouldInitializePageScript) {
       || element.localName === 'bili-comment-renderer'
   }
 
-  /**
-   * 线条模式下，有父级引导线的回复会隐藏正文前的「回复 @xxx :」
-   * 实际 DOM：
-   * <p id="contents">
-   *   <span>回复 </span>
-   *   <a data-type="mention">@用户</a>
-   *   <span> : 正文...</span>
-   * </p>
-   */
+  /** 有父级引导线时隐藏重复的“回复 @xxx :”前缀。 */
   const REPLY_AT_PREFIX_WORD = /^(?:回复|回覆|Reply(?:\s+to)?)\s*$/i
   const REPLY_AT_PREFIX_SINGLE = /^(?:回复|回覆|Reply(?:\s+to)?)\s*[^\s:：]+\s*[:：]\s*/i
   const REPLY_AT_COLON_PREFIX = /^\s*[:：]\s*/
@@ -3961,12 +3910,7 @@ else if (shouldInitializePageScript) {
 
   type CommentReplyOffpageParentMode = 'quote' | 'compact'
 
-  /**
-   * 直接父回复不在本页时的标注：
-   * - 有正文缓存 → quote：带样式引用原正文
-   * - 无正文但有父 rpid → compact：回复 + @昵称 + 不在本页
-   * 父在本页时移除标注。
-   */
+  /** 页外父回复优先引用缓存正文；无正文时仅标注昵称与页外状态。 */
   function updateCommentReplyOffpageParentLabel(
     renderer: HTMLElement,
     options: {
@@ -4098,17 +4042,7 @@ else if (shouldInitializePageScript) {
     })
   }
 
-  /**
-   * 给回复设置视觉顺序，并在结构可识别时同步调整 DOM 顺序。
-   *
-   * `bili-comment-replies-renderer` 的列表由 keyed repeat 渲染。回复 host
-   * 两侧的注释节点是 repeat 的边界；以前通过 insertBefore 只移动 host 会把
-   * host 与边界拆开，下一次列表更新时 Lit 会把旧节点再插入一次。
-   *
-   * 只用 flex order 时视觉顺序与 DOM 顺序不一致，跨多条回复拖选/复制会按
-   * DOM 顺序跳过子回复（#1327）。因此按 repeat 自身移动 part 的方式，把
-   * 「边界注释 + host + 边界注释」整段移动；识别不到边界时只保留 flex order。
-   */
+  /** 按 Lit repeat 的“边界注释 + host + 边界注释”整体排序，保留更新与复制顺序；无法识别时仅设 flex order。 */
   function setCommentReplyRendererOrder(
     currentRenderers: HTMLElement[],
     orderedRenderers: HTMLElement[],
@@ -4625,10 +4559,7 @@ else if (shouldInitializePageScript) {
     })
   }
 
-  /**
-   * 带 #reply{rpid} 的深链会触发 B 站：滚动定位、展开楼中楼、高亮目标评论。
-   * 这些步骤常在我们首次画线之后才完成，导致线条错位。在结算窗口内多次重算。
-   */
+  /** 带 #reply{rpid} 的深链会触发 B 站：滚动定位、展开楼中楼、高亮目标评论。 这些步骤常在我们首次画线之后才完成，导致线条错位。在结算窗口内多次重算。 */
   const COMMENT_REPLY_DEEP_LINK_RE = /#reply(\d+)/i
   const commentReplyDeepLinkSettleTimers: number[] = []
   let commentReplyDeepLinkScrollUntil = 0

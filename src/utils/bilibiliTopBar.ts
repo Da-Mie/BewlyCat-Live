@@ -170,12 +170,7 @@ export function captureOriginalBilibiliTopBar(doc: Document) {
   return cachedOriginalTopBar
 }
 
-/**
- * 同步 BewlyCat 独立滚动容器与 B 站原版顶栏的下拉状态。
- * B 站脚本只监听页面滚动，无法感知 Shadow DOM 内部容器的 scrollTop。
- *
- * slide-down 始终保留（1.6.8 观感）；频道 Logo 等仅依赖 bewly-original-top-bar-scrolled。
- */
+/** 同步 Shadow DOM 滚动与原生顶栏；保留 slide-down，仅切换滚动标记。 */
 export function setOriginalBilibiliTopBarScrolled(doc: Document, scrolled: boolean) {
   if (!topBarSessions.has(doc))
     return
@@ -296,10 +291,7 @@ function keepOriginalTopBarScrolled(header: HTMLElement) {
   })
 }
 
-/**
- * 原版顶栏宽 Logo：只用 B 站自身资源（banner / 顶栏内已有 logo），
- * 与插件设置 topBarLogoStyle 无关（该项仅作用于 Bewly 顶栏）。
- */
+/** 原版顶栏宽 Logo：只用 B 站自身资源（banner / 顶栏内已有 logo）， 与插件设置 topBarLogoStyle 无关（该项仅作用于 Bewly 顶栏）。 */
 function resolveOriginalTopBarLogoSrc(header: HTMLElement): string | null {
   const candidates = [
     header.querySelector<HTMLImageElement>('.bili-header__banner .inner-logo img'),
@@ -570,10 +562,7 @@ export function ensureOriginalBilibiliTopBarAppended(doc: Document): boolean {
   return true
 }
 
-/**
- * 将 body 上的原版顶栏尝试放回 B 站原生父节点。
- * 自定义首页路径不再调用此函数（避免回填保活）；保留给少数需要归还所有权的场景。
- */
+/** 将 body 上的原版顶栏尝试放回 B 站原生父节点。 自定义首页路径不再调用此函数（避免回填保活）；保留给少数需要归还所有权的场景。 */
 function restoreOriginalBilibiliTopBarParent(doc: Document): boolean {
   const mountedHeader = cachedOriginalTopBar?.parentElement === doc.body
     ? cachedOriginalTopBar

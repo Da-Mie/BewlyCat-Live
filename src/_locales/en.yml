@@ -2109,6 +2109,9 @@ live_client:
   volume: Volume
   seek: Buffered live playback
   live_edge: Live
+  returning_live: Returning to live
+  buffering: Buffering
+  history_unavailable: Not buffered
   return_to_live: Back to live
   behind_live: Behind live by {time}
   available_history: '{time} available'

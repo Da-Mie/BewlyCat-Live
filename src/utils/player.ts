@@ -580,10 +580,7 @@ function isLastPageOfCurrentVideo(): boolean {
   return !!activePage && !!pages && activePage === pages[pages.length - 1]
 }
 
-/**
- * 播完行为依据的视频类型。合集内的多 P 稿件未到最后一 P 时按分 P 设置在稿件内切 P，
- * 最后一 P 再按合集设置决定是否进入合集下一集。
- */
+/** 播完行为依据的视频类型。合集内的多 P 稿件未到最后一 P 时按分 P 设置在稿件内切 P， 最后一 P 再按合集设置决定是否进入合集下一集。 */
 function detectEndBehaviorVideoType(videoType = detectVideoType()): VideoType {
   if (videoType !== VideoType.MULTIPART || !isMultipartVideoInCollection())
     return videoType
@@ -902,10 +899,7 @@ function doesEndBehaviorAllowCustomAdvance(videoType: VideoType): boolean {
   return mode === 'autoPlay' || mode === 'autoPlayWithRecommend' || mode === 'default'
 }
 
-/**
- * 自定义播放是否接管当前视频的结束。合集内多 P 稿件未到最后一 P 时，
- * 由分 P 设置在稿件内切 P；最后一 P 再按自定义顺序切到合集下一条目。
- */
+/** 自定义播放是否接管当前视频的结束。合集内多 P 稿件未到最后一 P 时， 由分 P 设置在稿件内切 P；最后一 P 再按自定义顺序切到合集下一条目。 */
 export function canCustomPlayHandleCurrentEnd(): boolean {
   const videoType = detectVideoType()
   const endBehaviorVideoType = detectEndBehaviorVideoType(videoType)

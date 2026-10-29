@@ -160,20 +160,14 @@ function getMultiImageGalleryPeekWidth(containerWidth: number) {
   )
 }
 
-/**
- * 缩略图显示宽高比：超过 1:2 的长图按 1:2 裁切，其余保持原比例。
- */
+/** 缩略图显示宽高比：超过 1:2 的长图按 1:2 裁切，其余保持原比例。 */
 export function getClampedThumbnailRatio(ratio?: number) {
   if (!isUsableImageRatio(ratio))
     return undefined
   return Math.max(ratio, PORTRAIT_THUMBNAIL_MIN_RATIO)
 }
 
-/**
- * 多图共用同一高度：按第 1 张完整可见、并露出一点第 2 张来取高度，封顶 350px。
- * 单张（含竖图）按容器宽度适配，不预留下一张，同样封顶 350px。
- * 首图超过 1:2 时按 1:2 计算高度，缩略图只显示局部。
- */
+/** 图组露出次图，单图完整适配；高度上限 350px，首图宽高比最低 1:2。 */
 export function computeMultiImageGalleryHeight(
   containerWidth: number,
   ratios?: Array<number | undefined>,
@@ -193,9 +187,7 @@ export function computeMultiImageGalleryHeight(
   return Math.min(maxHeight, Math.max(1, height))
 }
 
-/**
- * 九宫格只展示完整的三列行；非完整行（1/2/4/5/7/8 图）继续使用横向画廊。
- */
+/** 九宫格只展示完整的三列行；非完整行（1/2/4/5/7/8 图）继续使用横向画廊。 */
 export function shouldUseMomentImageGrid(images: string[] | undefined, isNineGrid?: boolean) {
   const count = images?.length || 0
   return Boolean(

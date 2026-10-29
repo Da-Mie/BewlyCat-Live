@@ -1,5 +1,4 @@
 .bewly-design {
-  // #region theme color adaption part
   // Increase the priority of the style inside by writing a non-existent selector in `:not()`
   :not(foobar) {
     // 视频页 | 番剧播放页
@@ -49,9 +48,7 @@
       }
     }
   }
-  // #endregion
 
-  // #region dark mode adaption part
   &.dark {
     .bili-mini,
     .el-select-dropdown,
@@ -143,12 +140,10 @@
         border-color: var(--bew-border-color);
       }
 
-      // & -> .el-select-dropdown
       &.el-popper[x-placement^="bottom"] .popper__arrow {
         border-bottom-color: var(--bew-border-color);
       }
 
-      // & -> .el-select-dropdown
       &.el-popper[x-placement^="bottom"] .popper__arrow:after {
         border-bottom-color: var(--bew-content-alt-solid);
       }
@@ -183,5 +178,4 @@
       }
     }
   }
-  // #endregion
 }

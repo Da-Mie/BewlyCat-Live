@@ -27,9 +27,7 @@ export interface UserInfo {
   is_senior_member: boolean
 }
 
-/**
- * Number of follower, following and published posts by user
- */
+/** Number of follower, following and published posts by user */
 export interface UserStat {
   dynamic_count: number
   follower: number

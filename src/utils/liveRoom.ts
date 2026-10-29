@@ -103,7 +103,7 @@ export function readLiveRoom(play: any, details: any): LiveRoom {
   for (const stream of playurl?.stream ?? []) {
     for (const format of stream.format ?? []) {
       for (const codec of format.codec ?? []) {
-        // Request AVC explicitly: HEVC support varies between browsers and operating systems.
+        // 使用 AVC，避免 HEVC 兼容差异。
         if (codec.codec_name !== 'avc')
           continue
         const kind = stream.protocol_name === 'http_hls' ? 'hls' : format.format_name === 'flv' ? 'flv' : undefined

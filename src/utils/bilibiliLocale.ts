@@ -21,9 +21,7 @@ const BILIBILI_LOCALE_HOSTS = new Set(['www.bilibili.com', 'bilibili.com'])
 
 const LOCALE_PATH_PREFIX_PATTERN = /^\/([^/]+)(?=\/|$)/
 
-/**
- * 去掉主站路径中的语言段，使 /ja/video/BV... 与 /video/BV... 按同一页面识别。
- */
+/** 去掉主站路径中的语言段，使 /ja/video/BV... 与 /video/BV... 按同一页面识别。 */
 export function stripBilibiliLocalePathname(pathname: string): string {
   const segment = pathname.match(LOCALE_PATH_PREFIX_PATTERN)?.[1]
   if (!segment || !BILIBILI_LOCALE_PATH_SEGMENTS.has(segment.toLowerCase()))
@@ -32,9 +30,7 @@ export function stripBilibiliLocalePathname(pathname: string): string {
   return pathname.slice(segment.length + 1) || '/'
 }
 
-/**
- * 返回去掉主站语言段后的 URL；非主站或无法解析的 URL 原样返回。
- */
+/** 返回去掉主站语言段后的 URL；非主站或无法解析的 URL 原样返回。 */
 export function stripBilibiliLocaleUrl(url: string): string {
   try {
     const urlObj = new URL(url)
@@ -53,9 +49,7 @@ export function stripBilibiliLocaleUrl(url: string): string {
   }
 }
 
-/**
- * 当前页面去掉主站语言段后的 pathname，用于路径判断。
- */
+/** 当前页面去掉主站语言段后的 pathname，用于路径判断。 */
 export function getBilibiliPathname(url: string = location.href): string {
   return new URL(stripBilibiliLocaleUrl(url)).pathname
 }

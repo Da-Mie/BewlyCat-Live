@@ -8,7 +8,6 @@ defineProps<{
 </script>
 
 <template>
-  <!-- Modern Video Card Skeleton -->
   <div
     v-if="settings.videoCardLayout !== 'old' && !horizontal"
     mb-3 pointer-events-none select-none
@@ -34,21 +33,19 @@ defineProps<{
     </div>
   </div>
 
-  <!-- Modern Video Card Skeleton (Horizontal) -->
   <div
     v-else-if="settings.videoCardLayout !== 'old' && horizontal"
     flex="~ gap-6"
     mb-3 pointer-events-none select-none
     style="contain: layout; min-height: 180px;"
   >
-    <!-- Cover -->
     <div
       :class="horizontal ? 'horizontal-card-cover' : 'vertical-card-cover'"
       shrink-0 aspect-video h-fit bg="$bew-skeleton"
       rounded="$bew-radius"
       style="aspect-ratio: 16 / 9;"
     />
-    <!-- Other Information -->
+
     <div w-full mt-0 flex="~ col gap-2">
       <div flex="~ gap-1 justify-between items-start" w="full">
         <div w-full h-5 bg="$bew-skeleton" rounded="$bew-radius-sm" />
@@ -65,7 +62,6 @@ defineProps<{
     </div>
   </div>
 
-  <!-- Old Video Card Skeleton (Vertical) -->
   <div
     v-else-if="settings.videoCardLayout === 'old' && !horizontal"
     mb-4 pointer-events-none select-none
@@ -96,20 +92,18 @@ defineProps<{
     </div>
   </div>
 
-  <!-- Old Video Card Skeleton (Horizontal) -->
   <div
     v-else-if="settings.videoCardLayout === 'old' && horizontal"
     flex="~ gap-6"
     mb-4 pointer-events-none select-none
     style="contain: layout; min-height: 180px;"
   >
-    <!-- Cover -->
     <div
       :class="horizontal ? 'horizontal-card-cover' : 'vertical-card-cover'"
       shrink-0 aspect-video h-fit bg="$bew-skeleton"
       rounded="$bew-radius"
     />
-    <!-- Other Information -->
+
     <div
       w-full mt-0
       flex="~ gap-4"

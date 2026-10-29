@@ -465,16 +465,13 @@ onBeforeUnmount(() => {
     @mouseenter="isCoverHovered = true"
     @mouseleave="isCoverHovered = false"
   >
-    <!-- Skeleton mode -->
     <div
       v-if="skeleton"
       w-full h-full bg="$bew-skeleton" rounded="$bew-media-radius"
       style="aspect-ratio: 16 / 9;"
     />
 
-    <!-- Normal mode -->
     <template v-else>
-      <!-- Video cover -->
       <LazyPicture
         :src="coverImageUrl"
         loading="lazy"
@@ -526,7 +523,6 @@ onBeforeUnmount(() => {
         </Button>
       </div>
 
-      <!-- Video preview -->
       <Transition v-if="!removed && settings.enableVideoPreview" name="fade">
         <div
           v-if="isActive && previewVideoUrl && (isHover || isPreviewFullscreen)"
@@ -557,7 +553,6 @@ onBeforeUnmount(() => {
             />
           </div>
 
-          <!-- Loading indicator -->
           <Transition name="fade">
             <div
               v-if="isLoadingStream"
@@ -573,7 +568,6 @@ onBeforeUnmount(() => {
         </div>
       </Transition>
 
-      <!-- Ranking Number -->
       <div
         v-if="video?.rank"
         class="video-card-overlay-transition"
@@ -602,7 +596,6 @@ onBeforeUnmount(() => {
       </div>
 
       <template v-if="!removed && video">
-        <!-- Old layout: Video Duration (right bottom) -->
         <div
           v-if="layout === 'old' && settings.showVideoCardDuration && (video?.duration || video?.durationStr)"
           class="video-card-overlay-transition video-card-live-badge"
@@ -663,12 +656,10 @@ onBeforeUnmount(() => {
           {{ video?.badge?.text }}
         </div>
 
-        <!-- 封面右上角稍后再看：统一样式与行为，状态和增删逻辑在共享组件内部处理 -->
         <WatchLaterCoverButton
           :target="showWatcherLater ? watchLaterTarget : undefined"
         />
 
-        <!-- Modern layout: Cover stats (bottom overlay) -->
         <div
           v-if="layout !== 'old' && hasCoverStats"
           class="video-card-cover-stats video-card-stats"

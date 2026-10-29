@@ -1,6 +1,6 @@
 import type { LiveChatAuth } from '~/constants/liveClient'
 
-import { decodeLivePackets, encodeLivePacket } from './protocol'
+import { decodeLivePackets, encodeLivePacket, MAX_LIVE_PACKET_BYTES } from './protocol'
 
 export type LiveChatState = 'connecting' | 'connected' | 'reconnecting' | 'closed' | 'error'
 
@@ -30,12 +30,14 @@ export class LiveChatConnection {
         return
       const server = auth.servers[this.attempts % auth.servers.length]
       const url = new URL(server)
-      if (url.protocol !== 'wss:' || !url.hostname.endsWith('.chat.bilibili.com') || url.pathname !== '/sub')
+      if (url.protocol !== 'wss:' || url.username || url.password || !url.hostname.endsWith('.chat.bilibili.com') || url.pathname !== '/sub')
         throw new Error('Invalid live chat server')
       const socket = this.socket = new WebSocket(url)
       socket.binaryType = 'arraybuffer'
       this.lastPacket = Date.now()
       let decoding = Promise.resolve()
+      let pendingBytes = 0
+      let pendingFrames = 0
       this.timeout = setTimeout(() => this.reconnect(generation), 12000)
       socket.onopen = () => socket.send(encodeLivePacket(7, {
         uid: Number(auth.uid) || 0,
@@ -47,10 +49,18 @@ export class LiveChatConnection {
         buvid: auth.buvid,
       }))
       socket.onmessage = (event) => {
-        if (!(event.data instanceof ArrayBuffer))
+        if (!this.active || generation !== this.generation || !(event.data instanceof ArrayBuffer))
           return
+        if (pendingFrames >= 64 || pendingBytes + event.data.byteLength > MAX_LIVE_PACKET_BYTES) {
+          this.reconnect(generation)
+          return
+        }
+        pendingBytes += event.data.byteLength
+        pendingFrames++
         this.lastPacket = Date.now()
         decoding = decoding.then(async () => {
+          if (!this.active || generation !== this.generation)
+            return
           const packets = await decodeLivePackets(new Uint8Array(event.data))
           if (!this.active || generation !== this.generation)
             return
@@ -73,11 +83,14 @@ export class LiveChatConnection {
               }, 30000)
             }
             else if (packet.operation === 5) {
-              // Filtering/UI have their own queue and cannot delay authentication or heartbeat.
+              // 过滤独立排队，不阻塞认证和心跳。
               this.onMessage(packet.data)
             }
           }
-        }).catch(() => this.reconnect(generation))
+        }).catch(() => this.reconnect(generation)).finally(() => {
+          pendingBytes -= event.data.byteLength
+          pendingFrames--
+        })
       }
       socket.onerror = () => this.reconnect(generation)
       socket.onclose = () => this.reconnect(generation)
@@ -85,7 +98,7 @@ export class LiveChatConnection {
     catch (error) {
       if (!this.active || generation !== this.generation)
         return
-      // API authentication/risk errors require user action; do not hammer the endpoint.
+      // 认证或风控失败由用户重试。
       this.onState('error', error instanceof Error ? error.message : String(error))
     }
   }

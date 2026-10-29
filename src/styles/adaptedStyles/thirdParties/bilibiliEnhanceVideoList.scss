@@ -25,7 +25,6 @@
     }
   }
 
-  // #region dark mode adaption part
   &.dark {
     .video-pod__list {
       .simple-base-item.normal .title-txt {
@@ -43,5 +42,4 @@
       }
     }
   }
-  // #endregion
 }

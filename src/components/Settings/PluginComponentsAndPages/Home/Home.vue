@@ -133,7 +133,6 @@ function handleImport(filterType: 'title' | 'user') {
       else {
         settings.value.filterByUser = normalized
       }
-      // toast.success(`${filterType} filters imported successfully`)
     }
     catch (error) {
       console.error(`Error importing filter by ${filterType}:`, error)
@@ -146,7 +145,6 @@ function handleImport(filterType: 'title' | 'user') {
   input.click()
 }
 
-// Update the existing functions to use the new generic ones
 function handleExportFilterByTitle() {
   handleExport('title')
 }

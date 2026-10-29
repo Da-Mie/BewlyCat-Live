@@ -96,7 +96,7 @@ function handlePreviewRef(element: Element | ComponentPublicInstance | null) {
         <span v-if="showDuration" class="moment-card__video-duration">{{ duration }}</span>
       </span>
       <span v-if="chargeBadge" class="moment-card__charge-badge">{{ chargeBadge }}</span>
-      <!-- 封面上的功能角标由功能所有者经插槽注入，布局组件不感知具体功能 -->
+
       <slot name="coverAction" />
     </span>
     <span class="moment-card__video-card-info">

@@ -35,7 +35,6 @@ function handleUserTypeSelect(value: number) {
 
 <template>
   <div class="filter-bar" mb-4 flex="~ col" gap-3>
-    <!-- 排序 + 更多筛选按钮 -->
     <div flex items-center gap-2>
       <span text="sm $bew-text-2" min-w-12>{{ $t('search.sort') }}</span>
       <div flex items-center gap-2 flex-wrap flex-1>
@@ -63,9 +62,7 @@ function handleUserTypeSelect(value: number) {
       </button>
     </div>
 
-    <!-- 更多筛选内容 -->
     <div v-show="isMoreFiltersExpanded" flex="~ col" gap-3>
-      <!-- 用户类型 -->
       <div flex items-center gap-2>
         <span text="sm $bew-text-2" min-w-12>{{ $t('search.user_type') }}</span>
         <div flex items-center gap-2 flex-wrap>

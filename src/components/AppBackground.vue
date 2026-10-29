@@ -251,7 +251,6 @@ setAppWallpaperMaskingOpacity()
 
 <template>
   <div>
-    <!-- linear gradient background -->
     <Transition name="fade">
       <div
         v-if="settings.useLinearGradientThemeColorBackground && isDark"
@@ -265,13 +264,12 @@ setAppWallpaperMaskingOpacity()
 
     <Transition name="fade">
       <div v-if="activatedPage === AppPage.Search">
-        <!-- background -->
         <div
           pos="absolute top-0 left-0" w-full h-full duration-300 bg="cover center $bew-homepage-bg"
           z--1
           :style="{ backgroundImage: `url('${currentWallpaperUrl}')` }"
         />
-        <!-- background mask -->
+
         <Transition name="fade">
           <div
             v-if="(!settings.individuallySetSearchPageWallpaper && settings.enableWallpaperMasking) || (settings.searchPageEnableWallpaperMasking)"
@@ -282,14 +280,12 @@ setAppWallpaperMaskingOpacity()
         </Transition>
       </div>
       <div v-else>
-        <!-- background -->
         <div
           :style="{ backgroundImage: `url('${currentWallpaperUrl}')` }"
           pos="absolute top-0 left-0" w-full h-full duration-300 bg="cover center $bew-homepage-bg"
           z--1
         />
 
-        <!-- background mask -->
         <Transition name="fade">
           <div
             v-if="settings.enableWallpaperMasking"

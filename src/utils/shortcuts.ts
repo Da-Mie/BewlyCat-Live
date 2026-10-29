@@ -30,12 +30,6 @@ type ShortcutHandler = (e: KeyboardEvent, player?: Element) => void
 // 快捷键处理映射
 const shortcutHandlers: Record<string, ShortcutHandler> = {}
 
-/**
- * 注册快捷键处理函数
- * @param id 快捷键ID
- * @param handler 处理函数
- * @returns 是否注册成功
- */
 export function registerShortcutHandler(id: string, handler: ShortcutHandler): boolean {
   try {
     if (!id || typeof handler !== 'function') {
@@ -50,11 +44,6 @@ export function registerShortcutHandler(id: string, handler: ShortcutHandler): b
   }
 }
 
-/**
- * 注销快捷键处理函数
- * @param id 快捷键ID
- * @returns 是否注销成功
- */
 export function unregisterShortcutHandler(id: string): boolean {
   try {
     if (!id) {
@@ -73,11 +62,6 @@ export function unregisterShortcutHandler(id: string): boolean {
   }
 }
 
-/**
- * 获取快捷键处理函数
- * @param id 快捷键ID
- * @returns 处理函数或undefined
- */
 export function getShortcutHandler(id: string): ShortcutHandler | undefined {
   return shortcutHandlers[id]
 }
@@ -88,9 +72,7 @@ const LEGACY_DEFAULT_SHORTCUT_KEYS: Record<string, string> = {
   increaseVideoSize: 'Shift++',
 }
 
-/**
- * 实际生效的快捷键配置；未改动的旧默认绑定视为未绑定。
- */
+/** 实际生效的快捷键配置；未改动的旧默认绑定视为未绑定。 */
 export function getEffectiveShortcutSetting(id: string): BaseShortcutSetting | undefined {
   const shortcutConfig = settings.value.shortcuts?.[id]
   if (shortcutConfig && LEGACY_DEFAULT_SHORTCUT_KEYS[id] === shortcutConfig.key)
@@ -226,11 +208,7 @@ function handleShortcutKeyup(e: KeyboardEvent) {
 
 let shortcutListenerInstalled = false
 
-/**
- * 在 window 捕获阶段常驻监听快捷键。
- * 需在 document_start 时尽早调用：同一阶段的监听器按注册顺序执行，先于 B 站注册才能拦截其默认快捷键；
- * 之后也不再移除重装，避免排到 B 站的监听器之后。
- */
+/** document_start 尽早注册且不重装捕获监听器，保持先于 B 站处理快捷键。 */
 export function installShortcutListener() {
   if (shortcutListenerInstalled)
     return
@@ -261,9 +239,7 @@ export function setupShortcutHandlers() {
   updateShortcutsCache(true)
 }
 
-/**
- * 注册默认的快捷键处理器
- */
+/** 注册默认的快捷键处理器 */
 export function registerDefaultHandlers(): void {
   // 弹幕开关
   // 弹幕状态显示（不切换状态）
@@ -426,10 +402,7 @@ export function registerDefaultHandlers(): void {
   })
 }
 
-/**
- * 切换关注/取消关注
- * 在视频页点击关注按钮
- */
+/** 切换关注/取消关注 在视频页点击关注按钮 */
 function toggleFollow(): void {
   try {
     // 查找关注按钮

@@ -102,11 +102,7 @@ export function createPageSettingsPayload(value: unknown): PageSettingsPayload |
   }
 }
 
-/**
- * 页面启动快照：主站 localStorage 中保存决定 document_start 钩子是否安装的开关。
- * 页面脚本启动时设置尚未送达，只能同步读取上一次加载写入的值；
- * 快照缺失或无法读取时调用方按默认行为处理，不能据此跳过默认开启的功能。
- */
+/** document_start 同步读取上次快照；缺失时仍按默认值安装钩子。 */
 export interface PageBootSnapshot {
   accountLevelFilters: AccountLevelFilters
   preventMobileRedirect: boolean

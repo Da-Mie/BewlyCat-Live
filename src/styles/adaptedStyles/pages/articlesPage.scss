@@ -16,7 +16,6 @@
     backdrop-filter: var(--bew-filter-glass-1);
   }
 
-  // #region theme color adaption part
   // Increase the priority of the style inside by writing a non-existent selector in :not()
   :not(foobar) {
     .page-content .right-side .rank-module .rank-list .item a:hover,
@@ -111,7 +110,6 @@
     }
 
     .nav-tab-bar .tab-item.on {
-      // width: 28px;
       height: 28px;
       overflow: hidden;
 
@@ -132,9 +130,6 @@
     }
   }
 
-  // #endregion
-
-  // #region dark mode adaption part
   &.dark {
     .nav-tab-bar .tab-item,
     .page-content .left-side .partitio-name,
@@ -435,6 +430,4 @@
       filter: invert(1) hue-rotate(180deg);
     }
   }
-
-  // #endregion
 }

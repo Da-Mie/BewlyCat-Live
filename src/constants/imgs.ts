@@ -15,11 +15,7 @@ const searchBarCharacterAssetUrls = Object.fromEntries(
   ]),
 ) as Record<typeof SEARCH_BAR_CHARACTER_FILENAMES[number], string>
 
-/**
- * Resolve a bundled search-bar character and migrate URLs from older versions.
- *
- * The path check also handles settings restored from another extension ID.
- */
+/** 解析内置角色图片，兼容其他扩展 ID 导入的旧地址。 */
 export function resolveSearchBarCharacterUrl(url: string): string {
   const filename = /^(?:https?:)?\/\/cdn\.jsdelivr\.net\/gh\/BewlyBewly\/Imgs\/searchBarCharacters\/([^/?#]+)$/.exec(url)?.[1]
     || /\/assets\/search-bar-characters\/([^/?#]+)$/.exec(url)?.[1]
@@ -43,27 +39,13 @@ export interface wallpaperItem {
   name: string
   url: string
   thumbnail?: string
-  // 本地壁纸引用字段
+
   id?: string
   isLocal?: boolean
 }
 
 export const WALLPAPERS: wallpaperItem[] = [
-  // {
-  //   name: 'Unsplash Random Nature Image',
-  //   url: 'https://source.unsplash.com/1920x1080/?nature',
-  //   thumbnail: 'https://source.unsplash.com/1920x1080/?nature',
-  // },
-  // {
-  //   name: 'Unsplash Random Building Image',
-  //   url: 'https://source.unsplash.com/1920x1080/?building',
-  //   thumbnail: 'https://source.unsplash.com/1920x1080/?building',
-  // },
-  // {
-  //   name: 'Unsplash Random Night Scene Image',
-  //   url: 'https://source.unsplash.com/1920x1080/?night-scene',
-  //   thumbnail: 'https://source.unsplash.com/1920x1080/?night-scene',
-  // },
+
   {
     name: 'LoremPicsum Random Image',
     url: 'https://picsum.photos/2560/1440/?nature',

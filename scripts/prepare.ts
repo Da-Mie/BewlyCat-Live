@@ -14,9 +14,7 @@ const contributorsImageUrl = 'https://contrib.rocks/image?repo=keleus/BewlyCat'
 const contributorsImageCachePath = r('.cache/bewlycat/contributors.svg')
 const contributorsImagePath = r(extensionDirectory, 'assets/contributors.svg')
 
-/**
- * Stub index.html to use Vite in development
- */
+/** Stub index.html to use Vite in development */
 async function stubIndexHtml() {
   const views = [
     'options',

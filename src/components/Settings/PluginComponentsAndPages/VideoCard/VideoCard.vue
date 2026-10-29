@@ -139,7 +139,6 @@ function getCoverRatioProgress(value: number) {
       </template>
     </SettingsItemGroup>
 
-    <!-- 视频卡片网格：打开设置时直接展示断点配置 -->
     <SettingsItemGroup
       :title="$t('settings.group_video_card_grid')"
       :desc="$t('settings.grid_breakpoints_desc')"
@@ -269,7 +268,6 @@ function getCoverRatioProgress(value: number) {
       <VideoCardContextMenuEditor />
     </SettingsItemGroup>
 
-    <!-- 阴影设置仅适用于现代布局 -->
     <SettingsItemGroup
       v-if="isModernLayout"
       :title="$t('settings.video_card_shadow_curve')"

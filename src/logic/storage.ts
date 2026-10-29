@@ -187,12 +187,7 @@ export type RecommendationModeOption = 'web' | 'webNoCookie' | 'appSingle' | 'ap
 export const RECOMMENDATION_MODE_OPTIONS: readonly RecommendationModeOption[] = ['web', 'webNoCookie', 'appSingle', 'appDouble']
 /** 快速切换按钮组至少显示的选项数 */
 export const MIN_RECOMMENDATION_MODE_SWITCHER_OPTIONS = 2
-/**
- * 评论回复树展示模式：
- * - lineCollapseMain：线条，收起时折叠父节点本体
- * - lineKeepMain：线条，收起时保留父节点正文，仅隐藏子回复
- * - indentOnly：仅缩进，无收起
- */
+/** lineCollapseMain 折叠父正文，lineKeepMain 保留父正文，indentOnly 仅缩进。 */
 export type CommentReplyTreeMode = 'lineCollapseMain' | 'lineKeepMain' | 'indentOnly'
 export type CommentReplyPaginationMode = 'loadMore' | 'pagination'
 export type MomentsCardOpenMode = 'dialog' | 'newTab' | 'background'
@@ -216,10 +211,7 @@ export interface LocalSettings {
   bewlyWidescreenSidebarWidth: number
 }
 
-/**
- * 网格列数配置
- * 固定的媒体断点，只允许配置每个断点的列数
- */
+/** 网格列数配置 固定的媒体断点，只允许配置每个断点的列数 */
 export interface GridColumnsConfig {
   base: number // 默认列数 (< 640px)
   sm: number // >= 640px
@@ -1123,10 +1115,7 @@ function normalizeFavoriteOrganizerFolders(value: unknown): FavoriteOrganizerFol
   return folders
 }
 
-/**
- * 补齐推荐模式快速切换选项：旧版存储为可见项的字符串数组（固定顺序），转为带顺序的可见性列表；
- * 去除重复与非法项，缺失项按可见追加，可见项不足下限时全部显示。
- */
+/** 补齐推荐模式快速切换选项：旧版存储为可见项的字符串数组（固定顺序），转为带顺序的可见性列表； 去除重复与非法项，缺失项按可见追加，可见项不足下限时全部显示。 */
 export function normalizeRecommendationModeSwitcherOptions(value: unknown): Settings['recommendationModeSwitcherOptions'] {
   const items = Array.isArray(value) ? value : []
   const isLegacy = items.length > 0 && items.every(item => typeof item === 'string')

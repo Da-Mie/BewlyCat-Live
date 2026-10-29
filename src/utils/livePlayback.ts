@@ -3,6 +3,19 @@ export interface LiveTimeRange {
   end: number
 }
 
+export const LIVE_TIMELINE_SECONDS = 10 * 60
+
+export function livePlaybackPoint(ranges: LiveTimeRange[], sync: number | null | undefined, duration: number): number {
+  if (typeof sync === 'number' && Number.isFinite(sync) && sync >= 0 && (!Number.isFinite(duration) || sync <= duration))
+    return sync
+  const last = ranges.at(-1)
+  return last ? Math.max(last.start, last.end - 0.9) : 0
+}
+
+export function isLivePositionAvailable(ranges: LiveTimeRange[], position: number): boolean {
+  return Number.isFinite(position) && ranges.some(range => position >= range.start && position <= range.end)
+}
+
 export function readLiveRanges(media: Pick<HTMLMediaElement, 'buffered' | 'seekable'>): LiveTimeRange[] {
   const ranges: LiveTimeRange[] = []
   const { buffered, seekable } = media
@@ -43,7 +56,7 @@ export function clampLivePosition(ranges: LiveTimeRange[], target: number, curre
 export function liveHistorySeconds(bytesPerSecond: number): number {
   if (!Number.isFinite(bytesPerSecond) || bytesPerSecond <= 0)
     return 120
-  // Reserve headroom for audio and forward buffering; native eviction can shorten this window.
+  // 预留音频与前向缓冲；浏览器可能提前回收缓存。
   return Math.max(10, Math.min(15 * 60, Math.floor(96 * 1024 * 1024 / (bytesPerSecond * 1.25))))
 }
 

@@ -30,10 +30,7 @@ const playAllUrl = computed((): string => {
 
 const scrollContainer = ref<HTMLElement>()
 
-/**
- * 删除遮罩状态：confirming 等待确认（尚未调用接口），removing 删除中，
- * removed 已删除但保留原位可还原，restoring 还原中；index 为确认删除时在展示列表中的位置
- */
+/** 删除遮罩状态：confirming 等待确认（尚未调用接口），removing 删除中， removed 已删除但保留原位可还原，restoring 还原中；index 为确认删除时在展示列表中的位置 */
 type RemoveStatus = 'confirming' | 'removing' | 'removed' | 'restoring'
 const removeStatuses = reactive(new Map<number, { item: WatchLaterItem, index: number, status: RemoveStatus }>())
 
@@ -202,7 +199,6 @@ function handleOpenVideoPageAndRemove(index: number, aid: number, bvid: string) 
     data-key="watchLater"
     flex="~ col"
   >
-    <!-- top bar -->
     <header
       flex="~ items-center justify-between gap-3 wrap"
       p="x-6 y-5"
@@ -245,7 +241,6 @@ function handleOpenVideoPageAndRemove(index: number, aid: number, bvid: string) 
       </div>
     </header>
 
-    <!-- watchLater wrapper -->
     <main
       ref="scrollContainer"
       overflow-y-auto
@@ -255,21 +250,18 @@ function handleOpenVideoPageAndRemove(index: number, aid: number, bvid: string) 
       min-h-0
       overscroll-contain
     >
-      <!-- loading -->
       <Loading
         v-if="isLoadingWatchLater && watchLaterList.length === 0"
         h="full"
         flex="~ items-center"
       />
 
-      <!-- empty -->
       <Empty
         v-if="!isLoadingWatchLater && displayWatchLaterList.length === 0"
         w="full" flex-1
         flex="~ items-center"
       />
 
-      <!-- watchlater：卡片结构与收藏/动态弹窗视频卡保持一致，特有操作作为封面覆盖层 -->
       <TransitionGroup name="removable-list" tag="div" class="removable-list-group" flex="~ col gap-2">
         <ALink
           v-for="(item, index) in displayWatchLaterList"
@@ -290,7 +282,6 @@ function handleOpenVideoPageAndRemove(index: number, aid: number, bvid: string) 
             :author-name="getWatchLaterAuthor(item).name"
             :author-href="getAuthorJumpUrl(getWatchLaterAuthor(item))"
           >
-            <!-- 左上：在普通视频页打开 / 播放并从列表移除 -->
             <template #coverTopLeft>
               <div
                 class="group-hover:opacity-100 opacity-0"
@@ -317,7 +308,6 @@ function handleOpenVideoPageAndRemove(index: number, aid: number, bvid: string) 
               </div>
             </template>
 
-            <!-- 右上：从稍后再看移除 -->
             <template #coverTopRight>
               <div
                 class="group-hover:opacity-100 opacity-0"
@@ -336,7 +326,6 @@ function handleOpenVideoPageAndRemove(index: number, aid: number, bvid: string) 
               </div>
             </template>
 
-            <!-- 右下角：观看进度 / 总时长 -->
             <template #coverOverlay>
               <div
                 pos="absolute bottom-0 right-0"
@@ -356,7 +345,6 @@ function handleOpenVideoPageAndRemove(index: number, aid: number, bvid: string) 
             </template>
           </PopMediaCard>
 
-          <!-- 删除遮罩：拦截链接点击；确认前未调用接口，删除后可还原 -->
           <div
             v-if="removeStatuses.has(item.aid)"
             class="watch-later-removed-mask"
@@ -404,12 +392,10 @@ function handleOpenVideoPageAndRemove(index: number, aid: number, bvid: string) 
         </ALink>
       </TransitionGroup>
 
-      <!-- loading -->
       <Transition name="fade">
         <Loading v-if="isLoadingWatchLater && watchLaterList.length !== 0" m="b-4" />
       </Transition>
 
-      <!-- no more content -->
       <div
         v-if="!isLoadingWatchLater && !hasMoreContent && displayWatchLaterList.length > 0"
         text="$bew-text-3 xs center"

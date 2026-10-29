@@ -291,9 +291,7 @@ export function setupNecessarySettingsWatchers() {
   window.addEventListener('popstate', refreshUselessFeedCardBlocker)
   window.addEventListener('hashchange', refreshUselessFeedCardBlocker)
 
-  /**
-   * 搜尋結果的上方的廣告，但有時是年末總結、年度報告這些
-   */
+  /** 搜尋結果的上方的廣告，但有時是年末總結、年度報告這些 */
   const blockTopSearchPageAdsStyleEl = injectCSS(`
     .activity-game-list {
       display: none !important;

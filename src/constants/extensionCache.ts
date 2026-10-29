@@ -3,10 +3,7 @@ export const EXTENSION_CACHE_MESSAGE = {
   WRITE: 'extensionCache:write',
 } as const
 
-/**
- * 由后台 IndexedDB 保存的大体积缓存。storage.local 的每次写入都会把新旧值广播给
- * 所有标签页的所有框架，这类只服务单个页面的缓存不能放在那里。
- */
+/** 由后台 IndexedDB 保存的大体积缓存。storage.local 的每次写入都会把新旧值广播给 所有标签页的所有框架，这类只服务单个页面的缓存不能放在那里。 */
 export const EXTENSION_CACHE_KEYS = ['momentsFeedCache'] as const
 
 export type ExtensionCacheKey = typeof EXTENSION_CACHE_KEYS[number]

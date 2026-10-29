@@ -47,11 +47,11 @@ export function createLiveCommerce(api: Dependencies) {
       try {
         const sc = await api.get('/av/v1/SuperChat/config', { room_id: info.room_id, ruid: info.uid, area_id: info.area_id, parent_area_id: info.parent_area_id }, signal)
         if (sc.user_ban_info?.limited)
-          throw new Error(sc.user_ban_info.limited_tip || '当前账号暂不能发送醒目留言。')
+          throw new Error(sc.user_ban_info.limited_tip || '当前账号暂不能发送 SC。')
         for (const item of sc.price_configs ?? []) {
           if (item.type_detail?.can_buy === false || !Number.isSafeInteger(item.price * 1000) || item.price <= 0 || !Number.isSafeInteger(item.id) || !Number.isSafeInteger(item.level) || !Number.isInteger(item.limit) || item.limit < 1)
             continue
-          offers.push({ id: `sc:${item.id}`, kind: 'sc', giftId: Number(sc.gift_id), goodsId: Number(sc.goods_id) || 12, configId: item.id, level: item.level, name: String(sc.gift_name || '醒目留言'), image: '', price: item.price * 1000, currency: 'gold', maxQuantity: 1, limit: Math.min(item.limit, 1000) })
+          offers.push({ id: `sc:${item.id}`, kind: 'sc', giftId: Number(sc.gift_id), goodsId: Number(sc.goods_id) || 12, configId: item.id, level: item.level, name: 'SC', image: '', price: item.price * 1000, currency: 'gold', maxQuantity: 1, limit: Math.min(item.limit, 1000) })
         }
       }
       catch (error) {

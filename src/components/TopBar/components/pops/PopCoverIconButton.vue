@@ -1,8 +1,5 @@
 <script setup lang="ts">
-/**
- * 顶栏弹窗媒体卡封面上的圆形小图标钮（稍后再看操作 / 历史删除）。
- * 显隐由父级覆盖层容器的 group-hover 控制，本组件只管统一样式与可访问性。
- */
+/** 顶栏弹窗媒体卡封面上的圆形小图标钮（稍后再看操作 / 历史删除）。 显隐由父级覆盖层容器的 group-hover 控制，本组件只管统一样式与可访问性。 */
 withDefaults(defineProps<{
   ariaLabel?: string
   tooltip?: string

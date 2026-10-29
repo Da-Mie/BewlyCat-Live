@@ -4,10 +4,7 @@ import type { CSSProperties, Ref } from 'vue'
 const LIST_GAP = 4
 const VIEWPORT_MARGIN = 8
 
-/**
- * 输入框下拉提示：列表传送到顶层后按锚点 fixed 定位，避免被弹窗或设置面板的滚动区裁切。
- * 下方空间不足时向上展开；定位基于打开时的坐标，外部滚动或窗口尺寸变化时收起。
- */
+/** 输入框下拉提示：列表传送到顶层后按锚点 fixed 定位，避免被弹窗或设置面板的滚动区裁切。 下方空间不足时向上展开；定位基于打开时的坐标，外部滚动或窗口尺寸变化时收起。 */
 export function useAnchoredDropdown(
   anchorRef: Ref<HTMLElement | undefined>,
   listRef: Ref<HTMLElement | undefined>,

@@ -12,12 +12,7 @@ import {
 } from '~/utils/immersiveFeed'
 import { injectCSS, isVideoOrBangumiPage } from '~/utils/main'
 
-/**
- * 沉浸式模式 iframe 内的视频详情页：播放完全使用 B 站原生播放器，
- * 这里只把 Bewly 宽屏的「选集 / 推荐」面板换成首页推荐流，并在原生控制栏补充上一个 / 下一个，
- * 所有切换请求交给首页处理（首页更换 iframe 地址）。
- * 预加载的下一条视频页同样运行本模块，但在被切换为当前视频前保持暂停、不响应快捷键。
- */
+/** iframe 使用原生播放，首页负责换片；预加载页保持暂停且不响应快捷键。 */
 
 const PANEL_CLASS = 'bewly-immersive-feed-panel'
 const CONTROL_CLASS = 'bewly-immersive-ctrl'

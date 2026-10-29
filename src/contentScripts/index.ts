@@ -175,10 +175,7 @@ function isSupportedPages(): boolean {
     || /^https?:\/\/passport\.bilibili\.com\/login.*$/.test(currentUrl)
     // music center page 新歌熱榜 https://music.bilibili.com/pc/music-center/
     || /https?:\/\/music\.bilibili\.com\/pc\/music-center.*$/.test(currentUrl)
-    // // blackboard 存在和B站其他页面不一样的元素，需要独立适配
-    // || /https?:\/\/(?:www\.)?bilibili\.com\/blackboard.*$/.test(currentUrl)
-    // // judgement 存在和B站其他页面不一样的元素，需要独立适配
-    // || /https?:\/\/(?:www\.)?bilibili\.com\/judgement.*$/.test(currentUrl)
+
   ) {
     return true
   }
@@ -1416,25 +1413,6 @@ else if (shouldInitializeContentScript) {
       }
 
       // 如果要使用方案1（删除DOM），取消注释以下代码并注释掉上面的 CSS 方案：
-    /*
-    // 清理 B 站脚本资源，避免内存泄漏和性能问题
-    cleanupBilibiliScripts()
-
-    // 延迟一小段时间，让清理逻辑生效
-    await new Promise(resolve => setTimeout(resolve, 100))
-
-    // Remove the original Bilibili homepage
-    document.body.innerHTML = ''
-
-    // Remove the Bilibili Evolved homepage & Bilibili-Gate homepage
-    injectCSS(`
-      .home-redesign-base, .bilibili-gate-root {
-        display: none !important;
-      }
-    `)
-
-    ensureOriginalBilibiliTopBarAppended(document)
-    */
     }
 
     // 首屏 UI 不等待空闲回调，否则繁忙页面会长时间保留原站外观。

@@ -1,7 +1,4 @@
-/**
- * 视频卡片共享样式计算（单例模式）
- * 避免每个卡片重复计算相同的样式
- */
+/** 视频卡片共享样式计算（单例模式） 避免每个卡片重复计算相同的样式 */
 
 import { computed } from 'vue'
 
@@ -18,10 +15,7 @@ const VIDEO_CARD_FONT_SIZE_MAP = {
 // 标题行高常量
 const TITLE_LINE_HEIGHT = 1.35
 
-/**
- * 使用视频卡片共享样式
- * 所有卡片使用相同的字体大小，避免重复计算
- */
+/** 使用视频卡片共享样式 所有卡片使用相同的字体大小，避免重复计算 */
 export function useVideoCardSharedStyles() {
   // 标题字体大小类（全局共享，使用4档预设）
   const titleFontSizeClass = computed(() =>

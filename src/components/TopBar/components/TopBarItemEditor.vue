@@ -5,11 +5,7 @@ import { useLayoutEditMode } from '~/composables/useLayoutEditMode'
 
 const props = defineProps<{
   componentKey: string
-  /**
-   * Kept for callers that use the component as a labelled editor target. The
-   * inspector reads the stable settings key below, so no inline controls are
-   * rendered here.
-   */
+  /** 仅提供设置键供检查器定位，不渲染内联控件。 */
   title?: string
   settingsTargetTitleKey?: string
 }>()

@@ -396,7 +396,6 @@ provide('getVideoType', () => props.type!)
         }"
         v-on="coverSkeleton ? {} : linkEvents"
       >
-        <!-- Cover -->
         <div
           :class="horizontal ? 'horizontal-card-cover' : 'vertical-card-cover'"
           relative
@@ -439,7 +438,6 @@ provide('getVideoType', () => props.type!)
           </VideoCardCover>
         </div>
 
-        <!-- Other Information -->
         <VideoCardInfo
           v-if="!isRemoved"
           ref="infoComponentRef"
@@ -461,7 +459,7 @@ provide('getVideoType', () => props.type!)
           :compact-meta="props.type === 'appRcmd' && settings.appRecommendationColumn === 'double'"
           @more-btn-click="logic.handleMoreBtnClick"
         />
-        <!-- Keep the configured cover/info ratio after horizontal cards are removed. -->
+
         <div
           v-else-if="horizontal"
           class="horizontal-card-info"
@@ -470,7 +468,6 @@ provide('getVideoType', () => props.type!)
       </component>
     </div>
 
-    <!-- More menu -->
     <Teleport
       v-if="logic.showVideoOptions.value && props.video && showMoreButton"
       :to="mainAppRef"

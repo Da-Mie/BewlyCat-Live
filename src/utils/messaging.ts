@@ -39,9 +39,7 @@ function waitForRetry(delay: number) {
   return new Promise<void>(resolve => setTimeout(resolve, delay))
 }
 
-/**
- * 从 content script 发送消息到 background
- */
+/** 从 content script 发送消息到 background */
 export async function sendMessage<T = any, R = any>(type: string, data?: T): Promise<R> {
   const message: Message<T> = { type, data: data as T }
   let lastError: unknown
@@ -158,9 +156,7 @@ function sendApiPortMessage(type: string, data: unknown, signal: AbortSignal): P
   })
 }
 
-/**
- * 在 background 中监听来自 content script 的消息
- */
+/** 在 background 中监听来自 content script 的消息 */
 export function onMessage<T = any, R = any>(
   type: string,
   handler: MessageHandler<T, R>,

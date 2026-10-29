@@ -1,8 +1,6 @@
 import type { VideoSearchFilters } from '../types'
 
-/**
- * 获取时间范围参数
- */
+/** 获取时间范围参数 */
 export function getTimeRangeParams(filters: VideoSearchFilters): Record<string, number> {
   const { timeRange, customStartDate, customEndDate } = filters
 
@@ -66,9 +64,7 @@ export function getTimeRangeParams(filters: VideoSearchFilters): Record<string, 
   }
 }
 
-/**
- * 构建视频搜索参数
- */
+/** 构建视频搜索参数 */
 export function buildVideoSearchParams(options: {
   loadMore: boolean
   context: string
@@ -91,18 +87,14 @@ export function buildVideoSearchParams(options: {
   }
 }
 
-/**
- * 过滤视频广告
- */
+/** 过滤视频广告 */
 export function applyVideoTimeFilter(list: any[]): any[] {
   if (!Array.isArray(list))
     return []
   return list.filter(item => !isVideoAd(item))
 }
 
-/**
- * 判断是否为视频广告
- */
+/** 判断是否为视频广告 */
 function isVideoAd(item: any): boolean {
   if (!item || typeof item !== 'object')
     return false
@@ -120,9 +112,7 @@ function isVideoAd(item: any): boolean {
   return false
 }
 
-/**
- * 去重辅助函数
- */
+/** 去重辅助函数 */
 export function dedupeByKey<T>(items: T[], keyGetter: (item: T) => string): T[] {
   const seen = new Set<string>()
   const result: T[] = []

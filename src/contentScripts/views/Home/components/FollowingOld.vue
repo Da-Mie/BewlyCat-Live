@@ -43,9 +43,7 @@ interface LiveVideoElement {
 }
 
 const videoList = tabState.ref<VideoElement[]>('videoList', [])
-/**
- * Get all livestreaming videos of followed users
- */
+/** Get all livestreaming videos of followed users */
 const livePage = tabState.ref<number>('livePage', 1)
 const liveVideoList = tabState.ref<LiveVideoElement[]>('liveVideoList', [])
 const isLoading = ref<boolean>(false)
@@ -244,7 +242,7 @@ async function getLiveVideoList() {
     }
   }
   catch {
-    // 忽略错误
+
   }
 }
 

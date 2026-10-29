@@ -32,11 +32,7 @@ interface LiquidGeometry {
   height: number
 }
 
-/**
- * Liquid capsule morph: always keeps full item-sized rounded pill.
- * Never collapses into a ball or compresses on the cross-axis.
- * The sticky feel comes only from stretching along the travel direction.
- */
+/** 胶囊仅沿移动方向拉伸，保持选项尺寸。 */
 function computeLiquidGeometry(from: LiquidSegmentRect, to: LiquidSegmentRect, t: number): LiquidGeometry {
   const progress = clamp(t, 0, 1)
 
@@ -84,9 +80,7 @@ function computeLiquidGeometry(from: LiquidSegmentRect, to: LiquidSegmentRect, t
   }
 }
 
-/**
- * Sliding liquid indicator for segmented controls / dock.
- */
+/** Sliding liquid indicator for segmented controls / dock. */
 export function useLiquidSegmentIndicator(options: {
   containerRef: Ref<HTMLElement | null | undefined>
   activeKey: MaybeRefOrGetter<unknown>

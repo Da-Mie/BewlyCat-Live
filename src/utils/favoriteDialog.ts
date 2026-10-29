@@ -1,16 +1,11 @@
-/**
- * 收藏弹窗增强工具函数
- * 用于在B站收藏弹窗添加清空已选按钮和放大样式
- */
+/** 收藏弹窗增强工具函数 用于在B站收藏弹窗添加清空已选按钮和放大样式 */
 
 import { settings } from '~/logic'
 import { i18n } from '~/utils/i18n'
 
 let observer: MutationObserver | null = null
 
-/**
- * 创建清空已选按钮
- */
+/** 创建清空已选按钮 */
 function createClearButton(container: Element): HTMLElement {
   const clearBtn = document.createElement('button')
   clearBtn.className = 'bewly-clear-selection-btn btn'
@@ -26,9 +21,7 @@ function createClearButton(container: Element): HTMLElement {
   return clearBtn
 }
 
-/**
- * 清空所有选中的收藏夹
- */
+/** 清空所有选中的收藏夹 */
 function clearAllSelections(container: Element) {
   const checkboxes = container.querySelectorAll<HTMLInputElement>('.group-list ul li input[type="checkbox"]:checked')
 
@@ -42,16 +35,12 @@ const FAV_MARKED_ATTR = 'bewlyFavMarked'
 const FULL_GUARD_BOUND_ATTR = 'bewlyFullGuardBound'
 const FULL_DISABLED_CLASS = 'bewly-full-disabled'
 
-/**
- * 判断收藏夹是否已满（原生会为其 label 添加 disable 类）
- */
+/** 判断收藏夹是否已满（原生会为其 label 添加 disable 类） */
 function isFullFolder(label: HTMLElement): boolean {
   return label.classList.contains('disable')
 }
 
-/**
- * 标记「已满且视频原本不在其中」的收藏夹，用于灰色禁用外观与点击拦截
- */
+/** 标记「已满且视频原本不在其中」的收藏夹，用于灰色禁用外观与点击拦截 */
 function markFullDisabledFolders(dialog: Element) {
   dialog.querySelectorAll<HTMLElement>('.group-list li label').forEach((label) => {
     if (label.dataset[FAV_MARKED_ATTR])
@@ -68,9 +57,7 @@ function markFullDisabledFolders(dialog: Element) {
   })
 }
 
-/**
- * 是否应阻止勾选：收藏夹已满、当前未勾选，且视频原本不在其中
- */
+/** 是否应阻止勾选：收藏夹已满、当前未勾选，且视频原本不在其中 */
 function shouldBlockFullFolderToggle(label: HTMLElement, target: Element): boolean {
   if (!label.classList.contains(FULL_DISABLED_CLASS))
     return false
@@ -81,9 +68,7 @@ function shouldBlockFullFolderToggle(label: HTMLElement, target: Element): boole
   return !!input && (target === input ? input.checked : !input.checked)
 }
 
-/**
- * 显示与 B 站一致的「收藏夹已满」提示
- */
+/** 显示与 B 站一致的「收藏夹已满」提示 */
 function showFolderFullMessage(anchor: HTMLElement) {
   document.querySelectorAll('.bili-msg').forEach(el => el.remove())
 
@@ -101,9 +86,7 @@ function showFolderFullMessage(anchor: HTMLElement) {
   window.setTimeout(() => message.remove(), 2000)
 }
 
-/**
- * 拦截对已满收藏夹的勾选，并弹出提示
- */
+/** 拦截对已满收藏夹的勾选，并弹出提示 */
 function bindFullFolderGuard(dialog: Element) {
   const element = dialog as HTMLElement
   if (element.dataset[FULL_GUARD_BOUND_ATTR])
@@ -126,9 +109,7 @@ function bindFullFolderGuard(dialog: Element) {
   }, true)
 }
 
-/**
- * 应用放大样式到收藏弹窗
- */
+/** 应用放大样式到收藏弹窗 */
 function applyEnlargedStyle(dialog: Element) {
   if (settings.value.enlargeFavoriteDialog) {
     dialog.classList.add('bewly-enlarged-favorite-dialog')
@@ -138,9 +119,7 @@ function applyEnlargedStyle(dialog: Element) {
   }
 }
 
-/**
- * 注入清空按钮到收藏弹窗
- */
+/** 注入清空按钮到收藏弹窗 */
 function injectClearButton(dialog: Element) {
   // 检查是否已经注入过
   if (dialog.querySelector('.bewly-clear-selection-btn')) {
@@ -168,9 +147,7 @@ function injectClearButton(dialog: Element) {
   }
 }
 
-/**
- * 增强收藏弹窗
- */
+/** 增强收藏弹窗 */
 function enhanceFavoriteDialog(dialog: Element) {
   // 应用放大样式
   applyEnlargedStyle(dialog)
@@ -183,10 +160,7 @@ function enhanceFavoriteDialog(dialog: Element) {
   bindFullFolderGuard(dialog)
 }
 
-/**
- * 初始化收藏弹窗增强功能
- * 监听 DOM 变化，当收藏弹窗出现时应用增强功能（清空按钮和放大样式）
- */
+/** 初始化收藏弹窗增强功能 监听 DOM 变化，当收藏弹窗出现时应用增强功能（清空按钮和放大样式） */
 export function initFavoriteDialogEnhancement() {
   // 如果已经初始化过，先清理
   if (observer) {
@@ -234,9 +208,7 @@ export function initFavoriteDialogEnhancement() {
   }
 }
 
-/**
- * 停止收藏弹窗增强功能
- */
+/** 停止收藏弹窗增强功能 */
 export function stopFavoriteDialogEnhancement() {
   if (observer) {
     observer.disconnect()

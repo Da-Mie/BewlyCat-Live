@@ -260,7 +260,7 @@ defineExpose({
     <Transition name="fade">
       <Loading v-if="showLoading" w-full h-full pos="absolute top-0 left-0" />
     </Transition>
-    <!-- Iframe -->
+
     <iframe
       ref="iframeRef"
       :src="props.url"

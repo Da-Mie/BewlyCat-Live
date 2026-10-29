@@ -71,7 +71,7 @@ function handleEpisodeClick(url?: string) {
   closeDropdown()
 }
 
-/** when you click on it outside, the selection option will be turned off  */
+/** when you click on it outside, the selection option will be turned off */
 function onMouseLeave() {
   window.addEventListener('click', closeDropdown)
 }
@@ -114,7 +114,6 @@ watchEffect(() => {
     >
       <span truncate>{{ defaultLabel }}</span>
 
-      <!-- arrow -->
       <div
         border="~ solid t-0 l-0 r-2 b-2"
         :border-color="isOpen ? '$bew-theme-color' : '$bew-fill-4'"
@@ -169,7 +168,6 @@ watchEffect(() => {
         </div>
       </Transition>
 
-      <!-- 遮罩 外部滚动时关闭下拉菜单 -->
       <div
         v-if="isOpen"
         pos="fixed top-0 left-0"

@@ -295,7 +295,6 @@ function toggleTabContentLoading(loading: boolean) {
 
 <template>
   <div pos="relative">
-    <!-- Home search page mode background -->
     <Transition name="bg">
       <div
         v-if="settings.useSearchPageModeOnHomePage && settings.individuallySetSearchPageWallpaper && !settings.disableBackground"
@@ -314,7 +313,7 @@ function toggleTabContentLoading(loading: boolean) {
             backgroundAttachment: settings.searchPageModeWallpaperFixed ? 'fixed' : 'unset',
           }"
         />
-        <!-- background mask -->
+
         <Transition name="fade">
           <div
             v-if="(!settings.individuallySetSearchPageWallpaper && settings.enableWallpaperMasking) || (settings.searchPageEnableWallpaperMasking)"
@@ -336,7 +335,6 @@ function toggleTabContentLoading(loading: boolean) {
     </Transition>
 
     <main>
-      <!-- Home search page mode content -->
       <Transition name="content">
         <div
           v-if="settings.useSearchPageModeOnHomePage"

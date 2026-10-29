@@ -4,7 +4,7 @@ export interface NativeLiveFilters {
   blockedUids: string[]
 }
 
-/** The same account shield_info used by the native live room and PiliPlus. */
+/** 读取原生直播屏蔽规则。 */
 export function readNativeLiveFilters(data: unknown, uid: string): NativeLiveFilters {
   const shield = (data as { shield_info?: { keyword_list?: unknown, shield_user_list?: unknown } } | null)?.shield_info
   if (!shield || typeof shield !== 'object' || Array.isArray(shield))
@@ -27,6 +27,6 @@ export function readNativeLiveFilters(data: unknown, uid: string): NativeLiveFil
 }
 
 export function isNativeLiveMessageBlocked(message: { uid: string, text: string }, filters: NativeLiveFilters): boolean {
-  // Native live keywords are literal, case-sensitive substrings, not regexes.
+  // 按原文匹配，区分大小写。
   return filters.blockedUids.includes(message.uid) || filters.keywords.some(keyword => message.text.includes(keyword))
 }

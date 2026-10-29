@@ -1,44 +1,5 @@
 <script setup lang="ts">
-/**
- * Following Component - 正在关注页面
- *
- * ## 功能概述
- * 显示用户关注的UP主列表及其视频动态流。支持两种视图模式：
- * 1. ALL视图：显示所有关注UP主的混合视频流
- * 2. 单UP主视图：显示特定UP主的视频动态，支持通过关键词搜索其视频投稿
- *
- * UP主列表优先使用页面已加载到的历史投稿时间排序，来源包括：
- * 1. ALL视图的关注动态流中实际加载到的视频时间
- * 2. 用户点击某个UP主后实际加载到的视频时间
- * 3. 右上角动态Pop和插件动态页已经加载到的视频时间
- *
- * 没有历史投稿时间时使用关注接口的关注时间兜底，不发起后台逐人请求。
- *
- * ## 缓存策略
- *
- * ### 已读状态 (VIEWED_UPLOADERS_KEY)
- * - 记录用户查看每个UP主的时间戳
- * - 用于判断 hasUpdate 状态（红点提示）
- *
- * ### UP主投稿时间缓存
- * - 通过扩展级共享存储复用上述四类页面已经加载到的最新视频时间
- * - 旧版后台逐人同步产生的缓存不会参与排序
- *
- * ## 排序策略
- *
- * 可按更新时间或关注分组展示，分组内按更新时间排序；没有投稿记录时使用关注时间。
- *
- * ## 布局模式
- *
- * ### 新布局（默认，可在设置中关闭）
- * - 左侧：Sticky侧边栏显示UP主列表
- * - 右侧：全宽视频流，支持全页面滚动
- * - 参考 Ranking.vue 的布局设计
- *
- * ## 性能优化
- * - 扩展级共享缓存减少重复计算
- * - 分页加载，避免一次性加载过多数据
- */
+/** 关注流与单 UP 投稿共用已加载的投稿时间；缺失时按关注时间排序，不逐人请求。 */
 import { useI18n } from 'vue-i18n'
 
 import type { Author, Video } from '~/components/VideoCard/types'
@@ -1456,7 +1417,6 @@ defineExpose({ initData })
 
 <template>
   <div class="following-layout" flex="~ gap-40px">
-    <!-- Left Panel: Uploader List -->
     <aside class="uploader-sidebar" w-200px shrink-0>
       <div class="uploader-scroll bew-page-sidebar">
         <div class="following-display-toggle bew-segment-control bew-segment-control--static" role="group" :aria-label="$t('settings.following_sort')">
@@ -1472,7 +1432,7 @@ defineExpose({ initData })
             {{ $t(mode === 'group' ? 'home.following_display_grouped' : 'home.following_display_flat') }}
           </button>
         </div>
-        <!-- Search Box -->
+
         <div class="bew-toolbar-controls" mb-3>
           <Input
             v-model="searchKeyword"
@@ -1496,9 +1456,7 @@ defineExpose({ initData })
           </template>
         </div>
 
-        <!-- 分组一次可能移除数百个成员，直接更新列表，避免退出动画的绝对定位行覆盖其他按钮。 -->
         <ul ref="uploaderScrollRef" class="uploader-list" flex="~ col gap-2">
-          <!-- All Uploaders Option -->
           <li key="all-uploaders">
             <button
               type="button"
@@ -1529,7 +1487,6 @@ defineExpose({ initData })
             </button>
           </li>
 
-          <!-- 分组标题和成员随搜索框下方的列表整体滚动。 -->
           <li
             v-for="row in uploaderRows" :key="row.key"
             :class="{ 'uploader-group': row.type === 'group' }"
@@ -1572,7 +1529,7 @@ defineExpose({ initData })
                       loading="lazy"
                       alt="Avatar"
                     >
-                    <!-- Red dot for new updates -->
+
                     <div
                       v-if="uploader.hasUpdate"
                       pos="absolute top-0 right-0"
@@ -1610,7 +1567,6 @@ defineExpose({ initData })
       </div>
     </aside>
 
-    <!-- Right Panel: Video Feed -->
     <div w-full min-w-0>
       <form
         v-if="selectedUploader !== null"

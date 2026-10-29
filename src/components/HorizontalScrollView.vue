@@ -4,9 +4,6 @@ import type { Ref } from 'vue'
 import { settings } from '~/logic'
 
 const scrollListWrap = ref<HTMLElement>() as Ref<HTMLElement>
-// const showLeftMask = ref<boolean>(false)
-// const showRightMask = ref<boolean>(false)
-const showScrollMask = ref<boolean>(true)
 
 watch([() => settings.value.enableHorizontalScrolling, scrollListWrap], ([enableHorizontalScrolling, scrollListWrap]) => {
   if (!scrollListWrap)
@@ -18,22 +15,6 @@ watch([() => settings.value.enableHorizontalScrolling, scrollListWrap], ([enable
     scrollListWrap.removeEventListener('wheel', handleMouseScroll)
 })
 
-onMounted(() => {
-  // scrollListWrap.value.addEventListener('scroll', () => {
-  //   if (scrollListWrap.value.scrollLeft > 0)
-  //     showScrollMask.value = true
-
-  //   else
-  //     showScrollMask.value = false
-
-  //   if (
-  //     scrollListWrap.value.scrollLeft + scrollListWrap.value.clientWidth
-  //     >= scrollListWrap.value.scrollWidth - 20
-  //   )
-  //     showScrollMask.value = false
-  // })
-})
-
 function handleMouseScroll(event: WheelEvent) {
   event.preventDefault()
   scrollListWrap.value.scrollLeft += event.deltaY
@@ -42,29 +23,6 @@ function handleMouseScroll(event: WheelEvent) {
 
 <template>
   <div relative>
-    <!-- <transition name="fade">
-      <div
-        v-show="showLeftMask"
-        h-full
-        w-80px
-        absolute
-        z-1
-        style="mask-image: linear-gradient(to left, transparent, black); mask-mode: alpha;"
-      />
-    </transition>
-    <transition name="fade">
-      <div
-        v-show="showRightMask"
-        h-full
-        w-80px
-        pos="absolute right-0"
-        z-1
-        style="
-          background: linear-gradient(to right, transparent, var(--bew-bg));
-        "
-      />
-    </transition> -->
-
     <div
       ref="scrollListWrap"
       w="[calc(100%+80px)]"
@@ -73,7 +31,7 @@ function handleMouseScroll(event: WheelEvent) {
       overflow-x-scroll
       overflow-y-hidden
       relative
-      :class="{ 'scroll-mask': showScrollMask }"
+      class="scroll-mask"
     >
       <slot />
     </div>

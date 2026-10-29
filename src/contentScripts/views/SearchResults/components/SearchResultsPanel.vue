@@ -34,6 +34,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   updatePage: [page: number]
+  switchToLiveUser: []
 }>()
 
 // Page 组件的 refs
@@ -83,7 +84,6 @@ function handleUpdatePage(page: number) {
   emit('updatePage', page)
 }
 
-// 暴露给父组件
 defineExpose({
   handleReachBottom,
 })
@@ -91,7 +91,6 @@ defineExpose({
 
 <template>
   <div class="search-results-panel">
-    <!-- All Search Page -->
     <AllSearchPage
       v-if="currentCategory === 'all'"
       ref="allPageRef"
@@ -101,7 +100,6 @@ defineExpose({
       @update-page="handleUpdatePage"
     />
 
-    <!-- Video Search Page -->
     <VideoSearchPage
       v-if="currentCategory === 'video'"
       ref="videoPageRef"
@@ -111,7 +109,6 @@ defineExpose({
       @update-page="handleUpdatePage"
     />
 
-    <!-- Bangumi Search Page -->
     <BangumiSearchPage
       v-if="currentCategory === 'bangumi'"
       ref="bangumiPageRef"
@@ -120,7 +117,6 @@ defineExpose({
       @update-page="handleUpdatePage"
     />
 
-    <!-- MediaFt Search Page -->
     <MediaFtSearchPage
       v-if="currentCategory === 'media_ft'"
       ref="mediaFtPageRef"
@@ -129,7 +125,6 @@ defineExpose({
       @update-page="handleUpdatePage"
     />
 
-    <!-- User Search Page -->
     <UserSearchPage
       v-if="currentCategory === 'user'"
       ref="userPageRef"
@@ -139,7 +134,6 @@ defineExpose({
       @update-page="handleUpdatePage"
     />
 
-    <!-- Live Search Page -->
     <LiveSearchPage
       v-if="currentCategory === 'live'"
       ref="livePageRef"
@@ -147,9 +141,9 @@ defineExpose({
       :filters="liveFilters"
       :initial-page="initialPage"
       @update-page="handleUpdatePage"
+      @switch-to-live-user="emit('switchToLiveUser')"
     />
 
-    <!-- Article Search Page -->
     <ArticleSearchPage
       v-if="currentCategory === 'article'"
       ref="articlePageRef"

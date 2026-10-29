@@ -188,7 +188,6 @@ onMounted(() => {
         />
       </SettingsItem>
 
-      <!-- 缓存时间设置 - 对所有URL壁纸生效 -->
       <SettingsItem :title="$t('settings.wallpaper_cache_time')" right-width="auto">
         <template #desc>
           {{ $t('settings.wallpaper_cache_time_desc') }}
@@ -253,7 +252,6 @@ onMounted(() => {
             </Tooltip>
 
             <Tooltip placement="top" :content="localSettings.locallyUploadedWallpaper?.name || ''" aspect-video>
-              <!-- Upload wallpaper input -->
               <input
                 ref="uploadWallpaperRef" type="file" accept="image/*"
                 hidden

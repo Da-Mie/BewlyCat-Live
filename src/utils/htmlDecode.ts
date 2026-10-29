@@ -24,15 +24,7 @@ const entities: Record<string, string> = {
   '&rsquo;': '\u2019',
 }
 
-/**
- * 解码 HTML 实体
- * 使用轻量级正则替代 DOMParser，性能更好
- *
- * 支持：
- * - 命名实体：&amp; &lt; &gt; &quot; &#39; &nbsp; 等
- * - 十进制数字实体：&#38; &#60; &#34; 等
- * - 十六进制数字实体：&#x27; &#x3C; 等
- */
+/** 解码命名、十进制及十六进制 HTML 实体。 */
 export function decodeHtmlEntities(text: string | undefined): string {
   if (!text || typeof text !== 'string')
     return text || ''

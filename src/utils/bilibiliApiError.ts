@@ -39,12 +39,7 @@ export function isBilibiliLoginInvalidCode(code: unknown): boolean {
     && BILIBILI_LOGIN_INVALID_CODES.includes(normalizedCode as typeof BILIBILI_LOGIN_INVALID_CODES[number])
 }
 
-/**
- * Identifies the risk-control responses used by the web recommendation APIs.
- * Some request failures are thrown as errors with `isRiskControl: true`, while
- * JSON responses may carry a risk code or a `data.v_voucher` challenge even
- * when their top-level code is 0.
- */
+/** 识别风险错误、响应码及 code=0 的 v_voucher 挑战。 */
 export function isBilibiliRiskControl(value: unknown): boolean {
   if (!isRecord(value))
     return false

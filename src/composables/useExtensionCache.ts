@@ -18,10 +18,7 @@ interface ExtensionCacheHandle<T> {
   flush: () => void
 }
 
-/**
- * 后台 IndexedDB 中的整份缓存。只在赋值 `data.value` 时写入；不同标签页之间不实时同步，
- * 同时打开多个页面时以最后写入者为准，适合可重建的缓存数据。
- */
+/** 后台 IndexedDB 中的整份缓存。只在赋值 `data.value` 时写入；不同标签页之间不实时同步， 同时打开多个页面时以最后写入者为准，适合可重建的缓存数据。 */
 export function useExtensionCache<T>(
   key: ExtensionCacheKey,
   initialValue: T,

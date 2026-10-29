@@ -1,10 +1,4 @@
-/**
- * Shared image loading queue.
- *
- * LazyPicture deliberately waits until a queue slot is available before it
- * mounts an image with a src.  This keeps queued pictures cheap while still
- * letting the browser perform the actual format negotiation and decode.
- */
+/** 共享图片队列；取得槽位后才挂载 src，解码交给浏览器。 */
 
 export const IMAGE_LOAD_QUEUE_LIMIT = 6
 const DEFAULT_IMAGE_LOAD_TIMEOUT = 20_000

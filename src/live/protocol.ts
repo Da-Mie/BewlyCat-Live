@@ -1,7 +1,6 @@
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
-const MAX_BYTES = 8 * 1024 * 1024
-let decompressBrotli: typeof import('brotli/decompress').default | undefined
+export const MAX_LIVE_PACKET_BYTES = 8 * 1024 * 1024
 
 export function encodeLivePacket(operation: number, value: unknown = ''): ArrayBuffer {
   const body = encoder.encode(typeof value === 'string' ? value : JSON.stringify(value))
@@ -18,12 +17,17 @@ export function encodeLivePacket(operation: number, value: unknown = ''): ArrayB
 
 export interface LivePacket { operation: number, data: any }
 
-/** Own connection only. Native WebSocket, fetch and XMLHttpRequest are never patched. */
-export async function decodeLivePackets(bytes: Uint8Array, depth = 0): Promise<LivePacket[]> {
-  if (bytes.length > MAX_BYTES || depth > 4)
+export function decodeLivePackets(bytes: Uint8Array, depth = 0): Promise<LivePacket[]> {
+  return decodePackets(bytes, depth, { bytes: MAX_LIVE_PACKET_BYTES - bytes.length, packets: 4096 })
+}
+
+async function decodePackets(bytes: Uint8Array, depth: number, budget: { bytes: number, packets: number }): Promise<LivePacket[]> {
+  if (budget.bytes < 0 || depth > 4)
     throw new Error('Live packet exceeds bounds')
   const packets: LivePacket[] = []
   for (let offset = 0; offset < bytes.length;) {
+    if (--budget.packets < 0)
+      throw new Error('Too many live packets')
     if (offset + 16 > bytes.length)
       throw new Error('Truncated live packet')
     const view = new DataView(bytes.buffer, bytes.byteOffset + offset, bytes.length - offset)
@@ -38,8 +42,8 @@ export async function decodeLivePackets(bytes: Uint8Array, depth = 0): Promise<L
     if (operation === 5 && (version === 2 || version === 3)) {
       let expanded: Uint8Array
       if (version === 3) {
-        decompressBrotli ??= (await import('brotli/decompress')).default
-        expanded = decompressBrotli(body)
+        const { decodeBrotli } = await import('./brotli')
+        expanded = decodeBrotli(body, budget.bytes)
       }
       else {
         const reader = new Blob([new Uint8Array(body)]).stream().pipeThrough(new DecompressionStream('deflate')).getReader()
@@ -50,7 +54,7 @@ export async function decodeLivePackets(bytes: Uint8Array, depth = 0): Promise<L
           if (result.done)
             break
           size += result.value.length
-          if (size > MAX_BYTES) {
+          if (size > budget.bytes) {
             await reader.cancel()
             throw new Error('Expanded live packet exceeds bounds')
           }
@@ -63,7 +67,8 @@ export async function decodeLivePackets(bytes: Uint8Array, depth = 0): Promise<L
           start += part.length
         }
       }
-      packets.push(...await decodeLivePackets(expanded, depth + 1))
+      budget.bytes -= expanded.length
+      packets.push(...await decodePackets(expanded, depth + 1, budget))
     }
     else if (operation === 3) {
       packets.push({ operation, data: body.length >= 4 ? new DataView(body.buffer, body.byteOffset).getUint32(0) : 0 })

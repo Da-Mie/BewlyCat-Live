@@ -529,7 +529,7 @@ defineExpose({ nodes, remaining, focus, sync, setNodes, closePanel })
         @drop.prevent
       />
       <slot name="attachments" />
-      <!-- 工具栏放在输入框内，与正文共用同一个描边容器 -->
+
       <div class="moment-rich-editor__toolbar">
         <div ref="panelTriggers" class="moment-rich-editor__tools bew-segment-control bew-segment-control--static">
           <button

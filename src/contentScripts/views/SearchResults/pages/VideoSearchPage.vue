@@ -31,13 +31,11 @@ const { haveScrollbar, handleBackToTop } = useBewlyApp()
 // 分页模式：scroll 滚动加载，pagination 翻页
 const paginationMode = computed(() => settings.value.searchResultsPaginationMode)
 
-// 翻页加载状态
 const isPageChanging = ref(false)
 
 // Grid 布局：搜索结果使用 adaptive 布局
 const gridLayout = computed<GridLayoutType>(() => 'adaptive')
 
-// 搜索请求管理
 const {
   isLoading,
   error,
@@ -47,7 +45,6 @@ const {
   reset: resetSearch,
 } = useSearchRequest<any[]>('video')
 
-// 分页管理
 const {
   currentPage,
   totalResults,
@@ -60,7 +57,6 @@ const {
   reset: resetPagination,
 } = usePagination()
 
-// 无限加载管理
 const {
   hasMore,
   exhausted,
@@ -77,7 +73,6 @@ const {
   isLoading: () => isLoading.value,
 })
 
-// 监听关键词变化
 watch(() => props.keyword, async (newKeyword, oldKeyword) => {
   const normalizedNew = (newKeyword || '').trim()
   const normalizedOld = (oldKeyword || '').trim()
@@ -94,7 +89,6 @@ watch(() => props.keyword, async (newKeyword, oldKeyword) => {
   }
 })
 
-// 组件挂载时立即执行搜索
 onMounted(() => {
   const keyword = props.keyword.trim()
   if (keyword) {
@@ -178,7 +172,6 @@ async function performSearch(loadMore: boolean): Promise<boolean> {
     results.value = convertedList
   }
 
-  // 提取分页信息
   extractPagination(rawData, filteredList.length)
   updatePage(targetPage)
   setHasMore(paginationHasMore.value)
@@ -195,7 +188,6 @@ async function performSearch(loadMore: boolean): Promise<boolean> {
       setExhausted(true)
     }
 
-    // 处理加载完成
     if (isLoadMore)
       await handleLoadMoreCompletion(haveScrollbar)
   }
@@ -212,7 +204,6 @@ async function handlePageChange(page: number) {
   if (!keyword)
     return
 
-  // 先滚动到顶部
   handleBackToTop()
   await nextTick()
 
@@ -253,10 +244,8 @@ async function handlePageChange(page: number) {
     return convertVideoData(item)
   })
 
-  // 替换结果
   results.value = convertedList
 
-  // 提取分页信息
   extractPagination(rawData, filteredList.length)
   updatePage(page)
   setHasMore(paginationHasMore.value)
@@ -289,7 +278,6 @@ function transformVideo(video: any) {
   return video
 }
 
-// 暴露给父组件
 defineExpose({
   isLoading,
   error,
@@ -326,7 +314,6 @@ defineExpose({
       />
     </template>
 
-    <!-- 翻页模式 -->
     <Pagination
       v-if="paginationMode === 'pagination'"
       :current-page="currentPage"

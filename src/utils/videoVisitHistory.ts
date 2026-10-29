@@ -9,10 +9,7 @@ const VIDEO_VISIT_HISTORY_STORAGE_KEY = 'bewlycat_video_visit_history'
 const LEGACY_VIDEO_VISIT_HISTORY_STORAGE_KEY = 'videoVisitHistory'
 const VIDEO_VISIT_HISTORY_MIGRATION_KEY = 'bewlycat_video_visit_history_migrated'
 
-/**
- * 仅打开过的视频只存访问时间；在视频页实际播放过的视频存
- * `[访问时间, 播放进度秒数, 视频时长秒数]`，用紧凑元组控制本地缓存体积。
- */
+/** 仅打开过的视频只存访问时间；在视频页实际播放过的视频存 `[访问时间, 播放进度秒数, 视频时长秒数]`，用紧凑元组控制本地缓存体积。 */
 export type VideoVisitEntry = number | [visitedAt: number, progress: number, duration: number]
 export type VideoVisitHistory = Record<string, VideoVisitEntry>
 

@@ -112,11 +112,7 @@ export async function getBrowserInfo(): Promise<BrowserInfo> {
     : fallbackInfo
 }
 
-/**
- * 在 background 中读取浏览器信息。页面 MAIN world 的防移动端跳转会把 navigator.userAgent
- * 改写为 Chrome 桌面 UA，Firefox 内容脚本也会读到该值，因此不能在页面上下文中判断。
- * Firefox 优先使用专有的 runtime.getBrowserInfo()，不受任何 UA 改写影响。
- */
+/** MAIN 可能改写 UA；后台优先用 Firefox runtime.getBrowserInfo 判断浏览器。 */
 export async function getExtensionBrowserInfo(): Promise<BrowserInfo> {
   try {
     const runtimeInfo = await browser.runtime.getBrowserInfo?.()

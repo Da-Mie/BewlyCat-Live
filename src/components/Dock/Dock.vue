@@ -159,9 +159,7 @@ const tooltipPlacement = computed(() => {
   return 'right'
 })
 
-/**
- * Whether to show the back to top or refresh button
- */
+/** Whether to show the back to top or refresh button */
 const showBackToTopOrRefreshButton = computed((): boolean => {
   const dockItemConfig = settings.value.dockItemsConfig.find(e => e.page === props.activatedPage)
   if (dockItemConfig && dockItemConfig.useOriginalBiliPage) {
@@ -183,10 +181,7 @@ const showBackToTopOrRefreshActions = computed((): boolean => {
   return showBackToTopOrRefreshButton.value && (canRefreshCurrentPage.value || (backToTopButtonEnabled.value && !reachTop.value))
 })
 
-/**
- * Whether to show the undo/forward buttons
- * Only show on Home page when current sub-page is ForYou
- */
+/** Whether to show the undo/forward buttons Only show on Home page when current sub-page is ForYou */
 const shouldShowUndoForwardButtons = computed((): boolean => {
   return props.activatedPage === AppPage.Home && homeActivatedPage.value === HomeSubPage.ForYou
 })
@@ -562,7 +557,6 @@ onUnmounted(() => {
     pos="fixed" z-100 flex="~ col justify-center items-center"
     z-10 pointer-events-none
   >
-    <!-- Edge Div -->
     <div
       v-if="settings.autoHideDock && hideDock && !isLayoutEditing"
       class="dock-edge"
@@ -574,7 +568,6 @@ onUnmounted(() => {
       @mouseleave="toggleHideDock(true)"
     />
 
-    <!-- Dock Content -->
     <div
       ref="dockContentRef"
       class="dock-content"
@@ -630,7 +623,6 @@ onUnmounted(() => {
           </Tooltip>
         </template>
 
-        <!-- dividing line -->
         <div class="divider" />
 
         <div
@@ -647,7 +639,6 @@ onUnmounted(() => {
             class="group"
             pointer-events-none
           >
-            <!-- moon -->
             <div
               v-if="isDark"
               pos="absolute top-0 left-0 group-hover:top-2px group-hover:left--4px"
@@ -749,7 +740,6 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- Back to top & refresh buttons -->
       <div
         v-if="!isLayoutEditing && showDockActionButtons"
         class="dock-action-buttons"
@@ -814,7 +804,7 @@ onUnmounted(() => {
             </Transition>
           </button>
         </template>
-        <!-- 将原来的两个按钮替换为一个 -->
+
         <Transition name="fade">
           <button
             v-if="showUndoForwardActions"

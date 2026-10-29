@@ -205,7 +205,7 @@ onBeforeUnmount(() => {
       @click="open ? open = false : show()" @focus="onButtonFocus"
     >
       <span class="bpx-common-svg-icon">
-        <!-- 与原生控制栏图标同为 88 网格面性图形：轨道宽 8、推钮 20×12；轨道在推钮上下各留 4 的间隙 -->
+
         <svg viewBox="0 0 88 88" fill="#fff" aria-hidden="true">
           <mask
             :id="knobMaskId" maskUnits="userSpaceOnUse" x="0" y="0" width="88"
@@ -295,7 +295,7 @@ onBeforeUnmount(() => {
           {{ delayNotice }}
         </div>
       </div>
-      <!-- 音量均衡在设置页开启后才在面板中显示 -->
+
       <div v-if="settings.localLoudnessEnabled" class="panel-section">
         <div class="section-heading">
           {{ t('settings.local_loudness.title') }}

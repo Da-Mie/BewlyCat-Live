@@ -1,9 +1,5 @@
 <script setup lang="ts">
-/**
- * Firefox 只能通过 scrollbar-width / scrollbar-color 调整原生滚动条，
- * 这里为插件滚动容器绘制一条与 Chromium 版一致的覆盖式滚动条。
- * 目标容器需自行隐藏原生滚动条（scrollbar-width: none）。
- */
+/** Firefox 覆盖式滚动条；目标容器需设置 scrollbar-width: none。 */
 import { useEventListener, useResizeObserver } from '@vueuse/core'
 
 const props = defineProps<{

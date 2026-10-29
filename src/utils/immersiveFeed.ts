@@ -1,9 +1,6 @@
 import { isInIframe } from './main'
 
-/**
- * 首页沉浸式模式：首页用同源 iframe 打开 B 站视频详情页并强制 Bewly 宽屏，
- * 播放完全交给 B 站原生播放器；推荐流仍由首页持有，两侧通过 postMessage 同步。
- */
+/** 首页沉浸式模式：首页用同源 iframe 打开 B 站视频详情页并强制 Bewly 宽屏， 播放完全交给 B 站原生播放器；推荐流仍由首页持有，两侧通过 postMessage 同步。 */
 export const IMMERSIVE_FEED_FRAME_NAME = 'bewly-immersive-feed'
 // 预加载下一条时创建的 iframe；它在被切换为当前视频前保持暂停，不响应快捷键
 export const IMMERSIVE_FEED_PRELOAD_FRAME_NAME = 'bewly-immersive-feed-preload'
@@ -70,10 +67,7 @@ function isEditableElement(element: Element | null | undefined): boolean {
     || (tagName === 'input' && !['button', 'checkbox', 'radio', 'range', 'submit', 'reset'].includes((element as HTMLInputElement).type))
 }
 
-/**
- * 是否正在输入文字（评论框、弹幕框、搜索框等）。评论区等组件位于 Shadow DOM 内，
- * 除事件路径外还要沿各层 shadowRoot 的焦点元素向下查找。
- */
+/** 是否正在输入文字（评论框、弹幕框、搜索框等）。评论区等组件位于 Shadow DOM 内， 除事件路径外还要沿各层 shadowRoot 的焦点元素向下查找。 */
 export function isTypingContext(event: KeyboardEvent): boolean {
   if (event.isComposing || event.composedPath().some(node => isEditableElement(node as Element)))
     return true

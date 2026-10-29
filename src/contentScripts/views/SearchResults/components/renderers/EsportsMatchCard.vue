@@ -94,12 +94,12 @@ const awayScore = computed(() => {
     @click.stop=""
   >
     <div class="card-content">
-      <!-- 赛事标题和状态 -->
+
       <div class="header-container">
         <div class="season-title keep-one-line bew-body-text" :style="{ fontWeight: 'var(--bew-font-weight-bold)' }">
           {{ contest.season.title }}
         </div>
-        <!-- 状态标签 -->
+
         <div text="sm" class="status-badge" :class="{ finished: isFinished, live: !isNotStarted && !isFinished, upcoming: isNotStarted }">
           <template v-if="isFinished">{{ $t('search.match_finished') }}</template>
           <template v-else-if="isNotStarted">{{ $t('search.match_upcoming') }}</template>
@@ -107,15 +107,13 @@ const awayScore = computed(() => {
         </div>
       </div>
 
-      <!-- 比赛阶段和时间 -->
       <div text="xs" class="match-info">
         <span class="game-stage-inline">{{ contest.gameStage }}</span>
         <span v-if="isNotStarted" class="match-time">{{ matchTime }}</span>
       </div>
 
-      <!-- 队伍信息 -->
       <div class="teams-container">
-        <!-- 主队 -->
+
         <div class="team">
           <img
             :src="contest.homeTeam.logoFull"
@@ -127,7 +125,6 @@ const awayScore = computed(() => {
           </div>
         </div>
 
-        <!-- 比分或VS -->
         <div class="score-container">
           <template v-if="isNotStarted">
             <span class="vs-text">VS</span>
@@ -139,7 +136,6 @@ const awayScore = computed(() => {
           </template>
         </div>
 
-        <!-- 客队 -->
         <div class="team">
           <img
             :src="contest.awayTeam.logoFull"

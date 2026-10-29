@@ -203,7 +203,6 @@ onUnmounted(() => {
     </div>
   </Transition>
 
-  <!-- mask -->
   <Transition name="fade">
     <div
       v-if="show"

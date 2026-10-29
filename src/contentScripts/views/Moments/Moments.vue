@@ -1715,10 +1715,7 @@ function findShortestColumnIndex(columns: DisplayMoment[][], heights?: number[])
   return minIdx
 }
 
-/**
- * 对各列底部做有限次数的跨列补位。
- * 仅从每列靠后的卡片中选择，并且只有能明确缩小列高差时才移动。
- */
+/** 对各列底部做有限次数的跨列补位。 仅从每列靠后的卡片中选择，并且只有能明确缩小列高差时才移动。 */
 function balanceColumnBottoms(columns: DisplayMoment[][]) {
   const next = columns.map(column => [...column])
   if (next.length < 2)
@@ -1889,10 +1886,7 @@ function jumpToLastSeenMoments() {
   void loadMoments(true)
 }
 
-/**
- * 在各列顶部插入更新的动态。各列下移量不同，按最大与最小下移量的中值补偿滚动，
- * 任一列的偏移都不超过列差的一半。
- */
+/** 在各列顶部插入更新的动态。各列下移量不同，按最大与最小下移量的中值补偿滚动， 任一列的偏移都不超过列差的一半。 */
 function prependMoments(items: DisplayMoment[]) {
   const existingIds = new Set(moments.value.map(moment => moment.id))
   const fresh = items.filter((moment) => {
@@ -3976,7 +3970,6 @@ watch(
           </div>
         </section>
         <div class="moments-feed">
-          <!-- 零高度容器内的悬浮按钮，不参与布局，避免影响向上插入时的滚动补偿 -->
           <div v-if="!isInitialLoading && (hasNewerMoments || canJumpToLastSeen)" class="moments-newer-bar">
             <button
               v-if="hasNewerMoments"

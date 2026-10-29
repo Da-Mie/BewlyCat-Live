@@ -36,9 +36,7 @@ const historyTabs = computed(() => [
     isSelected: false,
   },
 ])
-/**
- * Active tab (0: archive, 1: live, 2: article)
- */
+/** Active tab (0: archive, 1: live, 2: article) */
 const activatedTab = ref<number>(0)
 const isLoading = ref<boolean>(false)
 // when noMoreContent is true, the user can't scroll down to load more content
@@ -122,11 +120,7 @@ function onClickTab(tabId: number) {
   })
 }
 
-/**
- * Get history list
- * @param type
- * @param view_at Last viewed timestamp
- */
+/** view_at 为上次查看时间戳。 */
 async function getHistoryList(type: Business, view_at = 0 as number) {
   if (isLoading.value)
     return
@@ -224,7 +218,6 @@ defineExpose({
     data-key="history"
     flex="~ col"
   >
-    <!-- top bar -->
     <header
       flex="~ items-center justify-between"
       p="x-6 y-5"
@@ -256,7 +249,6 @@ defineExpose({
       </ALink>
     </header>
 
-    <!-- historys wrapper -->
     <main
       ref="historysWrap"
       overflow-y-auto
@@ -266,14 +258,12 @@ defineExpose({
       min-h-0
       pos="relative"
     >
-      <!-- loading -->
       <Loading
         v-if="isLoading && historys.length === 0"
         h="full"
         flex="~ items-center"
       />
 
-      <!-- empty -->
       <Empty
         v-if="!isLoading && !loadFailed && historys.length === 0"
         pos="absolute top-0 left-0"
@@ -281,7 +271,6 @@ defineExpose({
         flex="~ items-center"
       />
 
-      <!-- load failed -->
       <Empty
         v-if="!isLoading && loadFailed && historys.length === 0"
         :description="$t('common.load_failed')"
@@ -294,7 +283,6 @@ defineExpose({
         </Button>
       </Empty>
 
-      <!-- historys -->
       <TransitionGroup name="removable-list" tag="div" class="removable-list-group" flex="~ col gap-2">
         <ALink
           v-for="(historyItem, index) in historys"
@@ -314,7 +302,6 @@ defineExpose({
             :author-name="historyItem.author_name"
             :author-href="`https://space.bilibili.com/${historyItem.author_mid}`"
           >
-            <!-- Delete button -->
             <template #coverTopRight>
               <div
                 class="group-hover:opacity-100 opacity-0"
@@ -332,9 +319,7 @@ defineExpose({
               </div>
             </template>
 
-            <!-- 封面框内覆盖角标：视频进度 / 直播状态 -->
             <template #coverOverlay>
-              <!-- Video: progress badge -->
               <div
                 v-if="activatedTab === 0"
                 pos="absolute bottom-0 right-0"
@@ -344,7 +329,6 @@ defineExpose({
                 text="white xs"
                 border="rounded-full"
               >
-                <!--  When progress = -1 means that the user watched the full video -->
                 {{
                   `${
                     historyItem.progress === -1
@@ -355,7 +339,6 @@ defineExpose({
                 }}
               </div>
 
-              <!-- Live: LIVE / OFFLINE badge -->
               <div
                 v-else-if="activatedTab === 1 && historyItem.live_status === 1"
                 pos="absolute top-0 left-0"
@@ -382,14 +365,12 @@ defineExpose({
               </div>
             </template>
 
-            <!-- Video: progress bar -->
             <template v-if="activatedTab === 0" #coverBelow>
               <Progress
                 :percentage="(historyItem.progress / historyItem.duration) * 100"
               />
             </template>
 
-            <!-- Live status next to author -->
             <template #bylineExtra>
               <span
                 v-if="historyItem.live_status === 1"
@@ -404,7 +385,6 @@ defineExpose({
               </span>
             </template>
 
-            <!-- View time -->
             <template #meta>
               <p class="bew-top-bar-media-meta" text="$bew-text-2">
                 {{
@@ -429,7 +409,7 @@ defineExpose({
           {{ $t('common.operation.refresh') }}
         </Button>
       </div>
-      <!-- loading -->
+
       <Transition name="fade">
         <Loading v-if="isLoading && historys.length !== 0" m="b-4" />
       </Transition>

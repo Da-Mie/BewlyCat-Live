@@ -42,12 +42,12 @@ export function normalizeAccountMid(value: unknown): string | undefined {
   return /^[1-9]\d{0,19}$/.test(mid) ? mid : undefined
 }
 
-/** Never interpret live UL, medal level, VIP status, or a missing flag as account identity. */
+/** 仅识别账号等级与硬核会员标记。 */
 export function readAccountIdentity(value: unknown): AccountIdentity {
   const data = record(value)
   const member = record(data.member ?? data.card ?? data)
   const rawLevel = member.level_info?.current_level ?? member.level
-  const level = rawLevel !== '' && rawLevel !== null && rawLevel !== undefined ? Number(rawLevel) : Number.NaN
+  const level = typeof rawLevel === 'number' || (typeof rawLevel === 'string' && rawLevel.trim()) ? Number(rawLevel) : Number.NaN
   return {
     mid: normalizeAccountMid(member.mid ?? member.uid),
     level: Number.isInteger(level) && level >= 0 && level <= 6 ? level : undefined,
@@ -90,7 +90,7 @@ export function decideAccountFilter(identity: AccountIdentity, filters: AccountL
   }
   if (identity.senior === true)
     return rule.blockSenior ? 'block' : 'allow'
-  // LV6 with an absent senior flag cannot be classified as an ordinary LV6 member.
+  // 未知硬核标记的 LV6 按未知身份处理。
   if (identity.level === undefined || (identity.level === 6 && identity.senior === undefined))
     return rule.unknown === 'block' ? 'block' : 'allow'
   return rule.blockedLevels.includes(identity.level) ? 'block' : 'allow'
@@ -110,7 +110,7 @@ export function isAccountRuleActive(rule: AccountLevelRule): boolean {
   return rule.enabled && (rule.blockedLevels.length > 0 || rule.blockSenior || rule.unknown === 'block')
 }
 
-/** Bounded, coalesced lookup queue; failed lookups also have a short TTL. */
+/** 合并查询并限流，短暂缓存失败结果。 */
 export class AccountIdentityCache {
   private entries = new Map<string, { identity: AccountIdentity, expires: number }>()
   private pending = new Map<string, Promise<AccountIdentity>>()
@@ -165,7 +165,7 @@ export class AccountIdentityCache {
         try {
           identity = { ...await this.lookup(mid), mid }
         }
-        catch { /* A failed lookup remains unknown. */ }
+        catch { /* 查询失败时保留未知身份。 */ }
         if (generation !== this.generation) {
           cancel()
           return

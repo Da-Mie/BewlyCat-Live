@@ -82,14 +82,12 @@ const { isDark } = useDark()
       transition="background-color duration-300, box-shadow duration-300"
       rounded="$bew-card-radius" h-fit
     >
-      <!-- Cover -->
       <div
         :style="{ width: horizontal ? '170px' : '100%' }"
         tabindex="-1" block
         rounded="$bew-media-radius" w-full bg="$bew-skeleton" relative shrink-0
       >
         <div aspect="12/16" overflow-hidden rounded="$bew-media-radius">
-          <!-- badge -->
           <div
             v-if="bangumi.badge && bangumi.badge.text"
             :style="{
@@ -103,7 +101,6 @@ const { isDark } = useDark()
             {{ bangumi.badge.text }}
           </div>
 
-          <!-- rank -->
           <div
             v-if="bangumi.rank"
             class="bangumi-rank"
@@ -126,7 +123,6 @@ const { isDark } = useDark()
             aspect="12/16"
             pos="relative"
           >
-            <!-- anime genres -->
             <div
               v-if="bangumi.evaluate || (Array.isArray(bangumi.tags) && bangumi.tags?.length > 0)"
               pos="absolute bottom-0" w-full h-full p-2
@@ -168,7 +164,6 @@ const { isDark } = useDark()
               rounded="$bew-media-radius" aspect="12/16" max-w-full w-full
             >
 
-            <!-- image after hovering -->
             <div
               v-if="bangumi.coverHover"
               w-full

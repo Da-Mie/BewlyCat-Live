@@ -1,10 +1,7 @@
 import { settings } from '~/logic'
 import type { RecommendationModeOption } from '~/logic/storage'
 
-/**
- * 推荐模式在界面上的四个选项。存储仍拆为 recommendationMode 与 appRecommendationColumn，
- * 选择 App 单列 / 双列时同时写入两者，旧配置无需迁移。
- */
+/** 推荐模式在界面上的四个选项。存储仍拆为 recommendationMode 与 appRecommendationColumn， 选择 App 单列 / 双列时同时写入两者，旧配置无需迁移。 */
 export function createRecommendationModeOptions(t: (key: string) => string): { label: string, value: RecommendationModeOption }[] {
   return [
     { label: 'Web', value: 'web' },

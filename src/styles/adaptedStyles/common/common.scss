@@ -8,7 +8,6 @@
     box-shadow: none;
   }
 
-  // #region theme color adaption part
   // Increase the priority of the style inside by writing a non-existent selector in `:not()`
   :not(foobar) {
     .bili-header .bili-header__channel .channel-entry-more__link--current,
@@ -24,14 +23,11 @@
       background: var(--bew-theme-color);
     }
   }
-  // #endregion
 
-  // #region dark mode adaption part
   &.dark {
     .card-loaded,
     .van-popover {
       background-color: var(--bew-elevated-solid);
     }
   }
-  // #endregion
 }

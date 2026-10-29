@@ -84,12 +84,7 @@ interface ConfirmDialogRequest {
   settled: boolean
 }
 
-/**
- * Lightweight confirm host (no Dialog / Transition / Teleport).
- * Resolving the promise often mutates large page lists (favorites, history…);
- * doing that in the same tick as a Transition/Teleport teardown races Vue's
- * patcher and throws insertBefore NotFoundError under <App>.
- */
+/** 确认结果延后结算，避免列表更新撞上 Transition/Teleport 卸载。 */
 const activeConfirmDialog = ref<ConfirmDialogRequest>()
 const confirmDialogQueue: ConfirmDialogRequest[] = []
 let confirmDialogBusy = false
@@ -1870,12 +1865,10 @@ if (settings.value.cleanUrlArgument) {
     @keydown.capture="blockOriginalLayoutInteraction"
     @scroll.capture.passive="scheduleLayoutEditTargetsRefresh"
   >
-    <!-- Background -->
     <template v-if="showBewlyPage && !settings.disableBackground">
       <AppBackground :activated-page="activatedPage" @wallpaper-ready="pageWallpaperReady = $event" />
     </template>
 
-    <!-- Settings -->
     <KeepAlive>
       <Settings
         v-if="showSettings"
@@ -2018,7 +2011,6 @@ if (settings.value.cleanUrlArgument) {
       </div>
     </div>
 
-    <!-- Dock & RightSideButtons -->
     <div
       v-if="!isInIframe()"
       class="dock-sidebar-host"
@@ -2046,7 +2038,6 @@ if (settings.value.cleanUrlArgument) {
       />
     </div>
 
-    <!-- TopBar -->
     <div
       v-if="showTopBar"
       class="top-bar-host"
@@ -2111,7 +2102,6 @@ if (settings.value.cleanUrlArgument) {
                   <Component :is="pages[activatedPage]" :key="activatedPage" />
                 </Transition>
 
-                <!-- ✅ IntersectionObserver 哨兵：用于检测滚动到底部，避免在 RAF 中读取 scrollHeight -->
                 <div ref="loadMoreSentinelRef" h-1px w-full pointer-events-none opacity-0 />
               </div>
             </main>
@@ -2138,7 +2128,6 @@ if (settings.value.cleanUrlArgument) {
       @close="videoDialog = null"
     />
 
-    <!-- Static confirm overlay: no Transition/Teleport (see finishConfirmDialog). -->
     <div
       v-if="activeConfirmDialog"
       :key="activeConfirmDialog.id"

@@ -5,15 +5,11 @@
 }
 
 .bewly-design.historyPage {
-  // #region new history page
   .history-record.fixed .main-breadcrums {
     background-color: var(--bew-elevated);
     backdrop-filter: var(--bew-filter-glass-1);
   }
-  // #endregion
 
-  // #region old history page
-  // #region theme color adaption part
   // Increase the priority of the style inside by writing a non-existent selector in `:not()`
   :not(foobar) {
     .history-list .r-info .w-info .username:hover,
@@ -75,9 +71,6 @@
     }
   }
 
-  // #endregion
-
-  // #region dark mode adaption part
   &.dark {
     .history-wrap .warn .txt,
     .history-wrap .b-head .b-head-t,
@@ -139,5 +132,4 @@
       background-color: var(--bew-content-solid) !important;
     }
   }
-  // #endregion
 }

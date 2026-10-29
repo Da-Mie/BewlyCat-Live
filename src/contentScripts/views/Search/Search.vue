@@ -28,7 +28,6 @@ function handleSearch(keyword: string) {
 </script>
 
 <template>
-  <!-- 显示搜索页面 -->
   <div
     flex="~ col"
     justify-center

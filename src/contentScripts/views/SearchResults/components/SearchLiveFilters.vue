@@ -31,7 +31,6 @@ function handleSubCategoryChange(value: LiveSubCategory) {
 
 <template>
   <div class="search-live-filters" mb-4>
-    <!-- 子分类切换 -->
     <div flex items-center gap-2 flex-wrap>
       <button
         v-for="category in subCategories"

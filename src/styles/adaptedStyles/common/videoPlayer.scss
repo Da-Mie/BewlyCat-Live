@@ -186,7 +186,6 @@
     }
   }
 
-  // #region theme color adaption part
   // Increase the priority of the style inside by writing a non-existent selector in `:not()`
   :not(foobar) {
     #musicApp {
@@ -213,9 +212,7 @@
       }
     }
   }
-  // #endregion
 
-  // #region dark mode adaption part
   &.dark {
     #musicApp {
       background-color: var(--bew-elevated-solid) !important;
@@ -267,5 +264,4 @@
       }
     }
   }
-  // #endregion
 }

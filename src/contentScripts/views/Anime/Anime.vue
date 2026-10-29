@@ -126,7 +126,6 @@ function getPopularAnimeList() {
 <template>
   <div>
     <div>
-      <!-- Your Watchlist -->
       <section v-if="getUserID()" class="anime-section">
         <div flex justify-between items-center mb-6>
           <h3 class="bew-page-heading" text="$bew-text-1">
@@ -189,7 +188,6 @@ function getPopularAnimeList() {
         </HorizontalScrollView>
       </section>
 
-      <!-- Popular Anime -->
       <section class="anime-section">
         <div flex justify-between items-center mb-6>
           <h3 class="bew-page-heading" text="$bew-text-1">
@@ -243,7 +241,6 @@ function getPopularAnimeList() {
         </HorizontalScrollView>
       </section>
 
-      <!-- Anime Timetable -->
       <section class="anime-section">
         <div flex justify-between items-end>
           <h3 class="bew-page-heading" text="$bew-text-1">
@@ -254,7 +251,6 @@ function getPopularAnimeList() {
         <AnimeTimeTable ref="animeTimeTableRef" w="[calc(100%+1.5rem)]" />
       </section>
 
-      <!-- Recommended for you -->
       <section class="anime-section">
         <h3 class="bew-page-heading" text="$bew-text-1" mb-6>
           {{ $t('anime.recommended_for_you') }}
@@ -287,10 +283,8 @@ function getPopularAnimeList() {
       </section>
     </div>
 
-    <!-- no more content -->
     <Empty v-if="noMoreContent" class="pb-4" :description="$t('common.no_more_content')" />
 
-    <!-- loading -->
     <Loading v-if="isLoadingRecommendAnime && recommendAnimeList.length !== 0" m="-t-4" />
   </div>
 </template>

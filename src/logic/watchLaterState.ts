@@ -20,10 +20,7 @@ import { onMessage, sendMessage } from '~/utils/messaging'
 import type { WatchLaterTarget } from '~/utils/watchLaterSnapshot'
 import { applyWatchLaterChange, createWatchLaterSnapshot, toWatchLaterEntry } from '~/utils/watchLaterSnapshot'
 
-/**
- * 当前账号的稍后再看成员关系（只含 aid/bvid/epid），供各处卡片判断“是否已加入”。
- * 完整列表由后台 broker 跨标签页缓存与合并请求；增删通过广播同步，无需重新拉取。
- */
+/** 当前账号的稍后再看成员关系（只含 aid/bvid/epid），供各处卡片判断“是否已加入”。 完整列表由后台 broker 跨标签页缓存与合并请求；增删通过广播同步，无需重新拉取。 */
 
 const DEFAULT_MAX_AGE = 5 * 60_000
 // 非强制加载的最小间隔：悬停等高频入口在请求失败或等待其他标签页时不会反复发消息
@@ -234,10 +231,7 @@ async function load(id: number, maxAge: number, force: boolean) {
   }
 }
 
-/**
- * 确保已加载稍后再看成员关系。缓存未过期时不发请求；多个调用与标签页共享同一次请求。
- * force 用于需要服务器最新结果的场景（如无法得知具体变更的批量移除）。
- */
+/** 确保已加载稍后再看成员关系。缓存未过期时不发请求；多个调用与标签页共享同一次请求。 force 用于需要服务器最新结果的场景（如无法得知具体变更的批量移除）。 */
 export function ensureWatchLaterState(options: { maxAge?: number, force?: boolean } = {}): Promise<void> {
   const { maxAge = DEFAULT_MAX_AGE, force = false } = options
   const id = syncAccount()

@@ -139,9 +139,7 @@ const content = computed(() => {
     }"
     flex="~"
   >
-    <!-- Skeleton mode -->
     <template v-if="skeleton">
-      <!-- Old layout skeleton: Avatar on left -->
       <div
         v-if="layout === 'old' && !horizontal && content.authorAvatarEnabled"
         m="r-4" w="34px" h="34px" rounded="1/2" bg="$bew-skeleton"
@@ -152,9 +150,7 @@ const content = computed(() => {
         class="group/desc" flex="~ col" :class="content.isModernLayout ? 'gap-2' : ''" w="full" min-w-0
         align="items-start"
       >
-        <!-- Title skeleton -->
         <div flex="~ gap-1 justify-between items-start" w="full">
-          <!-- 使用与真实标题完全相同的样式和高度 -->
           <div
             class="keep-two-lines" :class="[
               content.isModernLayout && moreBtn ? 'w-[calc(100%-40px)]' : 'w-full',
@@ -163,7 +159,6 @@ const content = computed(() => {
             :style="titleStyle"
             text="overflow-ellipsis $bew-text-1 lg"
           >
-            <!-- 使用与真实文本相同的行高填充，考虑 line-height -->
             <div w-full bg="$bew-skeleton" rounded="$bew-radius-sm" style="height: 1em; margin-bottom: calc((var(--bew-title-line-height, 1.35) - 1) * 0.5em);" />
             <div w="3/4" bg="$bew-skeleton" rounded="$bew-radius-sm" style="height: 1em;" />
           </div>
@@ -173,7 +168,6 @@ const content = computed(() => {
           />
         </div>
 
-        <!-- Modern compact layout: Author & tags in one row skeleton -->
         <div
           v-if="layout === 'modern' && compactMeta && content.authorNameEnabled"
           class="video-card-meta video-card-meta--compact"
@@ -194,7 +188,6 @@ const content = computed(() => {
           />
         </div>
 
-        <!-- Modern layout: Author info skeleton -->
         <div
           v-else-if="layout === 'modern' && (content.authorAvatarEnabled || content.authorNameEnabled)"
           class="video-card-meta"
@@ -206,14 +199,13 @@ const content = computed(() => {
             w="34px" h="34px" rounded="1/2" bg="$bew-skeleton" shrink-0
           />
           <div v-if="content.authorNameEnabled || content.metaPlaceholderEnabled" flex="~ col gap-1" w="[calc(100%-50px)]">
-            <!-- 作者名称骨架：使用与真实文本相同的字体大小和行高 -->
             <div
               v-if="content.authorNameEnabled"
               w="60%" bg="$bew-skeleton" rounded="$bew-radius-sm"
               :class="authorFontSizeClass"
               style="height: 1em;"
             />
-            <!-- 标签骨架：使用与真实标签相同的高度，包括 padding -->
+
             <div
               v-if="content.metaPlaceholderEnabled"
               w="80%" bg="$bew-skeleton" rounded="$bew-radius-sm"
@@ -223,7 +215,6 @@ const content = computed(() => {
           </div>
         </div>
 
-        <!-- Modern layout with hideAuthor: Tags skeleton -->
         <div
           v-if="layout === 'modern' && !content.authorAvatarEnabled && !content.authorNameEnabled && content.metaPlaceholderEnabled"
           class="video-card-meta-row"
@@ -236,9 +227,7 @@ const content = computed(() => {
           />
         </div>
 
-        <!-- Old layout: Info skeleton -->
         <template v-else-if="layout === 'old'">
-          <!-- Old layout with hideAuthor: Only tags skeleton -->
           <div
             v-if="hideAuthor && content.metaPlaceholderEnabled"
             mt-2
@@ -252,9 +241,7 @@ const content = computed(() => {
             />
           </div>
 
-          <!-- Old layout with author info: Full skeleton -->
           <template v-else-if="!hideAuthor">
-            <!-- Author name skeleton -->
             <div
               v-if="content.authorNameEnabled || (horizontal && content.authorAvatarEnabled)"
               text="$bew-text-2"
@@ -263,7 +250,6 @@ const content = computed(() => {
               flex="~ items-center"
               :class="authorFontSizeClass"
             >
-              <!-- Horizontal mode avatar -->
               <div
                 v-if="horizontal && content.authorAvatarEnabled"
                 w="34px" h="34px" rounded="1/2" bg="$bew-skeleton"
@@ -272,7 +258,6 @@ const content = computed(() => {
               <div v-if="content.authorNameEnabled" w="100px" bg="$bew-skeleton" rounded="$bew-radius-sm" style="height: 1em;" />
             </div>
 
-            <!-- View & Danmaku skeleton -->
             <div v-if="content.statsPlaceholderEnabled" flex="~ items-center gap-1">
               <div
                 :class="metaFontSizeClass"
@@ -282,7 +267,6 @@ const content = computed(() => {
               </div>
             </div>
 
-            <!-- Tags skeleton -->
             <div
               v-if="content.metaPlaceholderEnabled"
               mt-2
@@ -300,9 +284,7 @@ const content = computed(() => {
       </div>
     </template>
 
-    <!-- Normal mode -->
     <template v-else-if="video">
-      <!-- Old layout: Author Avatar (left side) -->
       <VideoCardAuthorAvatar
         v-if="layout === 'old' && !horizontal && content.showAuthorAvatar && video.author"
         :author="video.author"
@@ -358,7 +340,6 @@ const content = computed(() => {
           </button>
         </div>
 
-        <!-- Modern layout with hideAuthor: Tags directly under title -->
         <div
           v-if="layout === 'modern' && !content.showAuthorAvatar && !content.showAuthorName && content.hasVisibleMeta"
           v-meta-overflow
@@ -423,7 +404,6 @@ const content = computed(() => {
           </span>
         </div>
 
-        <!-- Modern layout: Author info -->
         <div
           v-if="layout === 'modern' && (content.showAuthorAvatar || content.showAuthorName)"
           class="video-card-meta"
@@ -520,9 +500,7 @@ const content = computed(() => {
           </div>
         </div>
 
-        <!-- Old layout: Traditional info display -->
         <template v-else-if="layout === 'old'">
-          <!-- Old layout with hideAuthor: Only tags -->
           <div
             v-if="hideAuthor && content.hasVisibleMeta"
             v-meta-overflow
@@ -531,7 +509,6 @@ const content = computed(() => {
             flex="~ gap-1 wrap"
             :class="metaFontSizeClass"
           >
-            <!-- Tag -->
             <component
               :is="videoTag.searchable ? 'a' : 'span'"
               v-for="videoTag in content.visibleVideoTags"
@@ -568,14 +545,13 @@ const content = computed(() => {
             >
               {{ video.publishedTimestamp ? calcTimeSince(video.publishedTimestamp * 1000) : video.capsuleText?.trim() }}
             </span>
-            <!-- Video type -->
+
             <span v-if="content.showVideoType" text="$bew-text-2" grid="~ place-items-center">
               <div v-if="video.type === 'vertical'" i-mingcute:cellphone-2-line />
               <div v-else-if="video.type === 'bangumi'" i-mingcute:movie-line />
             </span>
           </div>
 
-          <!-- Old layout with author info -->
           <template v-else>
             <div
               v-if="content.showAuthorName || (horizontal && content.showAuthorAvatar)"
@@ -585,7 +561,6 @@ const content = computed(() => {
               flex="~ items-center"
               :class="authorFontSizeClass"
             >
-              <!-- Author Avatar (horizontal mode) -->
               <span
                 :style="{
                   marginBottom: horizontal ? '0.5rem' : '0',
@@ -606,7 +581,6 @@ const content = computed(() => {
             </div>
 
             <div v-if="content.hasLegacyStats" flex="~ items-center gap-1 wrap">
-              <!-- View & Danmaku Count -->
               <div
                 text="$bew-text-2"
                 rounded="$bew-radius"
@@ -632,7 +606,6 @@ const content = computed(() => {
               flex="~ gap-1 wrap"
               :class="metaFontSizeClass"
             >
-              <!-- Tag -->
               <component
                 :is="videoTag.searchable ? 'a' : 'span'"
                 v-for="videoTag in content.visibleVideoTags"
@@ -669,7 +642,7 @@ const content = computed(() => {
               >
                 {{ video.publishedTimestamp ? calcTimeSince(video.publishedTimestamp * 1000) : video.capsuleText?.trim() }}
               </span>
-              <!-- Video type -->
+
               <span v-if="content.showVideoType" text="$bew-text-2" grid="~ place-items-center">
                 <div v-if="video.type === 'vertical'" i-mingcute:cellphone-2-line />
                 <div v-else-if="video.type === 'bangumi'" i-mingcute:movie-line />

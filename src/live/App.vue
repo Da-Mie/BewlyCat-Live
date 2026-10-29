@@ -64,7 +64,7 @@ function backgroundFailed(event: Event) {
 }
 
 function handleDanmakuKeydown(event: KeyboardEvent) {
-  if (event.code !== 'KeyD' || event.repeat || event.defaultPrevented || event.ctrlKey || event.altKey || event.metaKey || event.shiftKey || dialogOpen.value || dialog.value?.open || !ready.value)
+  if (event.code !== 'KeyD' || event.repeat || event.isComposing || event.defaultPrevented || event.ctrlKey || event.altKey || event.metaKey || event.shiftKey || dialogOpen.value || dialogEntering.value || document.querySelector('dialog[open]') || !ready.value)
     return
   if (event.target instanceof Element && event.target.closest('input, textarea, select, [contenteditable]'))
     return

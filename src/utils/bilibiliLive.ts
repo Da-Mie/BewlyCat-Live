@@ -10,10 +10,7 @@ function isBilibiliLiveOrigin(value: string): boolean {
   }
 }
 
-/**
- * 直播页会嵌入主站、登录等匹配域名的框架。主站功能通过此判断避开直播上下文；
- * 直播顶层的专用增强另行初始化，不进入这些内嵌框架。
- */
+/** 直播页会嵌入主站、登录等匹配域名的框架。主站功能通过此判断避开直播上下文； 直播顶层的专用增强另行初始化，不进入这些内嵌框架。 */
 export function isInBilibiliLiveContext(): boolean {
   try {
     if (location.hostname === BILIBILI_LIVE_HOSTNAME)

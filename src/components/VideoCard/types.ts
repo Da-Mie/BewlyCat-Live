@@ -10,10 +10,7 @@ export function createVideoCardState(): VideoCardState {
   return { removed: false, videoCurrentTime: null }
 }
 
-/**
- * 由页面持有的移除遮罩：confirming 时显示「确定/取消」等待确认，
- * 确认移除后卡片保留在原位，显示「还原」用于重新加回。
- */
+/** 由页面持有的移除遮罩：confirming 时显示「确定/取消」等待确认， 确认移除后卡片保留在原位，显示「还原」用于重新加回。 */
 export interface VideoCardRemovedState {
   message: string
   confirming?: boolean

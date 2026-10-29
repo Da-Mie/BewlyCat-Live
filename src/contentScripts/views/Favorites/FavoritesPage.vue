@@ -64,10 +64,7 @@ const articleFavoriteOffset = ref<string>('')
 const isBatchManaging = ref<boolean>(false)
 const isBatchOperating = ref<boolean>(false)
 const selectedResourceKeys = ref<string[]>([])
-/**
- * 卡片取消收藏遮罩状态：confirming 等待确认（尚未调用接口），removing 取消收藏中，
- * removed 已取消收藏但保留原位可还原，restoring 还原中；记录所属收藏夹以便还原
- */
+/** 卡片取消收藏遮罩状态：confirming 等待确认（尚未调用接口），removing 取消收藏中， removed 已取消收藏但保留原位可还原，restoring 还原中；记录所属收藏夹以便还原 */
 type RemoveStatus = 'confirming' | 'removing' | 'removed' | 'restoring'
 const removeStatuses = reactive(new Map<string, { categoryId: number, status: RemoveStatus }>())
 const targetCategory = ref<CategoryItem>()
@@ -870,13 +867,7 @@ async function loadActiveContent(pn: number, requestVersion: number) {
   }
 }
 
-/**
- * 获取收藏夹视频
- * @param media_id 收藏夹 ID
- * @param pn 页码
- * @param keyword 搜索关键词
- * @param type 搜索类型：0-特定收藏夹，1-全部收藏夹
- */
+/** type：0 当前收藏夹，1 全部收藏夹。 */
 async function getFavoriteResources(
   media_id: number,
   pn: number,

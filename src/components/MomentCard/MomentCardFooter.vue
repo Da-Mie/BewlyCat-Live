@@ -91,7 +91,7 @@ defineExpose({ focusCommentsToggle })
       <span i-tabler-users />
       {{ moment.livePopularity || t('moment_card.live_now') }}
     </span>
-    <!-- 请求期间不设 disabled：Firefox 会把 disabled 控件变成事件黑洞，光标停在按钮上时页面无法滚动 #1101 -->
+
     <button
       type="button"
       class="moment-card__likes"

@@ -1,13 +1,6 @@
 import api from '~/utils/api'
 
-/**
- * 动态“上次看到”定位。
- *
- * B 站在服务端记录动态已读位置：`dynamic/entrance` 的 `dyn_basic_infos` 按新到旧列出全部未读视频动态 ID，
- * 列表最后一项之后即上次看到的位置。`feed/nav`、`feed/all` 的 offset 可传任意动态 ID，返回比它更旧的一页，
- * 且带 offset 的请求不会重置已读位置；不带 offset 的首页请求会把已读位置推进到最新。
- * 因此定位时必须全程使用 offset，直到用户主动回到顶部才请求首页。
- */
+/** 未读 ID 最后一项之后为上次位置；定位全程带 offset，避免首页请求推进服务端已读位置。 */
 
 interface DynamicEntranceResult {
   code: number
@@ -66,20 +59,13 @@ export async function fetchUnreadMomentIds(): Promise<string[] | null> {
   }
 }
 
-/**
- * 从上次看到的位置开始加载时的首个 offset：保留 contextCount 条最旧的未读在分界线上方。
- * 未读不足时返回空串，表示直接从顶部加载即可。
- */
+/** 从上次看到的位置开始加载时的首个 offset：保留 contextCount 条最旧的未读在分界线上方。 未读不足时返回空串，表示直接从顶部加载即可。 */
 export function getLastSeenStartOffset(unreadIds: string[], contextCount: number): string {
   const index = unreadIds.length - 1 - contextCount
   return index >= 0 ? unreadIds[index] : ''
 }
 
-/**
- * 向上加载比 topId 更新的条目。
- * 已知未读 ID 时向上跨 step 条未读视频作为起点，否则直接请求首页；
- * 从起点向下翻页直到接上 topId，避免中间漏掉非视频动态。
- */
+/** 从较新的未读起点向下接回 topId，补齐途中非视频动态。 */
 export async function fetchNewerMoments<T extends { id_str?: string }>(
   fetchPage: (offset: string) => Promise<MomentFeedPage<T> | null>,
   unreadIds: string[],

@@ -34,7 +34,6 @@ const { haveScrollbar, handleBackToTop } = useBewlyApp()
 // 分页模式：scroll 滚动加载，pagination 翻页
 const paginationMode = computed(() => settings.value.searchResultsPaginationMode)
 
-// 翻页加载状态
 const isPageChanging = ref(false)
 
 const {
@@ -98,7 +97,6 @@ watch(() => props.keyword, async (newKeyword, oldKeyword) => {
   }
 })
 
-// 组件挂载时立即执行搜索
 onMounted(() => {
   const keyword = props.keyword.trim()
   if (keyword) {
@@ -169,7 +167,6 @@ async function performSearch(loadMore: boolean): Promise<boolean> {
       setExhausted(true)
     }
 
-    // 处理加载完成
     if (isLoadMore)
       await handleLoadMoreCompletion(haveScrollbar)
   }
@@ -186,7 +183,6 @@ async function handlePageChange(page: number) {
   if (!keyword)
     return
 
-  // 先滚动到顶部
   handleBackToTop()
   await nextTick()
 
@@ -209,10 +205,8 @@ async function handlePageChange(page: number) {
   const rawData = lastResponse.value.data
   const incomingList = Array.isArray(rawData?.result) ? rawData.result : []
 
-  // 替换结果
   results.value = incomingList
 
-  // 提取分页信息
   extractPagination(rawData, incomingList.length)
   updatePage(page)
   setHasMore(paginationHasMore.value)
@@ -384,7 +378,6 @@ defineExpose({
       </div>
     </div>
 
-    <!-- 滚动加载模式 -->
     <template v-if="paginationMode === 'scroll'">
       <SmoothLoading
         :show="isLoading && results && results.length > 0"
@@ -397,7 +390,6 @@ defineExpose({
       />
     </template>
 
-    <!-- 翻页模式 -->
     <template v-else>
       <Pagination
         :current-page="currentPage"

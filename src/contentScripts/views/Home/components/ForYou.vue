@@ -1049,8 +1049,8 @@ watch(recommendationFeedKey, () => {
   resetWebRecommendState()
   resetFilteredFeedPagingState()
   hasFilledRecommendationViewport.value = false
-  consecutiveEmptyLoads.value = 0 // 重置空加载计数器
-  appConsecutiveEmptyLoads.value = 0 // 重置APP模式空加载计数器
+  consecutiveEmptyLoads.value = 0
+  appConsecutiveEmptyLoads.value = 0
 
   videoList.value = []
   appVideoList.value = []
@@ -1109,8 +1109,8 @@ async function initData() {
   APP_LOAD_BATCHES.value = 1 // 初始化时只加载1批
   resetFilteredFeedPagingState()
   hasFilledRecommendationViewport.value = false
-  consecutiveEmptyLoads.value = 0 // 重置空加载计数器
-  appConsecutiveEmptyLoads.value = 0 // 重置APP模式空加载计数器
+  consecutiveEmptyLoads.value = 0
+  appConsecutiveEmptyLoads.value = 0
   requestFailed.value = false // 重置请求失败状态
   needToLoginFirst.value = false
   try {
@@ -1284,7 +1284,6 @@ function initPageAction() {
   handleUndoRefresh.value = () => {
     if (hasBackState.value) {
       if (isWebRecommendationMode.value && cachedVideoList.value.length > 0) {
-        // 滚动到页面顶部
         handleBackToTop()
 
         // Web模式下的后退操作
@@ -1311,10 +1310,9 @@ function initPageAction() {
         hasBackState.value = false
         undoForwardState.value = UndoForwardState.Hidden
         resetFilteredFeedPagingState()
-        consecutiveEmptyLoads.value = 0 // 重置空加载计数器
+        consecutiveEmptyLoads.value = 0
       }
       else if (settings.value.recommendationMode === 'app' && cachedAppVideoList.value.length > 0) {
-        // 滚动到页面顶部
         handleBackToTop()
 
         // APP模式下的后退操作
@@ -1331,7 +1329,7 @@ function initPageAction() {
         hasBackState.value = false
         undoForwardState.value = UndoForwardState.Hidden
         resetFilteredFeedPagingState()
-        appConsecutiveEmptyLoads.value = 0 // 重置APP模式空加载计数器
+        appConsecutiveEmptyLoads.value = 0
       }
     }
   }
@@ -1340,7 +1338,6 @@ function initPageAction() {
   handleForwardRefresh.value = () => {
     if (hasForwardState.value) {
       if (isWebRecommendationMode.value && forwardVideoList.value.length > 0) {
-        // 滚动到页面顶部
         handleBackToTop()
 
         // Web模式下的前进操作
@@ -1368,11 +1365,10 @@ function initPageAction() {
         hasForwardState.value = false
         undoForwardState.value = UndoForwardState.ShowUndo
         resetFilteredFeedPagingState()
-        consecutiveEmptyLoads.value = 0 // 重置空加载计数器
+        consecutiveEmptyLoads.value = 0
         return true
       }
       else if (settings.value.recommendationMode === 'app' && forwardAppVideoList.value.length > 0) {
-        // 滚动到页面顶部
         handleBackToTop()
 
         // APP模式下的前进操作
@@ -1390,7 +1386,7 @@ function initPageAction() {
         hasForwardState.value = false
         undoForwardState.value = UndoForwardState.ShowUndo
         resetFilteredFeedPagingState()
-        appConsecutiveEmptyLoads.value = 0 // 重置APP模式空加载计数器
+        appConsecutiveEmptyLoads.value = 0
         return true
       }
     }

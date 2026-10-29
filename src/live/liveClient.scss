@@ -886,7 +886,7 @@ body {
       flex: none;
     }
     .player-frame.player-empty {
-      // Leave room for wrapped actions when the live room is offline.
+      // 离线时为换行按钮留出高度。
       aspect-ratio: auto;
       min-height: 320px;
     }

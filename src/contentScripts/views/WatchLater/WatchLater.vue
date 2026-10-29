@@ -60,10 +60,7 @@ const watchLaterCount = ref<number>(0)
 const { handlePageRefresh, handleReachBottom, haveScrollbar } = useBewlyApp()
 const pageSize = ref<number>(20)
 const pendingRemovals = new Set<number>()
-/**
- * 卡片删除遮罩状态：confirming 等待确认（尚未调用接口），removing 删除中，
- * removed 已删除但保留原位可还原，restoring 还原中
- */
+/** 卡片删除遮罩状态：confirming 等待确认（尚未调用接口），removing 删除中， removed 已删除但保留原位可还原，restoring 还原中 */
 type RemoveStatus = 'confirming' | 'removing' | 'removed' | 'restoring'
 const removeStatuses = reactive(new Map<number, RemoveStatus>())
 let consumedCount = 0
@@ -138,9 +135,7 @@ watch(watchLaterLayout, (layout) => {
   handleReachBottom.value = layout === 'list' ? handleListReachBottom : undefined
 }, { immediate: true })
 
-/**
- * Get watch later list by page
- */
+/** Get watch later list by page */
 async function getWatchLaterListByPage() {
   if (disposed || isLoading.value || noMoreContent.value) {
     return
@@ -453,7 +448,6 @@ function handleOpenVideoPageAndRemove(bvid: string, aid: number) {
       </div>
       <Empty v-if="watchLaterCount === 0 && currentWatchLaterList.length === 0 && !isLoading" />
       <template v-else>
-        <!-- grid layout -->
         <VideoCardGrid
           v-if="watchLaterLayout === 'grid'"
           :items="currentWatchLaterList"
@@ -493,9 +487,7 @@ function handleOpenVideoPageAndRemove(bvid: string, aid: number) {
           </template>
         </VideoCardGrid>
 
-        <!-- list layout -->
         <template v-else>
-          <!-- watcher later list -->
           <TransitionGroup name="removable-list" tag="div" class="removable-list-group">
             <ALink
               v-for="item in currentWatchLaterList"
@@ -514,7 +506,6 @@ function handleOpenVideoPageAndRemove(bvid: string, aid: number) {
                 p-2 m-1
                 content-visibility-auto
               >
-                <!-- 删除遮罩：覆盖整行并拦截链接点击；确认前未调用接口，删除后可还原 -->
                 <div
                   v-if="removeStatuses.has(item.aid)"
                   class="watch-later-removed-mask"
@@ -564,7 +555,6 @@ function handleOpenVideoPageAndRemove(bvid: string, aid: number) {
                   </template>
                 </div>
 
-                <!-- Cover -->
                 <div
                   pos="relative"
                   bg="$bew-skeleton"
@@ -582,16 +572,6 @@ function handleOpenVideoPageAndRemove(bvid: string, aid: number) {
                     object-cover
                   >
 
-                  <!-- <div
-                  pos="absolute bottom-0 right-0"
-                  bg="black opacity-60"
-                  m="2"
-                  p="x-2 y-1"
-                  text="white xs"
-                  rounded="$bew-radius-half"
-                >
-                  {{ calcCurrentTime(item.duration) }}
-                </div> -->
                   <div
 
                     pos="absolute bottom-0 right-0"
@@ -601,7 +581,6 @@ function handleOpenVideoPageAndRemove(bvid: string, aid: number) {
                     text="white xs"
                     rounded="$bew-radius-half"
                   >
-                    <!--  When progress = -1 means that the user watched the full video -->
                     {{
                       `${
                         item.progress === -1
@@ -620,7 +599,6 @@ function handleOpenVideoPageAndRemove(bvid: string, aid: number) {
                   </div>
                 </div>
 
-                <!-- Description -->
                 <div class="watch-later-list-description">
                   <div class="watch-later-list-details" flex="~ col">
                     <a
@@ -730,7 +708,7 @@ function handleOpenVideoPageAndRemove(bvid: string, aid: number) {
               </section>
             </ALink>
           </TransitionGroup>
-          <!-- loading -->
+
           <Transition name="fade">
             <loading
               v-if="isLoading && currentWatchLaterList.length !== 0 && !noMoreContent"
@@ -749,7 +727,6 @@ function handleOpenVideoPageAndRemove(bvid: string, aid: number) {
           'bew-popover-surface bew-popover-surface--wallpaper': !settings.enableSidebarCoverBlur,
         }"
       >
-        <!-- Frosted Glass Cover -->
         <div
           v-if="settings.enableSidebarCoverBlur"
           class="watch-later-sidebar-background"
@@ -766,7 +743,6 @@ function handleOpenVideoPageAndRemove(bvid: string, aid: number) {
           >
         </div>
 
-        <!-- Content -->
         <main
           class="watch-later-sidebar-content"
           flex="~ col gap-4 justify-start"
