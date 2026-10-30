@@ -406,6 +406,10 @@ function handleOpenVideoPageAndRemove(bvid: string, aid: number) {
   handleVideoLinkClick(bvid)
   void deleteWatchLaterItem(aid)
 }
+
+function getItemKey(item: VideoItem) {
+  return item.aid
+}
 </script>
 
 <template>
@@ -452,7 +456,7 @@ function handleOpenVideoPageAndRemove(bvid: string, aid: number) {
           v-if="watchLaterLayout === 'grid'"
           :items="currentWatchLaterList"
           :transform-item="transformWatchLaterItem"
-          :get-item-key="(item: VideoItem) => item.aid"
+          :get-item-key="getItemKey"
           grid-layout="adaptive"
           :loading="isLoading"
           :no-more-content="noMoreContent"

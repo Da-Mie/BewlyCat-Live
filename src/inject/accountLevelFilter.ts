@@ -21,6 +21,34 @@ export function createPageAccountFilter(getSettings: () => AccountLevelFilters |
   let refreshScheduled = false
   let refreshTree: (() => void) | undefined
   let identityAccount: string | undefined
+  const pendingThreads = new Set<HTMLElement>()
+  const rendererThreads = new WeakMap<CommentRenderer, HTMLElement>()
+  const visibility = new WeakMap<CommentRenderer, boolean>()
+  const hiddenDisplay = new WeakMap<HTMLElement, { value: string, priority: string }>()
+  let layoutFrame = 0
+  let treeDirty = false
+
+  function setHidden(element: HTMLElement, hidden: boolean) {
+    const previous = hiddenDisplay.get(element)
+    const value = element.style.getPropertyValue('display')
+    const priority = element.style.getPropertyPriority('display')
+    const ownsDisplay = value === 'none' && priority === 'important'
+    if (hidden) {
+      if (!previous || !ownsDisplay)
+        hiddenDisplay.set(element, { value, priority })
+      if (!ownsDisplay)
+        element.style.setProperty('display', 'none', 'important')
+    }
+    else if (previous) {
+      if (ownsDisplay) {
+        if (previous.value)
+          element.style.setProperty('display', previous.value, previous.priority)
+        else
+          element.style.removeProperty('display')
+      }
+      hiddenDisplay.delete(element)
+    }
+  }
 
   function refresh() {
     if (refreshScheduled)
@@ -34,7 +62,7 @@ export function createPageAccountFilter(getSettings: () => AccountLevelFilters |
         else
           renderers.delete(renderer)
       })
-      refreshTree?.()
+      scheduleLayout(true)
     })
   }
 
@@ -99,10 +127,7 @@ export function createPageAccountFilter(getSettings: () => AccountLevelFilters |
     return decision(readAccountIdentity(component.data ?? component.reply ?? component.replyItem), 'comments') !== 'allow'
   }
 
-  const pendingThreads = new Set<HTMLElement>()
-  const rendererThreads = new WeakMap<CommentRenderer, HTMLElement>()
-  let threadSyncScheduled = false
-  function scheduleThread(renderer: CommentRenderer) {
+  function scheduleThread(renderer: CommentRenderer, changed = false) {
     let node: Element | null = renderer
     let thread: HTMLElement | undefined
     const visited = new Set<Element>()
@@ -122,11 +147,16 @@ export function createPageAccountFilter(getSettings: () => AccountLevelFilters |
       rendererThreads.set(renderer, thread)
       pendingThreads.add(thread)
     }
-    if (threadSyncScheduled || !pendingThreads.size)
+    scheduleLayout(changed)
+  }
+
+  function scheduleLayout(changed = false) {
+    treeDirty ||= changed
+    if (layoutFrame)
       return
-    threadSyncScheduled = true
-    queueMicrotask(() => {
-      threadSyncScheduled = false
+    // 等原生 Lit 提交完毕，再测量树线和楼层高度。
+    layoutFrame = requestAnimationFrame(() => {
+      layoutFrame = 0
       for (const host of pendingThreads) {
         const root = host.shadowRoot
         if (!host.isConnected || !root)
@@ -142,14 +172,13 @@ export function createPageAccountFilter(getSettings: () => AccountLevelFilters |
         }
         scan(root)
         host.toggleAttribute('data-bewly-account-empty', !allowed)
-        if (!root.querySelector('#bewly-account-thread-visibility')) {
-          const style = document.createElement('style')
-          style.id = 'bewly-account-thread-visibility'
-          style.textContent = ':host([data-bewly-account-empty]) { display: none !important; }'
-          root.append(style)
-        }
+        setHidden(host, !allowed)
       }
       pendingThreads.clear()
+      if (treeDirty) {
+        treeDirty = false
+        refreshTree?.()
+      }
     })
   }
 
@@ -170,7 +199,7 @@ export function createPageAccountFilter(getSettings: () => AccountLevelFilters |
     }
     prototype.disconnectedCallback = function () {
       renderers.delete(this)
-      scheduleThread(this)
+      scheduleThread(this, true)
       return disconnect?.call(this)
     }
     prototype.render = function (...args) {
@@ -178,14 +207,13 @@ export function createPageAccountFilter(getSettings: () => AccountLevelFilters |
       const data = this.data ?? this.reply ?? this.replyItem
       const identity = readAccountIdentity(data)
       const state = decision(identity, 'comments')
-      this.toggleAttribute('data-bewly-account-filtered', state !== 'allow')
-      scheduleThread(this)
-      if (state === 'allow')
-        return original.apply(this, args)
-
-      const style = document.createElement('style')
-      style.textContent = ':host { display: none !important; }'
-      return style
+      const hidden = state !== 'allow'
+      const changed = visibility.get(this) !== hidden
+      visibility.set(this, hidden)
+      this.toggleAttribute('data-bewly-account-filtered', hidden)
+      setHidden(this, hidden)
+      scheduleThread(this, changed)
+      return hidden ? null : original.apply(this, args)
     }
   }
 

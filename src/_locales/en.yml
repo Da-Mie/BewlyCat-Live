@@ -37,6 +37,7 @@ common:
     delete: Delete
     confirm: Confirm
     cancel: Cancel
+    close: Close
     enable: Enable
     disable: Disable
     refresh: Refresh
@@ -114,9 +115,7 @@ settings:
   ambilight:
     title: Video Ambient Light
     enable: Enable ambient light
-    enable_desc: Cast dynamic, soft ambient light around the video player to enhance immersion.
-    enable_fullscreen: Enable in fullscreen and web fullscreen
-    enable_fullscreen_desc: Keep ambient light active in fullscreen; when disabled, ambient light pauses in fullscreen.
+    enable_desc: Cast dynamic, soft ambient light around the video player to enhance immersion. Only works with the default and widescreen player; it turns off automatically in fullscreen, web fullscreen and Bewly Widescreen.
     preset: Light preset
     preset_soft: Soft
     preset_cinema: Cinema
@@ -126,7 +125,6 @@ settings:
     smoothing: Transition smoothing
     blur: Blur intensity
     saturation: Saturation
-    subgroup_scenes: Applied Scenes
     subgroup_effects: Light Effects
     subgroup_effects_desc: Fine-tune light brightness, spread radius, and smooth transition.
     subgroup_performance: Rendering Performance
@@ -375,6 +373,10 @@ settings:
   original_moments_show_up_list: Show dynamic uploader banner
   original_moments_use_bewly_filters: Filter the original dynamic feed
   original_moments_use_bewly_filters_desc: When enabled, the dynamic type and keyword filters above also apply to Bilibili's original dynamic page.
+  original_moments_show_fold_comments_button: Show "Collapse comments" button
+  original_moments_show_fold_comments_button_desc: Show a "Collapse comments" button at the bottom of the comment area on Bilibili's original moments page.
+  original_moments_click_blank_to_fold_comments: Click blank areas to collapse comments
+  original_moments_click_blank_to_fold_comments_desc: When enabled, click the blank areas on either side of a moment card to collapse expanded comments on the original moments page.
   moments_show_user_card: Show user card
   moments_show_publish: Show publish action
   moments_show_live: Show live users
@@ -1078,6 +1080,10 @@ settings:
   custom_playback_rate_no_video: No controllable video on this page. Open these settings on a video playback page.
   playback_rate_step: Playback rate shortcut step
   playback_rate_step_desc: Change the rate by 0.01–1 per key press; the default is 0.25. Configure the keys in Shortcuts.
+  fullscreen_wheel_volume: Mouse wheel volume in fullscreen
+  fullscreen_wheel_volume_desc: In fullscreen, BewlyCat handles the mouse wheel and changes the volume by a fixed step per notch, replacing bilibili's inconsistent native step.
+  fullscreen_wheel_volume_step: Wheel volume step
+  fullscreen_wheel_volume_step_desc: Change the volume by 1–50 per notch; the default is 5.
   remember_video_quality: Remember video quality
   remember_video_quality_desc: Restore the last selected video quality; if it is unavailable, the current quality is kept.
   remember_video_quality_confirm_title: Enable Remember video quality?
@@ -1299,6 +1305,8 @@ settings:
   show_bewly_widescreen_button_desc: Show the Bewly Widescreen button in the video player controls.
   show_video_screenshot_button: Show player screenshot button
   show_video_screenshot_button_desc: Show a screenshot button in the player controls. The shortcut still works when the button is hidden.
+  show_video_pip_button: Show player picture-in-picture button
+  show_video_pip_button_desc: Show the picture-in-picture button in the player controls. The shortcut still works when the button is hidden.
   enable_listen_video: Enable listen-video mode
   enable_listen_video_desc: Use the player button or shortcut to listen to videos. Only the picture is hidden; the video stream still loads.
   show_listen_video_button: Show player listen-video button
@@ -1869,6 +1877,7 @@ moments:
   zoom_out: Zoom out
   zoom_in: Zoom in
   fit_window: Fit to window
+  zoom_input: Zoom level. Enter a percentage, then press Enter or leave the field to apply
   rotate_clockwise: Rotate clockwise
 moment_card:
   repost_pending: This repost is still being submitted. Please wait.
@@ -1910,6 +1919,7 @@ moment_card:
   comment_login: Log in to post comments
   comment_send: Post
   comment_send_shortcut: Ctrl / ⌘ + Enter to send
+  comment_send_keys: Ctrl / ⌘ + Enter
   comment_reply: Reply
   comment_reply_to: "Reply to {'@'}{name}"
   comment_send_failed: Failed to post the comment. Please try again later
@@ -1933,6 +1943,8 @@ moment_card:
   open_original_video: 'Open original video: {title}'
   author_images: '{name} post images'
   view_author_images: View {name}'s post images
+  gallery_region: '{images}, scroll horizontally to view'
+  view_image: View image {index} of {images}
   open_origin_moment: View {name}'s original post
   view_details: View details
   view_original_post: View original post

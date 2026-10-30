@@ -156,7 +156,7 @@ function getCoverRatioProgress(value: number) {
             @blur="confirmListLayoutBreakpoint"
           >
             <template #prefix>
-              <span class="list-layout-control__label">{{ $t('settings.auto_switch_list_layout_breakpoint') }}</span>
+              <span class="list-layout-control__label" :data-settings-title="$t('settings.auto_switch_list_layout_breakpoint')">{{ $t('settings.auto_switch_list_layout_breakpoint') }}</span>
             </template>
             <template #suffix>
               <span class="list-layout-control__unit">px</span>
@@ -173,7 +173,7 @@ function getCoverRatioProgress(value: number) {
       >
         <div class="cover-ratio-controls">
           <label class="cover-ratio-control">
-            <span class="cover-ratio-control__label">{{ $t('settings.video_card_cover_ratio_one_column') }}</span>
+            <span class="cover-ratio-control__label" :data-settings-title="$t('settings.video_card_cover_ratio_one_column')">{{ $t('settings.video_card_cover_ratio_one_column') }}</span>
             <input
               v-model.number="settings.videoCardCoverRatioOneColumn"
               type="range"
@@ -186,7 +186,7 @@ function getCoverRatioProgress(value: number) {
             <span class="cover-ratio-control__value">{{ settings.videoCardCoverRatioOneColumn }}%</span>
           </label>
           <label class="cover-ratio-control">
-            <span class="cover-ratio-control__label">{{ $t('settings.video_card_cover_ratio_two_columns') }}</span>
+            <span class="cover-ratio-control__label" :data-settings-title="$t('settings.video_card_cover_ratio_two_columns')">{{ $t('settings.video_card_cover_ratio_two_columns') }}</span>
             <input
               v-model.number="settings.videoCardCoverRatioTwoColumns"
               type="range"

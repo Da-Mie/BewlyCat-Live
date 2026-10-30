@@ -37,6 +37,7 @@ common:
     delete: 刪除
     confirm: 確定
     cancel: 取消
+    close: 關閉
     enable: 啟用
     disable: 停用
     refresh: 重新整理
@@ -114,9 +115,7 @@ settings:
   ambilight:
     title: 影片環境光
     enable: 啟用影片環境光
-    enable_desc: 在影片播放頁四周投射隨畫面變化的柔和環境光，增強觀影沉浸感。
-    enable_fullscreen: 全螢幕與網頁全螢幕時啟用
-    enable_fullscreen_desc: 進入全螢幕或網頁全螢幕時保持環境光；關閉後全螢幕時暫停環境光。
+    enable_desc: 在影片播放頁四周投射隨畫面變化的柔和環境光，增強觀影沉浸感。僅在預設與寬螢幕播放器下生效，全螢幕、網頁全螢幕與 Bewly 寬螢幕時自動關閉。
     preset: 光效預設
     preset_soft: 柔和
     preset_cinema: 影院
@@ -126,7 +125,6 @@ settings:
     smoothing: 過渡平滑
     blur: 柔化程度
     saturation: 色彩飽和度
-    subgroup_scenes: 適用場景
     subgroup_effects: 光效調節
     subgroup_effects_desc: 調整光線發光強度、擴散範圍與色彩過渡質感。
     subgroup_performance: 渲染性能
@@ -371,6 +369,10 @@ settings:
   original_moments_show_up_list: 顯示動態 UP 橫幅
   original_moments_use_bewly_filters: 過濾原版動態流
   original_moments_use_bewly_filters_desc: 啟用後，以上動態類型與關鍵詞過濾設定也會套用至 Bilibili 原版動態頁。
+  original_moments_show_fold_comments_button: 顯示收起留言按鈕
+  original_moments_show_fold_comments_button_desc: 在 Bilibili 原版動態頁的評論區底部顯示「收起留言」按鈕。
+  original_moments_click_blank_to_fold_comments: 點擊空白處收起留言
+  original_moments_click_blank_to_fold_comments_desc: 啟用後，在原版動態頁展開評論，點擊動態卡片兩側的空白區域即可收起留言。
   moments_show_user_card: 顯示使用者卡片
   moments_show_publish: 顯示發布動態元件
   moments_show_live: 顯示正在直播元件
@@ -965,6 +967,10 @@ settings:
   custom_playback_rate_no_video: 目前頁面沒有可控制的影片，請在影片播放頁開啟此設定。
   playback_rate_step: 倍速快捷鍵調整幅度
   playback_rate_step_desc: 每次增減 0.01–1 倍；預設 0.25。快捷鍵可在「快捷鍵」設定中修改。
+  fullscreen_wheel_volume: 全螢幕滾輪調整音量
+  fullscreen_wheel_volume_desc: 全螢幕播放時由擴充功能接管滾輪調整音量，每滾一格按固定幅度調整，取代 B 站原生不規律的調整幅度。
+  fullscreen_wheel_volume_step: 滾輪音量調整幅度
+  fullscreen_wheel_volume_step_desc: 每格增減 1–50；預設 5。
   remember_video_quality: 記住畫質
   remember_video_quality_desc: 啟用後自動恢復上次選擇的畫質，無法使用時沿用目前畫質。
   remember_video_quality_confirm_title: 確認開啟記住畫質？
@@ -1181,6 +1187,8 @@ settings:
   show_bewly_widescreen_button_desc: 啟用後，在影片播放器控制列中顯示 Bewly 寬螢幕按鈕。
   show_video_screenshot_button: 顯示播放器截圖按鈕
   show_video_screenshot_button_desc: 在播放器控制列顯示截圖按鈕。關閉後仍可使用快捷鍵截圖。
+  show_video_pip_button: 顯示播放器子母畫面按鈕
+  show_video_pip_button_desc: 在播放器控制列顯示子母畫面按鈕。關閉後仍可使用快捷鍵切換。
   enable_listen_video: 啟用聽影片功能
   enable_listen_video_desc: 開啟後可透過播放器按鈕或快捷鍵進入聽影片。僅隱藏畫面，影片串流仍會正常載入。
   show_listen_video_button: 顯示播放器「聽影片」按鈕
@@ -1798,6 +1806,7 @@ moments:
   zoom_out: 縮小
   zoom_in: 放大
   fit_window: 適應視窗
+  zoom_input: 縮放比例，輸入百分比後按 Enter 或移開焦點套用
   rotate_clockwise: 順時針旋轉
 moment_card:
   repost_pending: 這則動態正在轉發，請稍候
@@ -1839,6 +1848,7 @@ moment_card:
   comment_login: 登入後才能發表留言
   comment_send: 發佈
   comment_send_shortcut: Ctrl / ⌘ + Enter 送出
+  comment_send_keys: Ctrl / ⌘ + Enter
   comment_reply: 回覆
   comment_reply_to: "回覆 {'@'}{name}"
   comment_send_failed: 留言送出失敗，請稍後重試
@@ -1862,6 +1872,8 @@ moment_card:
   open_original_video: '開啟原影片：{title}'
   author_images: '{name} 的動態圖片'
   view_author_images: 檢視 {name} 的動態圖片
+  gallery_region: '{images}，可橫向滑動檢視'
+  view_image: 檢視 {images} 第 {index} 張
   open_origin_moment: 查看 {name} 的原動態
   view_details: 查看詳情
   view_original_post: 查看原動態

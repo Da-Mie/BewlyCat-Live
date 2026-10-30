@@ -16,6 +16,7 @@ import { confirmDialogKey } from '~/composables/useConfirmDialog'
 import { useDark } from '~/composables/useDark'
 import { useLayoutEditMode } from '~/composables/useLayoutEditMode'
 import { BEWLY_MOUNTED, DRAWER_VIDEO_ENTER_PAGE_FULL, DRAWER_VIDEO_EXIT_PAGE_FULL, IFRAME_PAGE_SWITCH_BEWLY, IFRAME_PAGE_SWITCH_BILI, IFRAME_SEARCH_NAVIGATION, OVERLAY_SCROLL_BAR_SCROLL, OVERLAY_SCROLL_STATE_CHANGE } from '~/constants/globalEvents'
+import { isOriginalMomentsFeed } from '~/contentScripts/features/originalMomentsFeed'
 import { installScrollBridge } from '~/contentScripts/features/scrollBridge'
 import { HomeSubPage } from '~/contentScripts/views/Home/types'
 import { AppPage } from '~/enums/appEnums'
@@ -27,6 +28,7 @@ import { useTopBarStore } from '~/stores/topBarStore'
 import { stripBilibiliLocalePathname } from '~/utils/bilibiliLocale'
 import { setOriginalBilibiliTopBarScrolled } from '~/utils/bilibiliTopBar'
 import { isFirefoxBuild } from '~/utils/buildTarget'
+import { SELECTION_FALLBACK_CLASS, supportsHighlightInheritance } from '~/utils/highlightInheritance'
 import { isHomePage, isInIframe, isNotificationPage, isSearchResultsPage, isVideoOrBangumiPage, openLinkToNewTab, queryDomUntilFound, scrollToTop } from '~/utils/main'
 import emitter from '~/utils/mitt'
 import { navigateToPluginSearchResults } from '~/utils/searchNavigation'
@@ -385,7 +387,7 @@ function isLayoutEditCandidateVisible(element: HTMLElement) {
 }
 
 function isOriginalMomentsFeedPage() {
-  return window.location.hostname === 't.bilibili.com' && /^\/?$/.test(window.location.pathname)
+  return isOriginalMomentsFeed()
 }
 
 function refreshLayoutEditTargets() {
@@ -1619,6 +1621,16 @@ function openVideoDialog(url: string) {
  */
 async function haveScrollbar() {
   await nextTick()
+  // Read after the browser has laid out the newly rendered cards; reading right
+  // after the Vue flush forced that layout synchronously after every page load.
+  // Hidden tabs do not run animation frames, so a timeout keeps loading going.
+  await new Promise<void>((resolve) => {
+    const fallback = window.setTimeout(resolve, 100)
+    requestAnimationFrame(() => setTimeout(() => {
+      window.clearTimeout(fallback)
+      resolve()
+    }, 0))
+  })
   const viewport = scrollViewportRef.value
   if (!viewport)
     return false
@@ -1856,6 +1868,7 @@ if (settings.value.cleanUrlArgument) {
     :class="{
       'dark': isDark,
       'bewly-wrapper--viewport': isHomePage() && !settings.useOriginalBilibiliHomepage,
+      [SELECTION_FALLBACK_CLASS]: !supportsHighlightInheritance(),
     }"
     text="$bew-text-1"
     @pointerdown.capture="blockOriginalLayoutInteraction"
@@ -2082,7 +2095,11 @@ if (settings.value.cleanUrlArgument) {
               'bew-page-controls--blend': useBlendedPageControls,
               'bewly-scroll-viewport--repainted-scrollbar': useFirefoxScrollbar,
             }"
-            :style="{ '--bew-control-wallpaper-mask': pageControlWallpaperMask }"
+            :style="{
+              '--bew-control-wallpaper-mask': pageControlWallpaperMask,
+              // 视频弹窗打开时锁定背后列表，避免弹窗内滚轮与方向键越界滚动
+              'overflowY': videoDialog ? 'hidden' : undefined,
+            }"
             h-inherit of-y-auto of-x-hidden
             tabindex="-1"
             style="overscroll-behavior: contain;"

@@ -16,6 +16,7 @@ import {
 import type { LivePreferences } from '~/utils/livePreferences'
 import { normalizeLivePreferences } from '~/utils/livePreferences'
 import { normalizePlaybackRateStep } from '~/utils/playbackRate'
+import { normalizeWheelVolumeStep } from '~/utils/wheelVolume'
 
 export const storageDemo = useStorageLocal('webext-demo', 'Storage Demo')
 
@@ -50,6 +51,13 @@ export const momentsWantedUsers = useStorageLocal<MomentsWantedUser[]>(
 export const momentsPinnedUsers = useStorageLocal<MomentsWantedUser[]>(
   'momentsPinnedUsers',
   [],
+  { writeDefaults: false },
+)
+
+/** 动态卡片评论区上次选择的排序（0 最新，1 最热）；新展开的评论区沿用该排序。 */
+export const momentCommentSort = useStorageLocal<0 | 1>(
+  'momentCommentSort',
+  0,
   { writeDefaults: false },
 )
 
@@ -302,7 +310,6 @@ export interface Settings {
   liveRoomHideGifts: boolean
   liveRoomHideEntryEffects: boolean
   ambilightEnabled: boolean
-  ambilightEnableFullscreen: boolean
   ambilightPreset: AmbilightPreset
   ambilightStrength: number
   ambilightSpread: number
@@ -429,6 +436,10 @@ export interface Settings {
   originalMomentsShowUpList: boolean
   /** 将 Bewly 动态过滤设置同时应用到 Bilibili 原版动态流 */
   originalMomentsUseBewlyFilters: boolean
+  /** 在原版动态评论区底部显示“收起评论”按钮 */
+  originalMomentsShowFoldCommentsButton: boolean
+  /** 原版动态页展开评论后，点击卡片两侧空白处收起评论 */
+  originalMomentsClickBlankToFoldComments: boolean
   momentsSidebarShowUserCard: boolean
   momentsSidebarShowPublish: boolean
   momentsSidebarShowLive: boolean
@@ -617,6 +628,7 @@ export interface Settings {
   showVerticalVideoZoomButton: boolean // 显示竖屏视频放大按钮
   showBewlyWidescreenButton: boolean // 显示播放器 Bewly 宽屏按钮
   showVideoScreenshotButton: boolean // 显示播放器截图按钮
+  showVideoPipButton: boolean // 显示播放器画中画按钮
   enableListenVideo: boolean // 听视频功能总开关
   showListenVideoButton: boolean // 显示播放器听视频按钮
   listenVideoCoverShape: ListenVideoCoverShape // 听视频封面形状（圆形唱片旋转，方/矩形静止）
@@ -644,6 +656,8 @@ export interface Settings {
   rememberPlaybackRate: boolean // 启用倍速记忆功能
   savedPlaybackRate: number // 记住的倍速值 (0.25-5)
   playbackRateStep: number // 倍速快捷键每次调节的幅度 (0.01-1)
+  customFullscreenWheelVolume: boolean // 全屏时接管滚轮音量调节
+  fullscreenWheelVolumeStep: number // 全屏滚轮每格调节的音量 (1-50)
 
   // 清晰度记忆设置
   rememberVideoQuality: boolean
@@ -681,7 +695,6 @@ export const originalSettings: Settings = {
   liveRoomHideGifts: false,
   liveRoomHideEntryEffects: true,
   ambilightEnabled: false,
-  ambilightEnableFullscreen: true,
   ambilightPreset: 'cinema',
   ambilightStrength: 80,
   ambilightSpread: 100,
@@ -811,6 +824,8 @@ export const originalSettings: Settings = {
   originalMomentsShowHotSearch: true,
   originalMomentsShowUpList: true,
   originalMomentsUseBewlyFilters: false,
+  originalMomentsShowFoldCommentsButton: true,
+  originalMomentsClickBlankToFoldComments: false,
   momentsSidebarShowUserCard: true,
   momentsSidebarShowPublish: true,
   momentsSidebarShowLive: true,
@@ -992,6 +1007,7 @@ export const originalSettings: Settings = {
   showVerticalVideoZoomButton: true, // 默认显示竖屏视频放大按钮
   showBewlyWidescreenButton: true, // 默认显示播放器 Bewly 宽屏按钮
   showVideoScreenshotButton: true, // 默认显示播放器截图按钮
+  showVideoPipButton: true, // 默认显示播放器画中画按钮
   enableListenVideo: false, // 默认关闭听视频功能，需在设置中手动开启
   showListenVideoButton: true, // 默认显示播放器听视频按钮
   listenVideoCoverShape: 'circle', // 默认圆形唱片并保持旋转
@@ -1048,6 +1064,8 @@ export const originalSettings: Settings = {
   rememberPlaybackRate: false, // 启用倍速记忆功能
   savedPlaybackRate: 1, // 记住的倍速值 (0.25-5)
   playbackRateStep: 0.25,
+  customFullscreenWheelVolume: false,
+  fullscreenWheelVolumeStep: 5,
 
   // 清晰度记忆设置
   rememberVideoQuality: false,
@@ -1154,6 +1172,7 @@ export const settings = useSettingsStorage(originalSettings, {
     if (typeof record.liveRoomRememberPreferences !== 'boolean')
       record.liveRoomRememberPreferences = true
     record.playbackRateStep = normalizePlaybackRateStep(record.playbackRateStep)
+    record.fullscreenWheelVolumeStep = normalizeWheelVolumeStep(record.fullscreenWheelVolumeStep)
 
     // 旧配置也补齐新入口，保持菜单按钮与各项的默认可见状态一致。
     const menuConfig = record.videoCardContextMenuConfig
@@ -1207,8 +1226,8 @@ export const settings = useSettingsStorage(originalSettings, {
 
     if (typeof record.ambilightEnabled !== 'boolean')
       record.ambilightEnabled = false
-    if (typeof record.ambilightEnableFullscreen !== 'boolean')
-      record.ambilightEnableFullscreen = true
+    // 环境光固定不在全屏、网页全屏与 Bewly 宽屏下运行，旧的全屏开关不再沿用。
+    Reflect.deleteProperty(record, 'ambilightEnableFullscreen')
 
     const validAmbilightPresets: AmbilightPreset[] = ['soft', 'cinema', 'vivid']
     if (!validAmbilightPresets.includes(record.ambilightPreset))

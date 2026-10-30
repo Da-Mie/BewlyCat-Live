@@ -623,6 +623,10 @@ defineExpose({
   currentPage,
   totalPages,
 })
+
+function getLiveRoomKey(room: any) {
+  return room.id || room.roomid
+}
 </script>
 
 <template>
@@ -693,7 +697,7 @@ defineExpose({
             :items="transformedLiveRoomList"
             :grid-layout="gridLayout"
             :transform-item="transformLiveRoom"
-            :get-item-key="(room: any) => room.id || room.roomid"
+            :get-item-key="getLiveRoomKey"
             :loading="isLoading"
             :no-more-content="!hasMore"
             :request-failed="!!error"

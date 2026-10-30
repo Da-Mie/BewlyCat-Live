@@ -37,6 +37,7 @@ common:
     delete: 删除
     confirm: 确定
     cancel: 取消
+    close: 关闭
     enable: 启用
     disable: 禁用
     refresh: 刷新
@@ -114,9 +115,7 @@ settings:
   ambilight:
     title: 视频环境光
     enable: 启用视频环境光
-    enable_desc: 在视频播放页四周投射随画面变化的柔和环境光，增强观影沉浸感。
-    enable_fullscreen: 全屏与网页全屏时启用
-    enable_fullscreen_desc: 进入全屏或网页全屏时保持环境光；关闭后全屏时暂停环境光。
+    enable_desc: 在视频播放页四周投射随画面变化的柔和环境光，增强观影沉浸感。仅在默认与宽屏播放器下生效，全屏、网页全屏与 Bewly 宽屏时自动关闭。
     preset: 光效预设
     preset_soft: 柔和
     preset_cinema: 影院
@@ -126,7 +125,6 @@ settings:
     smoothing: 过渡平滑
     blur: 柔化程度
     saturation: 色彩饱和度
-    subgroup_scenes: 适用场景
     subgroup_effects: 光效调节
     subgroup_effects_desc: 调整光线发光强度、扩散范围与色彩过渡质感。
     subgroup_performance: 渲染性能
@@ -372,6 +370,10 @@ settings:
   original_moments_show_up_list: 显示动态 UP 横幅
   original_moments_use_bewly_filters: 过滤原版动态流
   original_moments_use_bewly_filters_desc: 开启后，以上动态类型与关键词过滤设置也会应用于 Bilibili 原版动态页。
+  original_moments_show_fold_comments_button: 显示收起评论按钮
+  original_moments_show_fold_comments_button_desc: 在 Bilibili 原版动态页的评论区底部显示“收起评论”按钮。
+  original_moments_click_blank_to_fold_comments: 点击空白处收起评论
+  original_moments_click_blank_to_fold_comments_desc: 开启后，在原版动态页展开评论，点击动态卡片两侧的空白区域即可收起评论。
   moments_show_user_card: 显示用户卡片
   moments_show_publish: 显示发布动态组件
   moments_show_live: 显示正在直播组件
@@ -560,6 +562,8 @@ settings:
   show_bewly_widescreen_button_desc: 启用后，在视频播放器控制栏中显示 Bewly 宽屏按钮。
   show_video_screenshot_button: 显示播放器截图按钮
   show_video_screenshot_button_desc: 在播放器控制栏显示截图按钮。关闭后仍可使用快捷键截图。
+  show_video_pip_button: 显示播放器画中画按钮
+  show_video_pip_button_desc: 在播放器控制栏显示画中画按钮。关闭后仍可使用快捷键切换。
   enable_listen_video: 启用听视频功能
   enable_listen_video_desc: 开启后可通过播放器按钮或快捷键进入听视频。仅隐藏画面，视频流仍会正常加载。
   show_listen_video_button: 显示播放器「听视频」按钮
@@ -594,6 +598,10 @@ settings:
   custom_playback_rate_no_video: 当前页面没有可控制的视频，请在视频播放页打开此设置。
   playback_rate_step: 倍速快捷键调节幅度
   playback_rate_step_desc: 每次增减 0.01–1 倍；默认 0.25。快捷键可在「快捷键」设置中修改。
+  fullscreen_wheel_volume: 全屏滚轮调节音量
+  fullscreen_wheel_volume_desc: 全屏播放时用插件接管滚轮调音，每滚一格按固定幅度调节，替代 B 站原生不规律的调节幅度。
+  fullscreen_wheel_volume_step: 滚轮音量调节幅度
+  fullscreen_wheel_volume_step_desc: 每格增减 1–50；默认 5。
   remember_video_quality: 记住清晰度
   remember_video_quality_desc: 启用后自动恢复上次选择的清晰度，不可用时沿用当前清晰度。
   remember_video_quality_confirm_title: 确认开启记住清晰度？
@@ -1783,6 +1791,7 @@ moments:
   zoom_out: 缩小
   zoom_in: 放大
   fit_window: 适应窗口
+  zoom_input: 缩放比例，输入百分比后按回车或移开焦点应用
   rotate_clockwise: 顺时针旋转
 moment_card:
   repost_pending: 这条动态正在转发，请稍候
@@ -1824,6 +1833,7 @@ moment_card:
   comment_login: 登录后才能发表评论
   comment_send: 发布
   comment_send_shortcut: Ctrl / ⌘ + Enter 发送
+  comment_send_keys: Ctrl / ⌘ + Enter
   comment_reply: 回复
   comment_reply_to: "回复 {'@'}{name}"
   comment_send_failed: 评论发送失败，请稍后重试
@@ -1847,6 +1857,8 @@ moment_card:
   open_original_video: '打开原视频：{title}'
   author_images: '{name} 的动态图片'
   view_author_images: 查看 {name} 的动态图片
+  gallery_region: '{images}，可横向滑动查看'
+  view_image: 查看 {images} 第 {index} 张
   open_origin_moment: 查看 {name} 的原动态
   view_details: 查看详情
   view_original_post: 查看原动态

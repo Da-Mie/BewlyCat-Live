@@ -1,4 +1,6 @@
 // 由于是浏览器环境，所以引入的ts不能使用webextension-polyfill相关api，包含获取本地Storage，获取的是网页的localStorage
+import injectMessages from 'virtual:bewly-inject-messages'
+
 import { isSearchResultApiPath } from '~/constants/searchApi'
 import COMMENT_REPLY_TREE_GUIDES_CSS from '~/styles/commentReplyTree.scss?inline'
 import type { AccountIdentity } from '~/utils/accountLevelFilter'
@@ -10,7 +12,6 @@ import type { CommentReplyAvatarAnchor, CommentReplyTreeBranch } from '~/utils/c
 import { formatCommentReplyGuideCoordinate, getCommentReplyBranchPath, getCommentReplyBranchToggleY } from '~/utils/commentReplyTree'
 import { projectCommentTree } from '~/utils/commentTreeProjection'
 import { getCommentSexIcon, normalizeCommentLocation } from '~/utils/commentUserInfo'
-import { i18n } from '~/utils/i18n'
 import { isElectron } from '~/utils/main'
 import type { PageSettingsPayload } from '~/utils/pageSettingsProtocol'
 import { createPageSettingsPayload, readPageBootSnapshot } from '~/utils/pageSettingsProtocol'
@@ -21,9 +22,17 @@ import { createLocalLoudnessController } from './audio/localLoudness'
 // 存储当前设置状态
 let currentSettings: PageSettingsPayload | null = null
 
+// Matches vue-i18n's default/fallback locale; only `inject.*` messages are bundled here.
+const DEFAULT_PAGE_LOCALE = 'en'
+
 function pageT(key: string, params: Record<string, unknown> = {}) {
-  const locale = currentSettings?.language || i18n.global.locale.value
-  return String(i18n.global.t(key, params, { locale }))
+  const locale = currentSettings?.language || DEFAULT_PAGE_LOCALE
+  const messageKey = key.replace(/^inject\./, '')
+  const message = injectMessages[locale]?.[messageKey] ?? injectMessages[DEFAULT_PAGE_LOCALE]?.[messageKey]
+  if (message === undefined)
+    return key
+  return message.replace(/\{(\w+)\}/g, (placeholder, name: string) =>
+    name in params ? String(params[name]) : placeholder)
 }
 let settingsReady = false
 let preventMobileRedirectEnabled = false
@@ -1194,7 +1203,7 @@ else if (shouldInitializePageScript) {
     }
     const state = commentReplyPaginationStates.get(component)
     const allExpanded = state?.allRepliesExpanded === true
-    const optionsKey = `${totalPage}|${allExpanded}|${currentSettings?.language ?? i18n.global.locale.value}`
+    const optionsKey = `${totalPage}|${allExpanded}|${currentSettings?.language ?? DEFAULT_PAGE_LOCALE}`
     if (select.dataset.optionsKey !== optionsKey) {
       const options = document.createDocumentFragment()
       if (allExpanded) {
@@ -4048,8 +4057,11 @@ else if (shouldInitializePageScript) {
     orderedRenderers: HTMLElement[],
     replyContainer?: HTMLElement,
   ): boolean {
+    // 保留被过滤项的 repeat 边界，不能只移动可见项的一部分。
+    const orderedSet = new Set(orderedRenderers)
+    const completeOrder = [...orderedRenderers, ...currentRenderers.filter(renderer => !orderedSet.has(renderer))]
     const orderByRenderer = new Map(
-      orderedRenderers.map((renderer, index) => [renderer, index] as const),
+      completeOrder.map((renderer, index) => [renderer, index] as const),
     )
     currentRenderers.forEach((renderer) => {
       const order = orderByRenderer.get(renderer)
@@ -4059,7 +4071,7 @@ else if (shouldInitializePageScript) {
         renderer.style.setProperty('--bew-comment-reply-order', String(order))
     })
     return replyContainer
-      ? moveCommentReplyRendererNodes(replyContainer, orderedRenderers)
+      ? moveCommentReplyRendererNodes(replyContainer, completeOrder)
       : false
   }
 
@@ -4127,7 +4139,7 @@ else if (shouldInitializePageScript) {
   function getCommentReplyTreeLayoutKey(replyRenderers: HTMLElement[]): string {
     return replyRenderers.map((renderer, index) => {
       const rpid = getReplyRpid(getCommentReplyData(renderer))
-      return rpid ? `r:${rpid}` : `i:${index}`
+      return `${rpid ? `r:${rpid}` : `i:${index}`}:${accountFilter.isHidden(renderer) ? 0 : 1}`
     }).join('|')
   }
 
@@ -4370,7 +4382,7 @@ else if (shouldInitializePageScript) {
     // 后再统一计算，避免现有评论随每个 IP 标签的到达而来回缩进。
     const expandAllLoading = Boolean(paginationState?.expandAllLoading)
     const layoutKey = expandAllLoading
-      ? getCommentReplyTreeLayoutKey(replyRenderers)
+      ? `${accountFilter.isHidden(getCommentReplyTreeRootRenderer(component)) ? 0 : 1}|${getCommentReplyTreeLayoutKey(replyRenderers)}`
       : ''
     if (treeMode !== null
       && expandAllLoading
@@ -4470,6 +4482,15 @@ else if (shouldInitializePageScript) {
     getCommentReplyInvisibleIds(component).forEach(rpid => state.replyMetaByRpid.delete(rpid))
     addMissingCommentReplyTreeParents(nodes, state.replyMetaByRpid, replyContainer)
     const { orderedNodes, liftedRenderers } = projectVisibleCommentReplyNodes(buildCommentReplyTreeOrder(nodes, state.replyMetaByRpid), state.replyMetaByRpid)
+    const visibleRenderers = new Set(orderedNodes.map(({ node }) => node.renderer))
+    replyRenderers.forEach((renderer) => {
+      if (visibleRenderers.has(renderer))
+        return
+      delete renderer.dataset.bewlyCommentReplyDepth
+      delete renderer.dataset.bewlyCommentReplyHidden
+      delete renderer.dataset.bewlyCommentReplyCollapsed
+      renderer.style.removeProperty('--bew-comment-reply-indent')
+    })
     const rootNodes = orderedNodes
       .filter(({ depth }) => depth === 0)
       .map(({ node }) => node)
@@ -4524,7 +4545,7 @@ else if (shouldInitializePageScript) {
     })
     // 未进入树序的节点恢复显示
     replyRenderers.forEach((replyRenderer) => {
-      if (!orderedNodes.some(({ node }) => node.renderer === replyRenderer)) {
+      if (!visibleRenderers.has(replyRenderer)) {
         setCommentReplyAtPrefixHidden(replyRenderer, false)
         clearCommentReplyOffpageParentLabel(replyRenderer)
       }
