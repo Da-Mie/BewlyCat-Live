@@ -252,6 +252,7 @@ else if (shouldInitializePageScript) {
   const COMMENT_REPLY_TREE_FALLBACK_AVATAR_RADIUS = 12
   const COMMENT_REPLY_TREE_INDENT_STEP = 'var(--bew-comment-reply-indent-step, var(--bew-space-8, 32px))'
   const COMMENT_REPLY_TREE_GUIDES_ID = 'bewly-comment-reply-tree-guides'
+  const COMMENT_REPLY_TREE_LIST_ATTRIBUTE = 'data-bewly-comment-reply-list'
   const COMMENT_REPLY_EXPAND_ALL_ID = 'bewly-comment-expand-all-replies'
   const COMMENT_REPLY_PAGE_SELECT_ID = 'bewly-comment-reply-page-select'
   const COMMENT_REPLY_PAGE_HEAD_ID = 'bewly-comment-reply-page-head'
@@ -290,7 +291,8 @@ else if (shouldInitializePageScript) {
     enabled: boolean
     nextOriginalOrder: number
     originalOrderByRenderer: WeakMap<HTMLElement, number>
-    observedTargetsKey?: string
+    observedTargets?: Set<HTMLElement>
+    observedShadowRoots?: Set<ShadowRoot>
     resizeObserver?: ResizeObserver
     observedReplyContainer?: HTMLElement
     replyContainerMutationObserver?: MutationObserver
@@ -546,7 +548,7 @@ else if (shouldInitializePageScript) {
           --bew-comment-reply-indent-step: var(--bew-space-8, 32px);
         }
 
-        :host([data-bewly-comment-reply-tree]) #expander-contents {
+        :host([data-bewly-comment-reply-tree]) [${COMMENT_REPLY_TREE_LIST_ATTRIBUTE}] {
           position: relative;
           /*
            * 树序优先连同 repeat 边界注释整段写入 DOM（见 setCommentReplyRendererOrder）；
@@ -557,7 +559,7 @@ else if (shouldInitializePageScript) {
           align-items: stretch;
         }
 
-        :host([data-bewly-comment-reply-tree]) #expander-contents > :is(bili-comment-reply-renderer, bili-comment-renderer, .bewly-comment-missing-parent)[data-bewly-comment-reply-depth] {
+        :host([data-bewly-comment-reply-tree]) [${COMMENT_REPLY_TREE_LIST_ATTRIBUTE}] > :is(bili-comment-reply-renderer, bili-comment-renderer, .bewly-comment-missing-parent)[data-bewly-comment-reply-depth] {
           box-sizing: border-box;
           display: block;
           padding-inline-start: var(--bew-comment-reply-indent, 0px);
@@ -565,15 +567,15 @@ else if (shouldInitializePageScript) {
           order: var(--bew-comment-reply-order, 0);
         }
 
-        :host([data-bewly-comment-reply-tree]) #expander-contents > #expander-footer {
+        :host([data-bewly-comment-reply-tree]) [${COMMENT_REPLY_TREE_LIST_ATTRIBUTE}] > #expander-footer {
           order: 2147483647;
         }
 
-        :host([data-bewly-comment-reply-tree]) #expander-contents > :is(bili-comment-reply-renderer, bili-comment-renderer, .bewly-comment-missing-parent)[data-bewly-comment-reply-hidden] {
+        :host([data-bewly-comment-reply-tree]) [${COMMENT_REPLY_TREE_LIST_ATTRIBUTE}] > :is(bili-comment-reply-renderer, bili-comment-renderer, .bewly-comment-missing-parent)[data-bewly-comment-reply-hidden] {
           display: none !important;
         }
 
-        :host([data-bewly-comment-reply-tree]) #expander-contents > :is(bili-comment-reply-renderer, bili-comment-renderer, .bewly-comment-missing-parent)[data-bewly-comment-reply-collapsed] {
+        :host([data-bewly-comment-reply-tree]) [${COMMENT_REPLY_TREE_LIST_ATTRIBUTE}] > :is(bili-comment-reply-renderer, bili-comment-renderer, .bewly-comment-missing-parent)[data-bewly-comment-reply-collapsed] {
           box-sizing: border-box;
           height: var(--bew-space-6, 24px) !important;
           min-height: var(--bew-space-6, 24px) !important;
@@ -2552,7 +2554,8 @@ else if (shouldInitializePageScript) {
   function disconnectCommentReplyTreeResizeObserver(state: CommentReplyTreeState) {
     state.resizeObserver?.disconnect()
     state.resizeObserver = undefined
-    state.observedTargetsKey = undefined
+    state.observedTargets = undefined
+    state.observedShadowRoots = undefined
     state.replyContainerMutationObserver?.disconnect()
     state.replyContainerMutationObserver = undefined
     state.observedReplyContainer = undefined
@@ -2565,6 +2568,50 @@ else if (shouldInitializePageScript) {
     }
   }
 
+  function getCommentReplyTreeContainer(root: ShadowRoot): HTMLElement | null {
+    const expanded = root.querySelector<HTMLElement>('#expander-contents')
+    const previews = new Set(Array.from(root.querySelectorAll<HTMLElement>(
+      'bili-comment-reply-renderer, bili-comment-renderer',
+    )).map(renderer => renderer.parentElement).filter((parent): parent is HTMLElement => (
+      parent !== null && parent !== expanded && !parent.closest('#expander-contents')
+    )))
+    const isVisibleList = (container: HTMLElement) => {
+      for (let node: HTMLElement | null = container; node; node = node.parentElement) {
+        if (node.hidden || getComputedStyle(node).display === 'none')
+          return false
+      }
+      return true
+    }
+    if (expanded && Array.from(expanded.children).some(isCommentReplyRenderer) && isVisibleList(expanded))
+      return expanded
+    return [...previews].find(isVisibleList) ?? expanded
+  }
+
+  function clearCommentReplyTreeList(
+    component: HTMLElement,
+    replyContainer: HTMLElement,
+    state?: CommentReplyTreeState,
+  ) {
+    removeCommentReplyTreeGuides(component, replyContainer)
+    replyContainer.querySelectorAll('.bewly-comment-missing-parent').forEach(node => node.remove())
+    const renderers = Array.from(replyContainer.children).filter(isCommentReplyRenderer)
+    if (state?.enabled && replyContainer.id === 'expander-contents') {
+      moveCommentReplyRendererNodes(replyContainer, [...renderers].sort((a, b) => (
+        getCommentReplyOriginalOrder(state, a) - getCommentReplyOriginalOrder(state, b)
+      )))
+    }
+    renderers.forEach((renderer) => {
+      delete renderer.dataset.bewlyCommentReplyDepth
+      delete renderer.dataset.bewlyCommentReplyHidden
+      delete renderer.dataset.bewlyCommentReplyCollapsed
+      renderer.style.removeProperty('--bew-comment-reply-indent')
+      renderer.style.removeProperty('--bew-comment-reply-order')
+      setCommentReplyAtPrefixHidden(renderer, false)
+      clearCommentReplyOffpageParentLabel(renderer)
+    })
+    replyContainer.removeAttribute(COMMENT_REPLY_TREE_LIST_ATTRIBUTE)
+  }
+
   /** 原生「收起回复」会在后续展开时复用组件实例。此时上一次展开的 折叠状态、父子关系和布局偏移都已失效，必须作为同一个会话整体清理。 */
   function clearCommentReplyTreeState(component: any) {
     commentReplyTreeEpochs.set(component, (commentReplyTreeEpochs.get(component) ?? 0) + 1)
@@ -2574,32 +2621,8 @@ else if (shouldInitializePageScript) {
 
     if (component instanceof HTMLElement) {
       const root = component.shadowRoot
-      const replyContainer = root?.querySelector<HTMLElement>('#expander-contents')
-      if (replyContainer) {
-        removeCommentReplyTreeGuides(component, replyContainer)
-        replyContainer.querySelectorAll('.bewly-comment-missing-parent').forEach(node => node.remove())
-        const replyRenderers = Array.from(replyContainer.children).filter(isCommentReplyRenderer)
-        // 树序已写入 DOM；原生收起/重新展开前按首次出现顺序还原，与列表数据一致。
-        if (state?.enabled) {
-          const getOrder = (renderer: HTMLElement) => (
-            state.originalOrderByRenderer.get(renderer) ?? Number.MAX_SAFE_INTEGER
-          )
-          moveCommentReplyRendererNodes(
-            replyContainer,
-            [...replyRenderers].sort((a, b) => getOrder(a) - getOrder(b)),
-          )
-        }
-        replyRenderers
-          .forEach((renderer) => {
-            delete renderer.dataset.bewlyCommentReplyDepth
-            delete renderer.dataset.bewlyCommentReplyHidden
-            delete renderer.dataset.bewlyCommentReplyCollapsed
-            renderer.style.removeProperty('--bew-comment-reply-indent')
-            renderer.style.removeProperty('--bew-comment-reply-order')
-            setCommentReplyAtPrefixHidden(renderer, false)
-            clearCommentReplyOffpageParentLabel(renderer)
-          })
-      }
+      root?.querySelectorAll<HTMLElement>(`[${COMMENT_REPLY_TREE_LIST_ATTRIBUTE}], #expander-contents`)
+        .forEach(container => clearCommentReplyTreeList(component, container, state))
       getCommentReplyTreeRootRenderer(component)
         ?.removeAttribute('data-bewly-comment-reply-collapsed')
       root?.querySelector(`#${COMMENT_REPLY_EXPAND_ALL_ID}`)?.remove()
@@ -2651,7 +2674,12 @@ else if (shouldInitializePageScript) {
   }
 
   /** 监听楼层、主评、回复及图片加载，覆盖上方内容变化造成的位移。 */
-  function scheduleCommentReplyTreeLayoutUpdate(component: any) {
+  function scheduleCommentReplyTreeLayoutUpdate(component: any, resetRetries = true) {
+    if (component && resetRetries) {
+      const state = commentReplyTreeStates.get(component)
+      if (state)
+        state.layoutRetryCount = 0
+    }
     if (!component || pendingCommentReplyTreeLayoutUpdates.has(component))
       return
 
@@ -2669,6 +2697,10 @@ else if (shouldInitializePageScript) {
     })
   }
 
+  function haveCommentReplyLayoutTargetsChanged<T>(previous: Set<T> | undefined, next: Set<T>): boolean {
+    return previous?.size !== next.size || [...next].some(target => !previous?.has(target))
+  }
+
   function observeCommentReplyTreeLayout(
     component: any,
     state: CommentReplyTreeState,
@@ -2678,6 +2710,9 @@ else if (shouldInitializePageScript) {
     const threadHost = threadRoot?.host instanceof HTMLElement ? threadRoot.host : null
     const mainRenderer = getCommentReplyTreeRootRenderer(component)
     const targets = new Set<HTMLElement>()
+    const shadowRoots = new Set<ShadowRoot>()
+    if (component.shadowRoot)
+      shadowRoots.add(component.shadowRoot)
     const addTarget = (target: Element | null | undefined) => {
       if (target instanceof HTMLElement)
         targets.add(target)
@@ -2691,6 +2726,8 @@ else if (shouldInitializePageScript) {
     // 在某些布局下无法捕获内部图片高度变化，导致回复坐标仍停留在旧位置。
     const layoutTargetSelector = '#body, #main, #header, #content, #pictures, #footer, #user-avatar, bili-comment-pictures-renderer, bili-rich-text, img'
     const collectNestedLayoutTargets = (root: ParentNode) => {
+      if (root instanceof ShadowRoot)
+        shadowRoots.add(root)
       root.querySelectorAll<HTMLElement>(layoutTargetSelector).forEach(addTarget)
       root.querySelectorAll<HTMLElement>('*').forEach((element) => {
         if (element.shadowRoot)
@@ -2702,12 +2739,11 @@ else if (shouldInitializePageScript) {
     else if (component instanceof HTMLElement && component.shadowRoot)
       collectNestedLayoutTargets(component.shadowRoot)
 
-    const targetList = [...targets]
-    const targetsKey = targetList.map(el => `${el.localName}#${el.id || ''}`).join('|')
-
-    if (state.observedTargetsKey !== targetsKey || !state.resizeObserver) {
+    const targetsChanged = haveCommentReplyLayoutTargetsChanged(state.observedTargets, targets)
+    if (targetsChanged || !state.resizeObserver) {
       disconnectCommentReplyTreeResizeObserver(state)
-      state.observedTargetsKey = targetsKey
+      state.observedTargets = targets
+      state.layoutRetryCount = 0
       state.resizeObserver = new ResizeObserver(() => {
         if (!component?.isConnected) {
           disconnectCommentReplyTreeResizeObserver(state)
@@ -2715,13 +2751,14 @@ else if (shouldInitializePageScript) {
         }
         scheduleCommentReplyTreeLayoutUpdate(component)
       })
-      targetList.forEach(target => state.resizeObserver?.observe(target))
+      targets.forEach(target => state.resizeObserver?.observe(target))
     }
 
     // 删除/屏蔽回复时，B 站有时直接从列表移除 renderer，不触发回复组件自身的
     // update；仅依赖 ResizeObserver 可能错过这一帧，导致楼层 shadow root 内的线条
     // 没有按剩余回复重新绘制。
-    if (state.observedReplyContainer !== replyContainer || !state.replyContainerMutationObserver) {
+    const rootsChanged = haveCommentReplyLayoutTargetsChanged(state.observedShadowRoots, shadowRoots)
+    if (state.observedReplyContainer !== replyContainer || rootsChanged || !state.replyContainerMutationObserver) {
       state.replyContainerMutationObserver?.disconnect()
       const observer = new MutationObserver((mutations) => {
         if (!component?.isConnected) {
@@ -2749,7 +2786,9 @@ else if (shouldInitializePageScript) {
           scheduleCommentReplyTreeLayoutUpdate(component)
       })
       observer.observe(replyContainer, { childList: true })
+      shadowRoots.forEach(root => observer.observe(root, { childList: true }))
       state.observedReplyContainer = replyContainer
+      state.observedShadowRoots = shadowRoots
       state.replyContainerMutationObserver = observer
     }
 
@@ -3376,7 +3415,7 @@ else if (shouldInitializePageScript) {
       if (retries >= 12)
         return
       state.layoutRetryCount = retries + 1
-      scheduleCommentReplyTreeLayoutUpdate(component)
+      scheduleCommentReplyTreeLayoutUpdate(component, false)
     }
 
     // 主评论锚点同样需要有效，否则根分支线会整体错位；容器模式不画根分支，无需校验
@@ -4358,9 +4397,12 @@ else if (shouldInitializePageScript) {
       return
     }
 
-    const replyContainer = root.querySelector<HTMLElement>('#expander-contents')
+    const replyContainer = getCommentReplyTreeContainer(root)
     if (!replyContainer)
       return
+    const previousContainer = root.querySelector<HTMLElement>(`[${COMMENT_REPLY_TREE_LIST_ATTRIBUTE}]`)
+    if (previousContainer && previousContainer !== replyContainer)
+      clearCommentReplyTreeList(component, previousContainer, existingState)
 
     // 在原生「点击查看」旁补充快捷入口；进入分页后改由 paginationItems
     // 提供同一个动作项。控件只在登录且「更多」模式下显示。
@@ -4398,8 +4440,9 @@ else if (shouldInitializePageScript) {
     const showGuides = treeMode === 'lineCollapseMain' || treeMode === 'lineKeepMain'
     // true：收起时折叠所有父节点本体；false：收起时父节点保持显示，仅隐藏子回复
     const collapseParentBody = treeMode === 'lineCollapseMain'
-    const containerEnabled = enabled && isCommentReplyContainerEnabled()
+    const containerEnabled = enabled && replyContainer.id === 'expander-contents' && isCommentReplyContainerEnabled()
     component.toggleAttribute('data-bewly-comment-reply-tree', enabled)
+    replyContainer.toggleAttribute(COMMENT_REPLY_TREE_LIST_ATTRIBUTE, enabled)
     applyCommentReplyContainer(component, containerEnabled)
     /*
      * 容器模式不再绘制主评论那条线，根分支的 −/+ 也就没有入口。
@@ -4419,26 +4462,9 @@ else if (shouldInitializePageScript) {
     if (!enabled) {
       disconnectCommentReplyTreeResizeObserver(state)
       component.style.removeProperty('--bew-comment-reply-indent-step')
-      removeCommentReplyTreeGuides(component, replyContainer)
-      replyContainer.querySelectorAll('.bewly-comment-missing-parent').forEach(node => node.remove())
+      clearCommentReplyTreeList(component, replyContainer, state)
       state.collapsedNodeKeys.clear()
       state.collapsedTailKeys.clear()
-      if (state.enabled) {
-        const originalOrder = [...replyRenderers].sort((a, b) => (
-          getCommentReplyOriginalOrder(state, a) - getCommentReplyOriginalOrder(state, b)
-        ))
-        setCommentReplyRendererOrder(replyRenderers, originalOrder, replyContainer)
-      }
-
-      replyRenderers.forEach((replyRenderer) => {
-        delete replyRenderer.dataset.bewlyCommentReplyDepth
-        delete replyRenderer.dataset.bewlyCommentReplyHidden
-        delete replyRenderer.dataset.bewlyCommentReplyCollapsed
-        replyRenderer.style.removeProperty('--bew-comment-reply-indent')
-        replyRenderer.style.removeProperty('--bew-comment-reply-order')
-        setCommentReplyAtPrefixHidden(replyRenderer, false)
-        clearCommentReplyOffpageParentLabel(replyRenderer)
-      })
       delete getCommentReplyTreeRootRenderer(component)?.dataset.bewlyCommentReplyCollapsed
       state.enabled = false
       return
@@ -4515,7 +4541,7 @@ else if (shouldInitializePageScript) {
     const movedReplyNodes = setCommentReplyRendererOrder(
       nodes.map(node => node.renderer),
       orderedNodes.map(({ node }) => node.renderer),
-      replyContainer,
+      replyContainer.id === 'expander-contents' ? replyContainer : undefined,
     )
     // 本次重排已基于当前 DOM 完成，丢弃自身移动产生的记录，避免多排一帧。
     if (movedReplyNodes)
@@ -4993,7 +5019,6 @@ else if (shouldInitializePageScript) {
       if (pageSettings.observeTripleRequests)
         installTripleRequestHooks()
       settingsReady = true
-      refreshCommentReplyTrees()
       if (getCommentReplyTreeMode() === null)
         clearCommentReplyDeepLinkSettlement()
       // 设置就绪后 B 站可能才开始 #reply 定位/展开

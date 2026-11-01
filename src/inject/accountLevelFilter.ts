@@ -7,6 +7,7 @@ interface CommentRenderer extends HTMLElement {
   replyItem?: unknown
   render: (...args: any[]) => unknown
   requestUpdate?: () => void
+  updateComplete?: Promise<unknown>
   connectedCallback?: () => void
   disconnectedCallback?: () => void
 }
@@ -24,8 +25,10 @@ export function createPageAccountFilter(getSettings: () => AccountLevelFilters |
   const pendingThreads = new Set<HTMLElement>()
   const rendererThreads = new WeakMap<CommentRenderer, HTMLElement>()
   const visibility = new WeakMap<CommentRenderer, boolean>()
+  const lastRender = new WeakMap<CommentRenderer, unknown>()
   const hiddenDisplay = new WeakMap<HTMLElement, { value: string, priority: string }>()
   let layoutFrame = 0
+  let layoutVersion = 0
   let treeDirty = false
 
   function setHidden(element: HTMLElement, hidden: boolean) {
@@ -152,10 +155,19 @@ export function createPageAccountFilter(getSettings: () => AccountLevelFilters |
 
   function scheduleLayout(changed = false) {
     treeDirty ||= changed
+    layoutVersion++
     if (layoutFrame)
       return
-    // 等原生 Lit 提交完毕，再测量树线和楼层高度。
-    layoutFrame = requestAnimationFrame(() => {
+    layoutFrame = requestAnimationFrame(async () => {
+      const version = layoutVersion
+      await Promise.allSettled([...renderers]
+        .filter(renderer => renderer.isConnected)
+        .map(renderer => renderer.updateComplete))
+      if (version !== layoutVersion) {
+        layoutFrame = 0
+        scheduleLayout()
+        return
+      }
       layoutFrame = 0
       for (const host of pendingThreads) {
         const root = host.shadowRoot
@@ -213,7 +225,16 @@ export function createPageAccountFilter(getSettings: () => AccountLevelFilters |
       this.toggleAttribute('data-bewly-account-filtered', hidden)
       setHidden(this, hidden)
       scheduleThread(this, changed)
-      return hidden ? null : original.apply(this, args)
+      // 等待身份时保留已提交模板，避免销毁随后仍需显示的头像与正文。
+      if (state === 'pending')
+        return lastRender.get(this) ?? null
+      if (hidden) {
+        lastRender.delete(this)
+        return null
+      }
+      const result = original.apply(this, args)
+      lastRender.set(this, result)
+      return result
     }
   }
 
